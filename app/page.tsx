@@ -191,74 +191,45 @@ export default function HomePage() {
   return (
     <div className="w-full flex flex-col space-y-16 sm:space-y-20 pb-24">
       {/* ========================================================================= */}
-      {/* SECTION 1 — Hero Area: Large Intelligent Search Gateway                   */}
+      {/* SECTION 1 — Hero Area: Institutional Search Gateway                        */}
       {/* ========================================================================= */}
-      <section className="relative pt-12 pb-16 md:pt-20 md:pb-24 border-b border-zinc-200 dark:border-zinc-800/80 bg-gradient-to-b from-zinc-100/90 via-zinc-50 to-white dark:from-zinc-900/60 dark:via-zinc-950 dark:to-zinc-950">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-8">
-          {/* Official Initiative Badge */}
-          <div className="inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-full bg-amber-500/10 dark:bg-amber-500/15 border border-amber-500/20 text-amber-700 dark:text-amber-400 text-xs font-semibold">
-            <Scale className="w-3.5 h-3.5 text-amber-500" />
-            <span>Free Legal Information & Research Initiative</span>
-            <span className="text-zinc-400">•</span>
-            <span className="text-zinc-600 dark:text-zinc-400 font-normal">Launch Version 1.0 (No Login Required)</span>
+      <section className="relative pt-12 pb-16 md:pt-20 md:pb-24 border-b border-zinc-200 dark:border-zinc-800/80 bg-zinc-50/50 dark:bg-zinc-950">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-7">
+          {/* Institutional Badge */}
+          <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-md bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-700 dark:text-zinc-300 text-xs font-medium">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 dark:bg-emerald-400" />
+            <span className="font-serif italic">Nyayota Legal Knowledge Repository</span>
+            <span className="text-zinc-300 dark:text-zinc-700">•</span>
+            <span className="text-zinc-500 font-normal">Open Public Access</span>
           </div>
 
-          {/* Exact Headline & Subheadline as required */}
-          <div className="space-y-4 max-w-3xl mx-auto">
-            <h1 className="text-3xl sm:text-5xl font-extrabold tracking-tight text-zinc-900 dark:text-white leading-[1.15]">
+          {/* Editorial Headline & Mission */}
+          <div className="space-y-3.5 max-w-3xl mx-auto">
+            <h1 className="text-3xl sm:text-5xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100 font-serif leading-[1.18]">
               Search, Learn, and Understand Law
             </h1>
             <p className="text-base sm:text-lg text-zinc-600 dark:text-zinc-400 max-w-2xl mx-auto leading-relaxed">
-              Explore legal information, legal research resources, and law explanations across jurisdictions.
+              Explore official statutory codifications, international treaties, and plain-language judicial guides across jurisdictions.
             </p>
           </div>
 
-          {/* Centerpiece Intelligent Search Bar */}
-          <div className="max-w-3xl mx-auto pt-2">
-            <div className="bg-white dark:bg-zinc-900 p-2 sm:p-2.5 rounded-2xl shadow-xl shadow-zinc-200/50 dark:shadow-black/50 border border-zinc-200 dark:border-zinc-800 transition-all">
+          {/* Centralized Search Desk */}
+          <div className="max-w-2xl mx-auto pt-2">
+            <div className="bg-white dark:bg-zinc-900 p-2 rounded-xl shadow-sm border border-zinc-300 dark:border-zinc-700/80 transition-all">
               <GlobalSearch isModal={false} />
             </div>
 
-            {/* Search Capabilities & Keyboard Shortcut Bar */}
-            <div className="mt-3 flex flex-wrap items-center justify-between gap-2 px-2 text-[11px] text-zinc-500 dark:text-zinc-400">
-              <div className="flex items-center space-x-3">
-                <span className="inline-flex items-center space-x-1">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-                  <span>Bangladesh Acts</span>
-                </span>
-                <span className="inline-flex items-center space-x-1">
-                  <span className="w-1.5 h-1.5 rounded-full bg-blue-500"></span>
-                  <span>International Treaties</span>
-                </span>
-                <span className="inline-flex items-center space-x-1">
-                  <span className="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
-                  <span>Legal Glossary</span>
-                </span>
-              </div>
-              <div className="hidden sm:flex items-center space-x-1.5 text-zinc-400 dark:text-zinc-500">
-                <span>Quick Search:</span>
-                <kbd className="px-1.5 py-0.5 rounded bg-zinc-200 dark:bg-zinc-800 text-[10px] font-mono text-zinc-700 dark:text-zinc-300 border border-zinc-300 dark:border-zinc-700">
-                  Cmd + K
-                </kbd>
-                <span>or</span>
-                <kbd className="px-1.5 py-0.5 rounded bg-zinc-200 dark:bg-zinc-800 text-[10px] font-mono text-zinc-700 dark:text-zinc-300 border border-zinc-300 dark:border-zinc-700">
-                  /
-                </kbd>
-              </div>
-            </div>
-
-            {/* Trending Query Pills */}
-            <div className="mt-4 flex flex-wrap items-center justify-center gap-2 text-xs text-zinc-500 dark:text-zinc-400">
-              <span className="font-semibold text-zinc-700 dark:text-zinc-300 flex items-center space-x-1">
-                <Flame className="w-3.5 h-3.5 text-amber-500" />
-                <span>Popular Searches:</span>
+            {/* Statutory Quick Links */}
+            <div className="mt-4 flex flex-wrap items-center justify-center gap-1.5 text-xs text-zinc-500 dark:text-zinc-400">
+              <span className="font-medium text-zinc-700 dark:text-zinc-300 mr-1 text-[11px] uppercase tracking-wider font-mono">
+                Curated References:
               </span>
               {popularTopics.map((t, idx) => (
                 <Link
                   key={idx}
                   href={t.href}
                   id={`home-trending-${idx}`}
-                  className="px-2.5 py-1 rounded-lg bg-zinc-200/70 dark:bg-zinc-800/80 hover:bg-amber-500/15 hover:text-amber-600 dark:hover:text-amber-400 transition-colors border border-zinc-300/50 dark:border-zinc-700/60"
+                  className="px-2 py-0.5 rounded bg-zinc-100 dark:bg-zinc-900 hover:bg-zinc-200 dark:hover:bg-zinc-800 text-zinc-700 dark:text-zinc-300 hover:text-zinc-950 dark:hover:text-white transition-colors border border-zinc-200/80 dark:border-zinc-800 text-[11px]"
                 >
                   {t.label}
                 </Link>
@@ -272,91 +243,91 @@ export default function HomePage() {
       {/* SECTION 2 — Real-World Situations & Immediate Guidance                    */}
       {/* ========================================================================= */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
-        <div className="mb-6">
-          <p className="text-xs font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400">
-            Real-World Guidance
+        <div className="mb-6 border-b border-zinc-200 dark:border-zinc-800 pb-4">
+          <p className="text-[11px] font-bold uppercase tracking-wider text-zinc-500 font-mono">
+            Practical Legal Pathways
           </p>
-          <h2 className="text-2xl sm:text-3xl font-bold text-zinc-900 dark:text-white mt-1">
-            What situation brings you here today?
+          <h2 className="text-xl sm:text-2xl font-bold text-zinc-900 dark:text-zinc-100 font-serif mt-1">
+            Statutory Guidance for Real-World Scenarios
           </h2>
-          <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">
-            Immediate statutory explanations and procedural steps for real challenges citizens and students face.
+          <p className="text-xs sm:text-sm text-zinc-600 dark:text-zinc-400 mt-0.5">
+            Structured statutory explanations, constitutional protections, and procedural rights for citizens, students, and practitioners.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {/* Situation 1 */}
-          <div className="p-5 sm:p-6 rounded-2xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 hover:border-amber-500/40 shadow-sm transition-all flex flex-col justify-between space-y-4">
-            <div className="space-y-2.5">
-              <div className="w-10 h-10 rounded-xl bg-rose-500/10 text-rose-600 dark:text-rose-400 flex items-center justify-center border border-rose-500/20">
-                <ShieldAlert className="w-5 h-5" />
-              </div>
-              <h3 className="text-base font-bold text-zinc-900 dark:text-white">
-                Arrest or Police Custody
+          <div className="p-5 rounded-xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800/90 shadow-xs flex flex-col justify-between space-y-4">
+            <div className="space-y-2">
+              <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-rose-700 dark:text-rose-400 px-2 py-0.5 rounded bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/50 inline-block">
+                Constitutional Safeguard
+              </span>
+              <h3 className="text-sm font-bold text-zinc-900 dark:text-zinc-100">
+                Arrest &amp; Police Custody
               </h3>
               <p className="text-xs text-zinc-600 dark:text-zinc-400 leading-relaxed">
-                What happens after an arrest? Learn mandatory 24-hour court production, right to an advocate, and bail procedures.
+                Mandatory 24-hour court production, right to consult an advocate, and statutory remand protections under criminal procedure.
               </p>
-              <div className="pt-1 text-[11px] text-zinc-500 space-y-1 font-mono">
+              <div className="pt-1 text-[11px] text-zinc-500 space-y-0.5 font-mono">
                 <div>• Art. 33 (Constitution)</div>
-                <div>• CrPC Sec. 54 &amp; 167 (Remand limits)</div>
+                <div>• CrPC Sec. 54 &amp; 167 (Remand)</div>
               </div>
             </div>
             <Link
               href="/legal-outcome-guide?topic=arrest-and-bail-rights"
-              className="pt-3 border-t border-zinc-100 dark:border-zinc-800 text-xs font-bold text-rose-600 dark:text-rose-400 hover:underline flex items-center justify-between"
+              className="pt-2.5 border-t border-zinc-100 dark:border-zinc-800 text-xs font-semibold text-zinc-900 dark:text-zinc-100 hover:text-amber-600 dark:hover:text-amber-400 transition-colors flex items-center justify-between"
             >
-              <span>View Arrest &amp; Bail Steps</span>
+              <span>View Statutory Steps</span>
               <ArrowRight className="w-3.5 h-3.5" />
             </Link>
           </div>
 
           {/* Situation 2 */}
-          <div className="p-5 sm:p-6 rounded-2xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 hover:border-amber-500/40 shadow-sm transition-all flex flex-col justify-between space-y-4">
-            <div className="space-y-2.5">
-              <div className="w-10 h-10 rounded-xl bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center border border-blue-500/20">
-                <Sparkles className="w-5 h-5" />
-              </div>
-              <h3 className="text-base font-bold text-zinc-900 dark:text-white">
+          <div className="p-5 rounded-xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800/90 shadow-xs flex flex-col justify-between space-y-4">
+            <div className="space-y-2">
+              <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-blue-700 dark:text-blue-400 px-2 py-0.5 rounded bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-900/50 inline-block">
+                Digital Security
+              </span>
+              <h3 className="text-sm font-bold text-zinc-900 dark:text-zinc-100">
                 Cyber Harassment &amp; Threats
               </h3>
               <p className="text-xs text-zinc-600 dark:text-zinc-400 leading-relaxed">
-                Facing online blackmail, fake profiles, or leaked data? Understand punishable offenses and reporting channels.
+                Statutory protections against online extortion, non-consensual image distribution, identity fraud, and reporting helplines.
               </p>
-              <div className="pt-1 text-[11px] text-zinc-500 space-y-1 font-mono">
+              <div className="pt-1 text-[11px] text-zinc-500 space-y-0.5 font-mono">
                 <div>• Cyber Security Act 2023</div>
-                <div>• Police Cyber Helpline: 01320-010148</div>
+                <div>• Helpline: 01320-010148</div>
               </div>
             </div>
             <Link
               href="/law/bd-cyber-security-2023"
-              className="pt-3 border-t border-zinc-100 dark:border-zinc-800 text-xs font-bold text-blue-600 dark:text-blue-400 hover:underline flex items-center justify-between"
+              className="pt-2.5 border-t border-zinc-100 dark:border-zinc-800 text-xs font-semibold text-zinc-900 dark:text-zinc-100 hover:text-amber-600 dark:hover:text-amber-400 transition-colors flex items-center justify-between"
             >
-              <span>Review Cyber Protections</span>
+              <span>Review Cyber Provisions</span>
               <ArrowRight className="w-3.5 h-3.5" />
             </Link>
           </div>
 
           {/* Situation 3 */}
-          <div className="p-5 sm:p-6 rounded-2xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 hover:border-amber-500/40 shadow-sm transition-all flex flex-col justify-between space-y-4">
-            <div className="space-y-2.5">
-              <div className="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center border border-amber-500/20">
-                <FileText className="w-5 h-5" />
-              </div>
-              <h3 className="text-base font-bold text-zinc-900 dark:text-white">
+          <div className="p-5 rounded-xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800/90 shadow-xs flex flex-col justify-between space-y-4">
+            <div className="space-y-2">
+              <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-amber-700 dark:text-amber-400 px-2 py-0.5 rounded bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-900/50 inline-block">
+                Property &amp; Civil Law
+              </span>
+              <h3 className="text-sm font-bold text-zinc-900 dark:text-zinc-100">
                 Eviction &amp; Land Disputes
               </h3>
               <p className="text-xs text-zinc-600 dark:text-zinc-400 leading-relaxed">
-                Received an eviction notice or boundary threat? Explore temporary injunctions and civil suit filing procedures.
+                Notice requirements, temporary civil injunction standards, and lawful possession remedies under the Code of Civil Procedure.
               </p>
-              <div className="pt-1 text-[11px] text-zinc-500 space-y-1 font-mono">
-                <div>• CPC 1908 (Order 39 Injunctions)</div>
-                <div>• Section 9 Civil Jurisdiction</div>
+              <div className="pt-1 text-[11px] text-zinc-500 space-y-0.5 font-mono">
+                <div>• CPC 1908 (Order 39)</div>
+                <div>• Sec. 9 Civil Jurisdiction</div>
               </div>
             </div>
             <Link
               href="/law/bd-cpc-1908"
-              className="pt-3 border-t border-zinc-100 dark:border-zinc-800 text-xs font-bold text-amber-600 dark:text-amber-400 hover:underline flex items-center justify-between"
+              className="pt-2.5 border-t border-zinc-100 dark:border-zinc-800 text-xs font-semibold text-zinc-900 dark:text-zinc-100 hover:text-amber-600 dark:hover:text-amber-400 transition-colors flex items-center justify-between"
             >
               <span>Explore Civil Remedies</span>
               <ArrowRight className="w-3.5 h-3.5" />
@@ -364,27 +335,27 @@ export default function HomePage() {
           </div>
 
           {/* Situation 4 */}
-          <div className="p-5 sm:p-6 rounded-2xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 hover:border-amber-500/40 shadow-sm transition-all flex flex-col justify-between space-y-4">
-            <div className="space-y-2.5">
-              <div className="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center border border-emerald-500/20">
-                <BookOpen className="w-5 h-5" />
-              </div>
-              <h3 className="text-base font-bold text-zinc-900 dark:text-white">
-                Studying for Law Exams
+          <div className="p-5 rounded-xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800/90 shadow-xs flex flex-col justify-between space-y-4">
+            <div className="space-y-2">
+              <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400 px-2 py-0.5 rounded bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-900/50 inline-block">
+                Academic Research
+              </span>
+              <h3 className="text-sm font-bold text-zinc-900 dark:text-zinc-100">
+                Legal Education &amp; Bar Prep
               </h3>
               <p className="text-xs text-zinc-600 dark:text-zinc-400 leading-relaxed">
-                Preparing for Bar Council, judicial service, or university exams? Review doctrine paths, Latin maxims, and citations.
+                Structured learning paths, Latin jurisprudence maxims, standard citations, and comparative statutory frameworks.
               </p>
-              <div className="pt-1 text-[11px] text-zinc-500 space-y-1 font-mono">
-                <div>• Latin Maxims &amp; Glossary</div>
-                <div>• Standard Bluebook Citations</div>
+              <div className="pt-1 text-[11px] text-zinc-500 space-y-0.5 font-mono">
+                <div>• Doctrines &amp; Maxims</div>
+                <div>• Standard Bluebook Format</div>
               </div>
             </div>
             <Link
               href="/knowledge-paths"
-              className="pt-3 border-t border-zinc-100 dark:border-zinc-800 text-xs font-bold text-emerald-600 dark:text-emerald-400 hover:underline flex items-center justify-between"
+              className="pt-2.5 border-t border-zinc-100 dark:border-zinc-800 text-xs font-semibold text-zinc-900 dark:text-zinc-100 hover:text-amber-600 dark:hover:text-amber-400 transition-colors flex items-center justify-between"
             >
-              <span>Start Learning Path</span>
+              <span>View Learning Modules</span>
               <ArrowRight className="w-3.5 h-3.5" />
             </Link>
           </div>
@@ -432,7 +403,7 @@ export default function HomePage() {
               </p>
             </div>
             <div className="pt-3 border-t border-zinc-100 dark:border-zinc-800 flex items-center justify-between text-xs font-bold text-emerald-600 dark:text-emerald-400">
-              <span>Browse 6+ Codified Acts</span>
+              <span>Browse {LAWS_DATABASE.filter((l) => l.jurisdiction === 'Bangladesh').length} Codified Acts</span>
               <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </div>
           </Link>
@@ -461,7 +432,7 @@ export default function HomePage() {
               </p>
             </div>
             <div className="pt-3 border-t border-zinc-100 dark:border-zinc-800 flex items-center justify-between text-xs font-bold text-blue-600 dark:text-blue-400">
-              <span>Browse 5+ Global Treaties</span>
+              <span>Browse {LAWS_DATABASE.filter((l) => l.jurisdiction === 'International').length} Global Treaties</span>
               <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </div>
           </Link>

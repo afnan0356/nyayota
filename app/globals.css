@@ -2,10 +2,11 @@
 
 @custom-variant dark (&:where(.dark, .dark *));
 
-/* Custom scrollbars and theme utilities */
+/* Legal typography, scholarly reading variables & editorial styling */
 @layer base {
   html {
     color-scheme: light dark;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
   }
   
   html.dark {
@@ -15,4 +16,55 @@
   html:not(.dark) {
     color-scheme: light;
   }
+
+  /* Academic reading baseline */
+  body {
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
 }
+
+/* Legal text formatting and reading rhythm */
+.legal-prose {
+  line-height: 1.75;
+  letter-spacing: -0.011em;
+}
+
+.legal-prose p {
+  margin-bottom: 1.25em;
+}
+
+.legal-prose strong {
+  font-weight: 650;
+}
+
+/* Custom scrollbar for dense statutory drawers and indexes */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(150, 150, 150, 0.25);
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(150, 150, 150, 0.45);
+}
+
+@media print {
+  header, footer, nav, button, #mobile-search-toggle-btn {
+    display: none !important;
+  }
+  body {
+    background: white !important;
+    color: black !important;
+  }
+}
+

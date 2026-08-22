@@ -24,12 +24,13 @@ export interface CollectedCitation {
   jurisdiction: string;
   enactmentYear: number;
   sectionNumber?: string;
-  citations: {
-    standard: string;
-    bluebook: string;
-    apa: string;
-    mla: string;
-    chicago: string;
+  citations?: {
+    standard?: string;
+    academic?: string;
+    bluebook?: string;
+    apa?: string;
+    mla?: string;
+    chicago?: string;
   };
   addedAt: string;
 }
@@ -175,7 +176,10 @@ export function formatCitationsExport(
   if (citations.length === 0) return '';
   return citations
     .map((c, idx) => {
-      const citeText = c.citations[style] || c.citations.standard;
+      const citeText =
+        c.citations?.[style] ||
+        c.citations?.standard ||
+        `${c.lawTitle} (${c.enactmentYear})${c.sectionNumber ? `, Sec. ${c.sectionNumber}` : ''}`;
       return `${idx + 1}. ${citeText}`;
     })
     .join('\n\n');

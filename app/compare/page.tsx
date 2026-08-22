@@ -36,8 +36,8 @@ function CompareToolContent() {
   const [lawAId, setLawAId] = useState<string>(initialLawAId);
   const [lawBId, setLawBId] = useState<string>(initialLawBId);
 
-  const lawA = useMemo(() => getEnrichedLaw(lawAId), [lawAId]);
-  const lawB = useMemo(() => getEnrichedLaw(lawBId), [lawBId]);
+  const lawA = useMemo(() => getEnrichedLaw(lawAId) || LAWS_DATABASE[0], [lawAId]);
+  const lawB = useMemo(() => getEnrichedLaw(lawBId) || LAWS_DATABASE[1], [lawBId]);
 
   // Find if there's a curated comparison profile
   const activePreset = useMemo<LawComparisonProfile | undefined>(() => {

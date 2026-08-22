@@ -138,10 +138,8 @@ export default function ContactPage() {
                       className="w-full p-2.5 text-xs bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500/40 text-zinc-900 dark:text-zinc-100"
                     >
                       <option value="General Inquiry">General Inquiry</option>
-                      <option value="Statute Data Correction">Statute / Amendment Correction</option>
-                      <option value="Academic Research Collaboration">Academic Research Collaboration</option>
-                      <option value="Feature / Jurisdiction Request">Jurisdiction Expansion Request</option>
-                      <option value="Accessibility Feedback">Accessibility Feedback</option>
+                      <option value="Statute Data Correction">Statute / Gazette Amendment Correction</option>
+                      <option value="Accessibility Feedback">Accessibility & Platform Feedback</option>
                     </select>
                   </div>
 
@@ -201,36 +199,64 @@ export default function ContactPage() {
         {/* Right Column: Channels & Future Support Infrastructure */}
         <div className="lg:col-span-5 space-y-4">
           <div className="p-6 rounded-3xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-sm space-y-4">
-            <h3 className="text-sm font-bold text-zinc-900 dark:text-white">Direct Communication Channels</h3>
+            <h3 className="text-sm font-bold text-zinc-900 dark:text-white">Communication & Departmental Channels</h3>
             
             <div className="space-y-3 text-xs">
+              {/* General Inquiries */}
               <div className="p-3.5 rounded-2xl bg-zinc-50 dark:bg-zinc-950/60 border border-zinc-200 dark:border-zinc-800/80 flex items-start space-x-3">
-                <div className="w-8 h-8 rounded-lg bg-amber-500/10 text-amber-500 flex items-center justify-center shrink-0">
+                <div className="w-8 h-8 rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0 border border-amber-500/20">
                   <Mail className="w-4 h-4" />
                 </div>
-                <div>
-                  <strong className="text-zinc-900 dark:text-white block">General Inquiries</strong>
-                  <span className="font-mono text-zinc-500">contact@nyayota.org</span>
+                <div className="space-y-0.5">
+                  <div className="flex items-center space-x-2">
+                    <strong className="text-zinc-900 dark:text-white block">General Inquiry</strong>
+                    <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800 font-semibold">
+                      Active
+                    </span>
+                  </div>
+                  <a
+                    href="mailto:contact.nyayota@gmail.com"
+                    className="font-mono text-zinc-600 dark:text-zinc-300 hover:text-amber-600 dark:hover:text-amber-400 hover:underline block text-xs"
+                  >
+                    contact.nyayota@gmail.com
+                  </a>
+                  <p className="text-[11px] text-zinc-500">Public inquiries, editorial feedback, and general questions.</p>
                 </div>
               </div>
 
-              <div className="p-3.5 rounded-2xl bg-zinc-50 dark:bg-zinc-950/60 border border-zinc-200 dark:border-zinc-800/80 flex items-start space-x-3">
-                <div className="w-8 h-8 rounded-lg bg-blue-500/10 text-blue-500 flex items-center justify-center shrink-0">
-                  <FileCheck className="w-4 h-4" />
-                </div>
-                <div>
-                  <strong className="text-zinc-900 dark:text-white block">Statutory Verification & Archives</strong>
-                  <span className="font-mono text-zinc-500">research@nyayota.org</span>
-                </div>
-              </div>
-
-              <div className="p-3.5 rounded-2xl bg-zinc-50 dark:bg-zinc-950/60 border border-zinc-200 dark:border-zinc-800/80 flex items-start space-x-3">
-                <div className="w-8 h-8 rounded-lg bg-purple-500/10 text-purple-500 flex items-center justify-center shrink-0">
+              {/* Academic Partnerships */}
+              <div className="p-3.5 rounded-2xl bg-zinc-50/70 dark:bg-zinc-950/40 border border-zinc-200 dark:border-zinc-800/80 flex items-start space-x-3 opacity-90">
+                <div className="w-8 h-8 rounded-lg bg-zinc-200 dark:bg-zinc-800 text-zinc-500 flex items-center justify-center shrink-0">
                   <GraduationCap className="w-4 h-4" />
                 </div>
-                <div>
-                  <strong className="text-zinc-900 dark:text-white block">Academic Partnerships</strong>
-                  <span className="font-mono text-zinc-500">partnerships@nyayota.org</span>
+                <div className="space-y-0.5">
+                  <div className="flex items-center space-x-2">
+                    <strong className="text-zinc-900 dark:text-white block">Academic Partnerships</strong>
+                    <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-zinc-200 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 font-medium">
+                      Under Maintenance
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-zinc-500">
+                    Institutional curriculum integrations and faculty pilot programs are temporarily paused while our core repository indices are being upgraded.
+                  </p>
+                </div>
+              </div>
+
+              {/* Verification & Archive Requests */}
+              <div className="p-3.5 rounded-2xl bg-zinc-50/70 dark:bg-zinc-950/40 border border-zinc-200 dark:border-zinc-800/80 flex items-start space-x-3 opacity-90">
+                <div className="w-8 h-8 rounded-lg bg-zinc-200 dark:bg-zinc-800 text-zinc-500 flex items-center justify-center shrink-0">
+                  <FileCheck className="w-4 h-4" />
+                </div>
+                <div className="space-y-0.5">
+                  <div className="flex items-center space-x-2">
+                    <strong className="text-zinc-900 dark:text-white block">Verification &amp; Archive Requests</strong>
+                    <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-zinc-200 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 font-medium">
+                      Under Maintenance
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-zinc-500">
+                    Direct custom gazette archival extraction requests are currently paused during scheduled repository maintenance.
+                  </p>
                 </div>
               </div>
             </div>

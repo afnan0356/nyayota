@@ -47,6 +47,8 @@ export interface LawItem {
   sourceReliabilityStatus?: SourceReliabilityStatus;
   contentQualityStatus?: ContentQualityStatus;
   publishingAuthority?: string;
+  totalStatutorySectionsCount?: number;
+  isCuratedSubset?: boolean;
   topics?: string[];
   enactmentYear: number;
   effectiveDate?: string;
@@ -274,6 +276,8 @@ export const LAWS_DATABASE: LawItem[] = [
     status: 'In Force',
     enactmentYear: 1860,
     lastAmendedYear: 2023,
+    totalStatutorySectionsCount: 511,
+    isCuratedSubset: true,
     officialGazetteRef: 'Govt. of Bangladesh Legislative Archives Act XLV/1860',
     officialSource: 'Laws of Bangladesh (bdlaws.minlaw.gov.bd)',
     sourceOrganization: 'Legislative and Parliamentary Affairs Division, Ministry of Law, Justice and Parliamentary Affairs',
@@ -397,6 +401,8 @@ export const LAWS_DATABASE: LawItem[] = [
     status: 'In Force',
     enactmentYear: 1972,
     lastAmendedYear: 2018,
+    totalStatutorySectionsCount: 153,
+    isCuratedSubset: true,
     officialGazetteRef: 'Bangladesh Gazette Extraordinary, Dec 14, 1972',
     officialSource: 'Laws of Bangladesh (bdlaws.minlaw.gov.bd)',
     sourceOrganization: 'Parliament of Bangladesh / Ministry of Law, Justice and Parliamentary Affairs',
@@ -500,6 +506,8 @@ export const LAWS_DATABASE: LawItem[] = [
     status: 'In Force',
     enactmentYear: 1898,
     lastAmendedYear: 2021,
+    totalStatutorySectionsCount: 565,
+    isCuratedSubset: true,
     officialGazetteRef: 'Legislative Division Archive Act V of 1898',
     officialSource: 'Laws of Bangladesh (bdlaws.minlaw.gov.bd)',
     sourceOrganization: 'Legislative and Parliamentary Affairs Division, Ministry of Law, Justice and Parliamentary Affairs',
@@ -611,6 +619,8 @@ export const LAWS_DATABASE: LawItem[] = [
     category: 'Cyber & Digital',
     status: 'In Force',
     enactmentYear: 2023,
+    totalStatutorySectionsCount: 60,
+    isCuratedSubset: true,
     officialGazetteRef: 'Bangladesh Gazette Notification Sept 18, 2023',
     overview: 'Governs national cyber infrastructure protection, hacking, digital identity theft, digital fraud, cyber terrorism, and online safety standards replacing the previous Digital Security Act 2018.',
     overviewBn: 'সাইবার অবকাঠামো সুরক্ষা, হ্যাকিং, ডিজিটাল জালিয়াতি এবং অনলাইন অপরাধ প্রতিরোধের আইন।',
@@ -669,6 +679,8 @@ export const LAWS_DATABASE: LawItem[] = [
     status: 'In Force',
     enactmentYear: 2006,
     lastAmendedYear: 2018,
+    totalStatutorySectionsCount: 353,
+    isCuratedSubset: true,
     officialGazetteRef: 'Bangladesh Gazette Extraordinary, Oct 11, 2006',
     overview: 'Comprehensive codification consolidating 25 disparate labor laws covering working conditions, maximum working hours, overtime compensation, maternity benefits, workplace safety, trade unions, and labor courts.',
     overviewBn: 'শ্রমিকদের কর্মঘণ্টা, মজুরি, মাতৃত্বকালীন সুবিধা, কর্মপরিবেশের নিরাপত্তা এবং ট্রেড ইউনিয়ন সংক্রান্ত সমন্বিত আইন।',
@@ -715,6 +727,8 @@ export const LAWS_DATABASE: LawItem[] = [
     category: 'Human Rights',
     status: 'Customary Law',
     enactmentYear: 1948,
+    totalStatutorySectionsCount: 30,
+    isCuratedSubset: true,
     signatoriesCount: 193,
     overview: 'Adopted by the United Nations General Assembly in Paris on 10 December 1948, the UDHR represents the foundational milestone document in the history of human rights, setting out 30 universal articles protecting every human being everywhere.',
     overviewBn: 'জাতিসংঘ সাধারণ পরিষদ কর্তৃক গৃহীত ঐতিহাসিক দলিল যা বিশ্বের সকল মানুষের জন্য ৩০টি মৌলিক ও অবিচ্ছেদ্য মানবাধিকার নিশ্চিত করে।',
@@ -781,6 +795,8 @@ export const LAWS_DATABASE: LawItem[] = [
     category: 'Human Rights',
     status: 'Active Treaty',
     enactmentYear: 1966,
+    totalStatutorySectionsCount: 53,
+    isCuratedSubset: true,
     signatoriesCount: 174,
     overview: 'A multilateral treaty adopted by the UN General Assembly that commits state parties to respect the civil and political rights of individuals, including right to life, freedom of religion, freedom of assembly, electoral rights, and due process.',
     overviewBn: 'জাতিসংঘের একটি বাধ্যতামূলক আন্তর্জাতিক চুক্তি যা স্বাক্ষরকারী রাষ্ট্রগুলোকে তাদের নাগরিকদের জীবন, ধর্মীয় স্বাধীনতা, সমাবেশের অধিকার ও সুষ্ঠু বিচারের নিশ্চয়তা দিতে বাধ্য করে।',
@@ -837,6 +853,8 @@ export const LAWS_DATABASE: LawItem[] = [
     category: 'International Humanitarian',
     status: 'Active Treaty',
     enactmentYear: 1949,
+    totalStatutorySectionsCount: 159,
+    isCuratedSubset: true,
     signatoriesCount: 196,
     overview: 'The core body of international humanitarian law (IHL) establishing legal protections in times of armed conflict for wounded combatants, prisoners of war, medical personnel, and non-combatant civilians.',
     overviewBn: 'আন্তর্জাতিক মানবিক আইনের মূল স্তম্ভ যা যুদ্ধকালীন সময়ে আহত সৈনিক, যুদ্ধবন্দী এবং সাধারণ বেসামরিক নাগরিকদের সুরক্ষা নিশ্চিত করে।',
@@ -883,6 +901,8 @@ export const LAWS_DATABASE: LawItem[] = [
     category: 'Commercial & Contract',
     status: 'Active Treaty',
     enactmentYear: 1982,
+    totalStatutorySectionsCount: 320,
+    isCuratedSubset: true,
     signatoriesCount: 169,
     overview: 'Known as the Constitution for the Oceans, UNCLOS establishes a comprehensive legal framework governing maritime zones, territorial seas (12 NM), Exclusive Economic Zones (EEZ up to 200 NM), continental shelves, and maritime dispute resolution tribunals (ITLOS).',
     overviewBn: 'সমুদ্রের সংবিধান হিসেবে পরিচিত আন্তর্জাতিক চুক্তি যা রাষ্ট্রগুলোর জলসীমা, অর্থনৈতিক অঞ্চল (EEZ) ও সমুদ্র সম্পদের অধিকার নির্ধারণ করে।',
@@ -931,6 +951,8 @@ export const LAWS_DATABASE: LawItem[] = [
     status: 'In Force',
     enactmentYear: 1908,
     lastAmendedYear: 2017,
+    totalStatutorySectionsCount: 158,
+    isCuratedSubset: true,
     officialGazetteRef: 'Govt. of Bangladesh Legislative Archive Act V/1908',
     overview: 'The primary procedural legislation governing the adjudication of civil suits, property disputes, plaints, written statements, temporary injunctions under Order XXXIX, decree executions, and civil appeals in Bangladesh.',
     overviewBn: 'দেওয়ানি মামলার আরজি দাখিল, জবাব, অস্থায়ী নিষেধাজ্ঞা, ডিক্রি জারি ও আপিল নিষ্পত্তির প্রধান কার্যপ্রণালী সংক্রান্ত আইন।',
@@ -989,6 +1011,8 @@ export const LAWS_DATABASE: LawItem[] = [
     status: 'In Force',
     enactmentYear: 1961,
     lastAmendedYear: 2019,
+    totalStatutorySectionsCount: 13,
+    isCuratedSubset: true,
     officialGazetteRef: 'Govt. of Bangladesh Legislative Archive Ord. VIII/1961',
     overview: 'Statutory codification regulating marriage registration, mandatory procedures for Talaq (notice to Arbitration Council), restrictions on polygamy, maintenance rights of wives, and succession rights of orphaned grandchildren.',
     overviewBn: 'বিবাহ নিবন্ধন, তালাকের নোটিশ ও সালিশি কাউন্সিল পদ্ধতি, বহুবিবাহ নিয়ন্ত্রণ, ভরণপোষণ এবং নাতি-নাতনিদের উত্তরাধিকার সংক্রান্ত আইন।',
@@ -1085,12 +1109,132 @@ export const LAWS_DATABASE: LawItem[] = [
       { year: '2010', title: 'Wetlands & Hill Cutting Amendments', description: 'Strengthened restrictions against hill cutting and river encroachment.', status: 'amended' }
     ],
     relatedLawIds: ['bd-constitution-1972', 'int-paris-agreement-2015'],
+    totalStatutorySectionsCount: 22,
+    isCuratedSubset: true,
     citations: {
       standard: 'Bangladesh Environment Conservation Act, 1995 (Act No. I of 1995)',
       academic: 'BECA 1995, Ministry of Environment, Forest and Climate Change (BD).',
       bluebook: 'Environment Conservation Act, Act No. I of 1995 (Bangl.).'
     },
     keywords: ['environmental law', 'pollution', 'ecc', 'eca', 'sundarbans', 'river protection', 'environment court', 'climate']
+  },
+  {
+    id: 'bd-contract-act-1872',
+    slug: 'contract-act-1872',
+    title: 'The Contract Act, 1872',
+    titleBn: 'চুক্তি আইন, ১৮৭২',
+    shortTitle: 'Contract Act 1872 (Act IX of 1872)',
+    actNumber: 'Act No. IX of 1872',
+    jurisdiction: 'Bangladesh',
+    jurisdictionCode: 'BD',
+    category: 'Commercial & Contract',
+    status: 'In Force',
+    enactmentYear: 1872,
+    lastAmendedYear: 2020,
+    totalStatutorySectionsCount: 238,
+    isCuratedSubset: true,
+    officialGazetteRef: 'Govt. of Bangladesh Legislative Archives Act IX/1872',
+    officialSource: 'Laws of Bangladesh (bdlaws.minlaw.gov.bd)',
+    sourceOrganization: 'Legislative and Parliamentary Affairs Division, Ministry of Law, Justice and Parliamentary Affairs',
+    sourceVerificationUrl: 'http://bdlaws.minlaw.gov.bd/act-24.html',
+    lastUpdatedDate: 'January 2025',
+    overview: 'The fundamental statute governing commercial and civil agreements in Bangladesh. It establishes rules for proposal, acceptance, lawful consideration, capacity to contract, void agreements, breach of contract, and compensation.',
+    overviewBn: 'বাংলাদেশের ব্যবসায়িক ও দেওয়ানি চুক্তির মূল আইন, যা প্রস্তাব, সম্মতি, আইনানুগ প্রতিদান, চুক্তিভঙ্গের ক্ষতিপূরণ এবং দায়বদ্ধতা নির্ধারণ করে।',
+    simpleSummary: 'Defines how legally binding agreements are formed, when promises can be enforced in court, and what financial damages are payable if a business or individual breaks a contract.',
+    fullOfficialTextExcerpt: 'WHEREAS it is expedient to define and amend certain parts of the law relating to contracts; It is enacted as follows: This Act may be called the Contract Act, 1872. It extends to the whole of Bangladesh; and it shall come into force on the first day of September, 1872.',
+    keyHighlights: [
+      'Contains 238 codified sections defining general principles of contracts, quasi-contracts, indemnity, guarantee, bailment, agency, and remedies for breach.',
+      'Establishes the foundational principle: all agreements are contracts if they are made by free consent of parties competent to contract, for a lawful consideration and with a lawful object.',
+      'Sections 73 and 74 govern the measure of damages for breach of contract and enforcement of reasonable compensation.'
+    ],
+    sections: [
+      {
+        number: 'Section 2',
+        title: 'Interpretation-clause (Proposal, Acceptance, Agreement & Contract)',
+        titleBn: 'ব্যাখ্যামূলক ধারা (প্রস্তাব, গ্রহণ, সম্মতি ও চুক্তি)',
+        content: 'When one person signifies to another his willingness to do or to abstain from doing anything, with a view to obtaining the assent of that other to such act or abstinence, he is said to make a proposal. An agreement enforceable by law is a contract.',
+        contentBn: 'আইন দ্বারা বলবৎযোগ্য সম্মতিই হলো একটি চুক্তি।',
+        simpleExplanation: 'Lays down the basic definitions: an offer accepted becomes a promise; promises forming mutual consideration become an agreement; and any agreement enforceable by law is a contract.',
+        punishmentOrRemedy: 'Enforceability of legal promises in courts of civil judicature.',
+        keyConcepts: ['Proposal', 'Acceptance', 'Consideration', 'Enforceability']
+      },
+      {
+        number: 'Section 10',
+        title: 'What agreements are contracts',
+        titleBn: 'কোন চুক্তিগুলো বৈধ বলে গণ্য হবে',
+        content: 'All agreements are contracts if they are made by the free consent of parties competent to contract, for a lawful consideration and with a lawful object, and are not hereby expressly declared to be void.',
+        contentBn: 'চুক্তি সম্পাদনে যোগ্য পক্ষগণের স্বাধীন সম্মতি, আইনানুগ প্রতিদান ও উদ্দেশ্যের ভিত্তিতে সম্পাদিত সম্মতিই বৈধ চুক্তি।',
+        simpleExplanation: 'A contract is valid only if all parties agree freely without coercion, fraud, or undue influence, have legal capacity, and the agreement is for a legal purpose.',
+        punishmentOrRemedy: 'Civil recognition and binding judicial enforceability.',
+        keyConcepts: ['Free consent', 'Lawful object', 'Competency']
+      },
+      {
+        number: 'Section 11',
+        title: 'Who are competent to contract',
+        titleBn: 'চুক্তি সম্পাদনে কারা যোগ্য',
+        content: 'Every person is competent to contract who is of the age of majority according to the law to which he is subject, and who is of sound mind, and is not disqualified from contracting by any law to which he is subject.',
+        contentBn: 'প্রাপ্তবয়স্ক, সুস্থ মস্তিষ্কের অধিকারী এবং আইনত অযোগ্য নন এমন যেকোনো ব্যক্তি চুক্তি করতে পারেন।',
+        simpleExplanation: 'Minors (under 18) and persons of unsound mind cannot enter into legally binding contracts; agreements with minors are void ab initio (void from the beginning).',
+        punishmentOrRemedy: 'Agreements by incompetent persons are void and unenforceable.',
+        keyConcepts: ['Age of majority', 'Sound mind', 'Void ab initio']
+      },
+      {
+        number: 'Section 23',
+        title: 'What considerations and objects are lawful, and what not',
+        titleBn: 'আইনসঙ্গত ও বেআইনি প্রতিদান ও উদ্দেশ্য',
+        content: 'The consideration or object of an agreement is lawful, unless it is forbidden by law, or is of such a nature that, if permitted, it would defeat the provisions of any law, or is fraudulent, or involves injury to the person or property of another, or the Court regards it as immoral, or opposed to public policy.',
+        contentBn: 'আইনবিরুদ্ধ, প্রতারণামূলক বা জনস্বার্থবিরোধী যেকোনো চুক্তির উদ্দেশ্য বা প্রতিদান বেআইনি ও বাতিল।',
+        simpleExplanation: 'You cannot enforce contracts for illegal deals, smuggling, bribery, or activities contrary to public morality.',
+        punishmentOrRemedy: 'Contract is declared void and of no legal effect.',
+        keyConcepts: ['Public policy', 'Unlawful consideration', 'Void agreement']
+      },
+      {
+        number: 'Section 73',
+        title: 'Compensation for loss or damage caused by breach of contract',
+        titleBn: 'চুক্তিভঙ্গের কারণে ক্ষতি বা লোকসানের ক্ষতিপূরণ',
+        content: 'When a contract has been broken, the party who suffers by such breach is entitled to receive, from the party who has broken the contract, compensation for any loss or damage caused to him thereby, which naturally arose in the usual course of things from such breach, or which the parties knew, when they made the contract, to be likely to result from the breach of it.',
+        contentBn: 'চুক্তি ভঙ্গের কারণে ক্ষতিগ্রস্ত পক্ষ স্বাভাবিক প্রক্রিয়ায় সৃষ্ট ক্ষতির জন্য ক্ষতিপূরণ পাওয়ার অধিকারী।',
+        simpleExplanation: 'If someone breaks a business deal, they must pay money to put the injured party in the financial position they would have been in if the contract had been performed.',
+        punishmentOrRemedy: 'Civil court money decree awarding compensatory damages.',
+        keyConcepts: ['Breach of contract', 'Direct damages', 'Foreseeable loss']
+      },
+      {
+        number: 'Section 74',
+        title: 'Compensation for breach of contract where penalty stipulated for',
+        titleBn: 'চুক্তিতে নির্ধারিত জরিমানার ক্ষেত্রে ক্ষতিপূরণ',
+        content: 'When a contract has been broken, if a sum is named in the contract as the amount to be paid in case of such breach, or if the contract contains any other stipulation by way of penalty, the party complaining of the breach is entitled, whether or not actual damage or loss is proved to have been caused thereby, to receive from the party who has broken the contract reasonable compensation not exceeding the amount so named.',
+        contentBn: 'চুক্তিতে উল্লিখিত জরিমানার অঙ্ক অতিক্রম না করে আদালত যুক্তিসঙ্গত ক্ষতিপূরণ মঞ্জুর করতে পারে।',
+        simpleExplanation: 'Even if a contract specifies a huge penalty for default, courts will only award reasonable compensation up to that stated cap.',
+        punishmentOrRemedy: 'Reasonable judicial compensation up to the stipulated penalty cap.',
+        keyConcepts: ['Liquidated damages', 'Penalty clause', 'Reasonable compensation']
+      },
+      {
+        number: 'Section 124',
+        title: '"Contract of indemnity" defined',
+        titleBn: 'ক্ষতিপূরণের চুক্তির (ইন্ডেমনিটি) সংজ্ঞা',
+        content: 'A contract by which one party promises to save the other from loss caused to him by the conduct of the promisor himself, or by the conduct of any other person, is called a contract of indemnity.',
+        contentBn: 'এক পক্ষ অপর পক্ষকে কোনো ক্ষতির হাত থেকে রক্ষা করার যে প্রতিশ্রুতি দেয় তাকে ক্ষতিপূরণ বা ইন্ডেমনিটি চুক্তি বলে।',
+        simpleExplanation: 'An indemnity clause promises to protect and reimburse someone against losses or liabilities caused by the promisor or third parties.',
+        punishmentOrRemedy: 'Reimbursement of all damages, court costs, and compromise sums.',
+        keyConcepts: ['Indemnity', 'Reimbursement', 'Protection from loss']
+      }
+    ],
+    timeline: [
+      { year: '1872', title: 'Enactment of Act IX of 1872', description: 'Codified general principles of English common law contracts adapted for the subcontinent.', status: 'enacted' },
+      { year: '1930', title: 'Sale of Goods Segregation', description: 'Provisions relating to sale of goods were separated into the Sale of Goods Act 1930.', status: 'amended' },
+      { year: '1932', title: 'Partnership Segregation', description: 'Partnership provisions were codified into the Partnership Act 1932.', status: 'amended' },
+      { year: '2020', title: 'Modern Electronic Contracts Recognition', description: 'Judicial recognition of digital agreements and e-signatures in commercial contracts.', status: 'active' }
+    ],
+    relatedLawIds: ['bd-cpc-1908', 'int-cisg-1980'],
+    citations: {
+      standard: 'The Contract Act, 1872 (Act No. IX of 1872)',
+      academic: 'The Contract Act 1872, Legislative & Parliamentary Affairs Division, Dhaka.',
+      bluebook: 'Contract Act, Act No. IX of 1872 (Bangl.).',
+      apa: 'Contract Act, 1872 (Act IX of 1872). Laws of Bangladesh.',
+      mla: '"The Contract Act, 1872." Bangladesh Code, 1872. Ministry of Law.',
+      chicago: 'The Contract Act, 1872 (Act IX of 1872). Dhaka: Government Press.'
+    },
+    keywords: ['contract', 'agreement', 'breach of contract', 'damages', 'consideration', 'indemnity', 'commercial law', 'free consent']
   },
   {
     id: 'int-paris-agreement-2015',
@@ -1103,6 +1247,8 @@ export const LAWS_DATABASE: LawItem[] = [
     category: 'Environmental Law',
     status: 'Active Treaty',
     enactmentYear: 2015,
+    totalStatutorySectionsCount: 29,
+    isCuratedSubset: true,
     signatoriesCount: 195,
     overview: 'A legally binding international treaty on climate change adopted by 196 Parties at COP21 in Paris, aiming to limit global temperature increase to well below 2°C above pre-industrial levels, with efforts to limit warming to 1.5°C through Nationally Determined Contributions (NDCs).',
     overviewBn: 'জলবায়ু পরিবর্তন মোকাবেলায় বৈশ্বিক তাপমাত্রা বৃদ্ধি ১.৫ থেকে ২ ডিগ্রি সেলসিয়াসের মধ্যে সীমাবদ্ধ রাখার ঐতিহাসিক আন্তর্জাতিক চুক্তি।',
@@ -1159,6 +1305,8 @@ export const LAWS_DATABASE: LawItem[] = [
     category: 'Commercial & Contract',
     status: 'Active Treaty',
     enactmentYear: 1980,
+    totalStatutorySectionsCount: 101,
+    isCuratedSubset: true,
     signatoriesCount: 95,
     overview: 'The uniform multilateral legal code prepared by UNCITRAL governing the formation of international commercial sales contracts, rights and obligations of buyers and sellers, remedies for breach of contract, and risk of loss in global trade.',
     overviewBn: 'আন্তর্জাতিক বাণিজ্যিক পণ্য ক্রয়-বিক্রয় চুক্তি, ক্রেতা-বিক্রেতার অধিকার ও দায়িত্ব এবং চুক্তিভঙ্গের ক্ষতিপূরণ সংক্রান্ত ইউনিফর্ম আইন।',
@@ -1815,6 +1963,8 @@ export interface EnrichedLawItem extends LawItem {
   sourceVerificationUrl: string;
   simpleSummary: string;
   explainLike15: string;
+  totalStatutorySectionsCount: number;
+  isCuratedSubset: boolean;
   aiSummary: {
     overview: string;
     keyConcepts: string[];
@@ -1834,12 +1984,24 @@ export interface EnrichedLawItem extends LawItem {
   };
 }
 
-export function getEnrichedLaw(id: string): EnrichedLawItem {
-  const baseLaw = LAWS_DATABASE.find((l) => l.id === id || l.slug === id) || LAWS_DATABASE[0];
+export function getEnrichedLaw(id: string): EnrichedLawItem | null {
+  if (!id) return null;
+  const cleanId = id.trim().toLowerCase();
+  const baseLaw = LAWS_DATABASE.find(
+    (l) =>
+      l.id.toLowerCase() === cleanId ||
+      l.slug.toLowerCase() === cleanId ||
+      l.id.replace(/^(bd-|int-|uk-|us-)/, '').toLowerCase() === cleanId ||
+      l.slug.replace(/^(bd-|int-)/, '').toLowerCase() === cleanId
+  );
+  
+  if (!baseLaw) return null;
   
   // Guarantee all fields are present
   return {
     ...baseLaw,
+    totalStatutorySectionsCount: baseLaw.totalStatutorySectionsCount || baseLaw.sections.length,
+    isCuratedSubset: baseLaw.isCuratedSubset ?? true,
     status: (baseLaw.status || 'Active') as any,
     sourceReliabilityStatus: baseLaw.sourceReliabilityStatus || (baseLaw.jurisdiction === 'Bangladesh' ? 'Official Government Source' : 'Official Treaty Source'),
     contentQualityStatus: baseLaw.contentQualityStatus || 'Verified',
@@ -1890,7 +2052,7 @@ export function getEnrichedLaw(id: string): EnrichedLawItem {
 }
 
 export function getAllEnrichedLaws(): EnrichedLawItem[] {
-  return LAWS_DATABASE.map((l) => getEnrichedLaw(l.id));
+  return LAWS_DATABASE.map((l) => getEnrichedLaw(l.id)!).filter(Boolean);
 }
 
 // ----------------------------------------------------
@@ -1955,7 +2117,7 @@ export const POPULAR_SEARCHES_DATA: PopularSearchItem[] = [
     category: 'Criminal Law',
     countLabel: '14.2k searches',
     type: 'section',
-    targetHref: '/law/penal-code-1860?section=Section+300'
+    targetHref: '/law/bd-penal-code-1860?section=Section+300'
   },
   {
     id: 'ps-2',
@@ -1964,7 +2126,7 @@ export const POPULAR_SEARCHES_DATA: PopularSearchItem[] = [
     category: 'Cyber & Digital',
     countLabel: '12.8k searches',
     type: 'topic',
-    targetHref: '/law/cyber-security-act-2023'
+    targetHref: '/law/bd-cyber-security-2023'
   },
   {
     id: 'ps-3',
@@ -1973,7 +2135,7 @@ export const POPULAR_SEARCHES_DATA: PopularSearchItem[] = [
     category: 'Constitutional Law',
     countLabel: '11.5k searches',
     type: 'section',
-    targetHref: '/law/constitution-bd?section=Article+102'
+    targetHref: '/law/bd-constitution-1972?section=Article+102'
   },
   {
     id: 'ps-4',
@@ -1982,7 +2144,7 @@ export const POPULAR_SEARCHES_DATA: PopularSearchItem[] = [
     category: 'Criminal Procedure',
     countLabel: '9.7k searches',
     type: 'section',
-    targetHref: '/law/crpc-1898?section=Section+54'
+    targetHref: '/law/bd-crpc-1898?section=Section+54'
   },
   {
     id: 'ps-5',
@@ -1991,7 +2153,7 @@ export const POPULAR_SEARCHES_DATA: PopularSearchItem[] = [
     category: 'Commercial Law',
     countLabel: '8.4k searches',
     type: 'topic',
-    targetHref: '/law/contract-act-1872'
+    targetHref: '/law/bd-contract-act-1872'
   },
   {
     id: 'ps-6',
@@ -2000,7 +2162,7 @@ export const POPULAR_SEARCHES_DATA: PopularSearchItem[] = [
     category: 'Human Rights',
     countLabel: '7.9k searches',
     type: 'statute',
-    targetHref: '/law/udhr-1948'
+    targetHref: '/law/int-udhr-1948'
   },
   {
     id: 'ps-7',
@@ -2009,7 +2171,7 @@ export const POPULAR_SEARCHES_DATA: PopularSearchItem[] = [
     category: 'Labor Law',
     countLabel: '6.5k searches',
     type: 'topic',
-    targetHref: '/law/labor-act-2006'
+    targetHref: '/law/bd-labor-act-2006'
   },
   {
     id: 'ps-8',
@@ -2054,7 +2216,7 @@ export const LEGAL_CONCEPTS_DATA: LegalConcept[] = [
     simpleExplanation: 'When someone acts carelessly, ignoring their basic responsibility to avoid harming others, resulting in foreseeable injury or financial loss.',
     explainLike15: 'Imagine driving while texting and crashing into a neighbor parked bicycle. You did not intend to crash, but because you were careless when you should have paid attention, you are legally responsible to pay for the damage.',
     courtroomExample: 'A building developer fails to install mandatory scaffolding safety nets, and falling debris injures a pedestrian. The court holds the developer liable for tortious negligence.',
-    relatedStatuteIds: ['penal-code-1860', 'contract-act-1872'],
+    relatedStatuteIds: ['bd-penal-code-1860', 'bd-contract-act-1872'],
     relatedConcepts: ['Strict Liability', 'Vicarious Liability', 'Damages', 'Causation'],
     keyElements: ['Existence of a legal Duty of Care', 'Breach of that duty by defendant', 'Direct Causation of harm', 'Actual measurable damage or loss']
   },
@@ -2069,7 +2231,7 @@ export const LEGAL_CONCEPTS_DATA: LegalConcept[] = [
     simpleExplanation: 'An act alone does not make a person guilty unless their mind was also guilty. Criminal law usually requires proving both the physical crime and wrongful intention.',
     explainLike15: 'If you take an identical black umbrella by accident from a restaurant rack thinking it is yours, you do not have Mens Rea (no crime). If you knew it was not yours and took it to keep it, you have Mens Rea (theft).',
     courtroomExample: 'In a homicide trial under Penal Code Section 300, the prosecution must prove beyond reasonable doubt that the accused intended to cause bodily injury likely to cause death.',
-    relatedStatuteIds: ['penal-code-1860', 'crpc-1898'],
+    relatedStatuteIds: ['bd-penal-code-1860', 'bd-crpc-1898'],
     relatedConcepts: ['Actus Reus', 'Intention', 'Recklessness', 'Criminal Negligence'],
     keyElements: ['Intentional conduct', 'Knowledge of consequences', 'Reckless disregard of danger', 'Absence of bona fide mistake']
   },
@@ -2084,7 +2246,7 @@ export const LEGAL_CONCEPTS_DATA: LegalConcept[] = [
     simpleExplanation: 'The ultimate constitutional shield against unlawful arrest or secret police detention. The High Court forces the state to immediately bring the detainee to court or release them.',
     explainLike15: 'If police secretly lock someone in a room without presenting them to a magistrate within 24 hours, their family can file a Habeas Corpus petition. The High Court judges will order the police: "Bring this person to court immediately and prove your legal authority, or let them walk free today."',
     courtroomExample: 'Under Article 102(2)(b)(i) of the Bangladesh Constitution, a citizen unlawfully held without charge is ordered released immediately by the High Court Division.',
-    relatedStatuteIds: ['constitution-bd', 'crpc-1898', 'iccpr-1966'],
+    relatedStatuteIds: ['bd-constitution-1972', 'bd-crpc-1898', 'int-iccpr-1966'],
     relatedConcepts: ['Due Process', 'Ultra Vires', 'Fundamental Rights', 'Judicial Review'],
     keyElements: ['Actual physical detention or custody', 'Lack of valid statutory authority or procedure', 'Urgent High Court jurisdiction', 'Immediate release order if detention is illegal']
   },
@@ -2099,7 +2261,7 @@ export const LEGAL_CONCEPTS_DATA: LegalConcept[] = [
     simpleExplanation: 'When one party fails to perform their side of a legally binding promise without a valid legal excuse, entitling the innocent party to compensation or specific enforcement.',
     explainLike15: 'You pay a web designer $500 to build your website by Friday. Friday arrives, they refuse to deliver the code and keep your money. They have breached the contract, and you can demand your money back plus any business loss.',
     courtroomExample: 'Under Section 73 of the Contract Act 1872, an export company sues a logistics supplier for failing to ship perishable cargo on agreed dates, recovering compensation for lost market sales.',
-    relatedStatuteIds: ['contract-act-1872'],
+    relatedStatuteIds: ['bd-contract-act-1872'],
     relatedConcepts: ['Specific Performance', 'Quantum Meruit', 'Injunction', 'Consideration'],
     keyElements: ['Valid enforceable contract with consideration', 'Performance obligations fulfilled by claimant', 'Failure or repudiation by defendant', 'Measurable commercial loss']
   },
@@ -2114,7 +2276,7 @@ export const LEGAL_CONCEPTS_DATA: LegalConcept[] = [
     simpleExplanation: 'Liability imposed on dangerous activities (like handling toxic chemicals or wild explosives). Even if you took every imaginable precaution, if it escapes and hurts someone, you must pay.',
     explainLike15: 'If a chemical factory owner stores dangerous explosive gas and an earthquake causes a tiny leak that damages nearby homes, the factory owner must pay for the damage even though they were careful. The danger was so high that they bear absolute responsibility.',
     courtroomExample: 'Industrial gas leak cases where the Supreme Court rules that enterprises engaged in inherently hazardous activities have an absolute and non-delegable duty to indemnify all victims.',
-    relatedStatuteIds: ['penal-code-1860', 'contract-act-1872'],
+    relatedStatuteIds: ['bd-penal-code-1860', 'bd-contract-act-1872'],
     relatedConcepts: ['Tort Liability', 'Public Nuisance', 'Environmental Justice', 'Duty of Care'],
     keyElements: ['Bringing inherently hazardous substance onto land', 'Non-natural use of property', 'Escape of the hazardous element', 'Consequent damage to person or property']
   },
@@ -2129,7 +2291,7 @@ export const LEGAL_CONCEPTS_DATA: LegalConcept[] = [
     simpleExplanation: 'When a government official, board, or minister makes a rule or decision they had no legal authority to make. The court strikes it down as completely void and null.',
     explainLike15: 'Imagine your school traffic guard tries to issue you a fine for not doing your math homework. They have no legal authority over homework, so their order is "Ultra Vires" (powerless) and you do not have to obey it.',
     courtroomExample: 'A municipal council passes a by-law banning imported books. The High Court strikes it down under Article 102 as Ultra Vires the Municipalities Act.',
-    relatedStatuteIds: ['constitution-bd'],
+    relatedStatuteIds: ['bd-constitution-1972'],
     relatedConcepts: ['Judicial Review', 'Natural Justice', 'Rule of Law', 'Subordinate Legislation'],
     keyElements: ['Statute establishing bounded authority', 'Exercise of decision beyond those bounds', 'Nullity of resulting decision', 'Judicial declaration of invalidity']
   },
@@ -2144,7 +2306,7 @@ export const LEGAL_CONCEPTS_DATA: LegalConcept[] = [
     simpleExplanation: 'Prevents endless lawsuits over the same dispute. Once a final decision is delivered after hearing both sides, neither party can sue again on the exact same facts.',
     explainLike15: 'If your landlord sues you claiming you didn\'t pay rent for June, and the court looks at bank receipts and rules you paid in full, your landlord cannot sue you again next week for the same June rent. The case is finished forever.',
     courtroomExample: 'Under Section 11 of the Civil Procedure Code 1908, a second partition lawsuit between the same heirs over previously partitioned land is dismissed.',
-    relatedStatuteIds: ['crpc-1898', 'constitution-bd'],
+    relatedStatuteIds: ['bd-crpc-1898', 'bd-cpc-1908', 'bd-constitution-1972'],
     relatedConcepts: ['Double Jeopardy', 'Estoppel', 'Finality of Judgments', 'Limitation'],
     keyElements: ['Former suit between same parties or representatives', 'Matter directly and substantially in issue', 'Court of competent jurisdiction', 'Final hearing and decision on merits']
   },
@@ -2159,7 +2321,7 @@ export const LEGAL_CONCEPTS_DATA: LegalConcept[] = [
     simpleExplanation: 'Resolving business or international contract fights outside lengthy court trials using an agreed neutral expert. Faster, confidential, and globally enforceable.',
     explainLike15: 'Instead of spending 6 years in court arguing about a software delivery milestone, two companies hire a neutral senior tech lawyer for a 3-day private hearing. Whatever the arbitrator decides is final and legally binding.',
     courtroomExample: 'Two multinational shipping companies arbitrate a breach under international maritime arbitration rules, and enforce the arbitral award in local high court.',
-    relatedStatuteIds: ['contract-act-1872'],
+    relatedStatuteIds: ['bd-contract-act-1872', 'int-cisg-1980'],
     relatedConcepts: ['Mediation', 'Enforcement of Foreign Awards', 'Arbitral Tribunal', 'Jurisdiction'],
     keyElements: ['Written arbitration agreement', 'Appointment of neutral tribunal', 'Principles of natural justice', 'Final and binding arbitral award']
   },
@@ -2521,8 +2683,8 @@ export const KNOWLEDGE_PATHS_DATA: KnowledgePath[] = [
         durationMinutes: 12,
         summary: 'How codified statutes distinguish fair comment from malicious electronic character assassination and identity spoofing.',
         keyStatutes: [
-          { lawId: 'cyber-security-act-2023', title: 'Cyber Security Act 2023', section: 'Section 24-25' },
-          { lawId: 'penal-code-1860', title: 'Penal Code 1860', section: 'Section 499-500' }
+          { lawId: 'bd-cyber-security-2023', title: 'Cyber Security Act 2023', section: 'Section 24-25' },
+          { lawId: 'bd-penal-code-1860', title: 'Penal Code 1860', section: 'Section 499-500' }
         ],
         takeaways: [
           'Digital defamation requires proving publication to third parties and reputational harm.',
@@ -2539,7 +2701,7 @@ export const KNOWLEDGE_PATHS_DATA: KnowledgePath[] = [
         durationMinutes: 11,
         summary: 'Requirements for screenshots, server logs, hash values, and forensic mirrors to be admissible in a court of law.',
         keyStatutes: [
-          { lawId: 'crpc-1898', title: 'Code of Criminal Procedure 1898', section: 'Section 103' }
+          { lawId: 'bd-crpc-1898', title: 'Code of Criminal Procedure 1898', section: 'Section 103' }
         ],
         takeaways: [
           'Raw screenshots can be contested as forged unless backed by server logs or forensic notary certification.',
@@ -2556,8 +2718,8 @@ export const KNOWLEDGE_PATHS_DATA: KnowledgePath[] = [
         durationMinutes: 12,
         summary: 'Emergency reporting channels, cyber police complaints, search warrants, and High Court writ protections.',
         keyStatutes: [
-          { lawId: 'cyber-security-act-2023', title: 'Cyber Security Act 2023', section: 'Section 28' },
-          { lawId: 'constitution-bd', title: 'Constitution of Bangladesh', section: 'Article 102' }
+          { lawId: 'bd-cyber-security-2023', title: 'Cyber Security Act 2023', section: 'Section 28' },
+          { lawId: 'bd-constitution-1972', title: 'Constitution of Bangladesh', section: 'Article 102' }
         ],
         takeaways: [
           'Victims of electronic extortion can file direct police complaints or approach specialized cyber tribunals.',
@@ -2589,7 +2751,7 @@ export const KNOWLEDGE_PATHS_DATA: KnowledgePath[] = [
         durationMinutes: 12,
         summary: 'Article 7 supremacy principle: any law inconsistent with the Constitution is void to the extent of inconsistency.',
         keyStatutes: [
-          { lawId: 'constitution-bd', title: 'Constitution of Bangladesh', section: 'Article 7' }
+          { lawId: 'bd-constitution-1972', title: 'Constitution of Bangladesh', section: 'Article 7' }
         ],
         takeaways: [
           'Parliament cannot pass statutes violating fundamental basic constitutional provisions.',
@@ -2606,8 +2768,8 @@ export const KNOWLEDGE_PATHS_DATA: KnowledgePath[] = [
         durationMinutes: 14,
         summary: 'Detailed study of Article 27 (Equality), Article 31 (Protection of Law), and Article 32 (Right to Life and Liberty).',
         keyStatutes: [
-          { lawId: 'constitution-bd', title: 'Constitution of Bangladesh', section: 'Articles 27, 31, 32' },
-          { lawId: 'udhr-1948', title: 'Universal Declaration of Human Rights', section: 'Articles 1-3' }
+          { lawId: 'bd-constitution-1972', title: 'Constitution of Bangladesh', section: 'Articles 27, 31, 32' },
+          { lawId: 'int-udhr-1948', title: 'Universal Declaration of Human Rights', section: 'Articles 1-3' }
         ],
         takeaways: [
           'Every citizen is entitled to equal protection of law without arbitrary state discrimination.',
@@ -2624,8 +2786,8 @@ export const KNOWLEDGE_PATHS_DATA: KnowledgePath[] = [
         durationMinutes: 12,
         summary: 'Balancing constitutional freedoms under Article 39 with reasonable restrictions imposed in interests of public order.',
         keyStatutes: [
-          { lawId: 'constitution-bd', title: 'Constitution of Bangladesh', section: 'Articles 37-39' },
-          { lawId: 'iccpr-1966', title: 'International Covenant on Civil and Political Rights', section: 'Article 19' }
+          { lawId: 'bd-constitution-1972', title: 'Constitution of Bangladesh', section: 'Articles 37-39' },
+          { lawId: 'int-iccpr-1966', title: 'International Covenant on Civil and Political Rights', section: 'Article 19' }
         ],
         takeaways: [
           'Freedom of speech includes freedom of the press and public critique of governance.',
@@ -2642,7 +2804,7 @@ export const KNOWLEDGE_PATHS_DATA: KnowledgePath[] = [
         durationMinutes: 12,
         summary: 'Mastering the five classical writs: Mandamus, Prohibition, Certiorari, Habeas Corpus, and Quo Warranto.',
         keyStatutes: [
-          { lawId: 'constitution-bd', title: 'Constitution of Bangladesh', section: 'Article 102' }
+          { lawId: 'bd-constitution-1972', title: 'Constitution of Bangladesh', section: 'Article 102' }
         ],
         takeaways: [
           'Writ of Mandamus compels a public official to perform a mandatory statutory duty.',
@@ -2675,7 +2837,7 @@ export const KNOWLEDGE_PATHS_DATA: KnowledgePath[] = [
         durationMinutes: 14,
         summary: 'How the Penal Code 1860 structures offenses against person (murder, assault) and property (theft, extortion, cheating).',
         keyStatutes: [
-          { lawId: 'penal-code-1860', title: 'Penal Code 1860', section: 'Sections 299, 300, 378, 415' }
+          { lawId: 'bd-penal-code-1860', title: 'Penal Code 1860', section: 'Sections 299, 300, 378, 415' }
         ],
         takeaways: [
           'Theft requires dishonest taking of movable property out of possession without consent.',
@@ -2692,8 +2854,8 @@ export const KNOWLEDGE_PATHS_DATA: KnowledgePath[] = [
         durationMinutes: 14,
         summary: 'Limits on warrantless arrest, mandatory 24-hour magistrate presentation, and Supreme Court arrest guidelines.',
         keyStatutes: [
-          { lawId: 'crpc-1898', title: 'Code of Criminal Procedure 1898', section: 'Section 54, 61' },
-          { lawId: 'constitution-bd', title: 'Constitution of Bangladesh', section: 'Article 33' }
+          { lawId: 'bd-crpc-1898', title: 'Code of Criminal Procedure 1898', section: 'Section 54, 61' },
+          { lawId: 'bd-constitution-1972', title: 'Constitution of Bangladesh', section: 'Article 33' }
         ],
         takeaways: [
           'Police must produce any arrested person before a judicial magistrate within 24 hours of arrest.',
@@ -2710,8 +2872,8 @@ export const KNOWLEDGE_PATHS_DATA: KnowledgePath[] = [
         durationMinutes: 12,
         summary: 'Bailable offenses (matter of right) vs Non-bailable offenses (judicial discretion), anticipatory bail, and presumption of innocence.',
         keyStatutes: [
-          { lawId: 'crpc-1898', title: 'Code of Criminal Procedure 1898', section: 'Section 496, 497' },
-          { lawId: 'constitution-bd', title: 'Constitution of Bangladesh', section: 'Article 35' }
+          { lawId: 'bd-crpc-1898', title: 'Code of Criminal Procedure 1898', section: 'Section 496, 497' },
+          { lawId: 'bd-constitution-1972', title: 'Constitution of Bangladesh', section: 'Article 35' }
         ],
         takeaways: [
           'In bailable offenses, release on bail is a statutory right upon furnishing surety.',
@@ -2766,13 +2928,13 @@ export const LEGAL_OUTCOME_SCENARIOS_DATA: LegalOutcomeScenario[] = [
     scenarioSummaryBn: 'কোনো ব্যক্তি গোপন ছবি বা পাসওয়ার্ড ইন্টারনেটে ছড়িয়ে দেওয়ার হুমকি দিয়ে অর্থ দাবি করলে প্রযোজ্য আইনি ফলাফল।',
     applicableStatutes: [
       {
-        lawId: 'cyber-security-act-2023',
+        lawId: 'bd-cyber-security-2023',
         title: 'Cyber Security Act 2023',
         section: 'Section 24 & 28',
         explanation: 'Criminalizes electronic identity spoofing, hacking, and cyber extortion with strict non-bailable prison terms.'
       },
       {
-        lawId: 'penal-code-1860',
+        lawId: 'bd-penal-code-1860',
         title: 'Penal Code 1860',
         section: 'Section 383 & 384',
         explanation: 'Defines Extortion (putting any person in fear of injury and dishonestly inducing them to deliver property).'
@@ -2829,13 +2991,13 @@ export const LEGAL_OUTCOME_SCENARIOS_DATA: LegalOutcomeScenario[] = [
     scenarioSummaryBn: 'অনুমতি ছাড়া অসদুপায়ে অন্যের মালামাল বা অর্থ হস্তগত করার আইনি ফলাফল।',
     applicableStatutes: [
       {
-        lawId: 'penal-code-1860',
+        lawId: 'bd-penal-code-1860',
         title: 'Penal Code 1860',
         section: 'Section 378, 379 & 408',
         explanation: 'Defines Theft (3 years imprisonment) and Criminal Breach of Trust by Clerk/Servant (up to 7 years imprisonment).'
       },
       {
-        lawId: 'crpc-1898',
+        lawId: 'bd-crpc-1898',
         title: 'Code of Criminal Procedure 1898',
         section: 'Schedule II & Section 497',
         explanation: 'Sets Cognizability, non-bailable status for higher offenses, and compounding rules.'
@@ -2890,7 +3052,7 @@ export const LEGAL_OUTCOME_SCENARIOS_DATA: LegalOutcomeScenario[] = [
     scenarioSummaryBn: 'চুক্তি অনুযায়ী পণ্য বা সেবা সরবরাহের পর অর্থ পরিশোধে অস্বীকৃতির আইনি প্রতিকার।',
     applicableStatutes: [
       {
-        lawId: 'contract-act-1872',
+        lawId: 'bd-contract-act-1872',
         title: 'Contract Act 1872',
         section: 'Section 73 & 74',
         explanation: 'Provides that the party who suffers by breach is entitled to receive compensation for any loss or damage caused to them.'
@@ -2944,13 +3106,13 @@ export const LEGAL_OUTCOME_SCENARIOS_DATA: LegalOutcomeScenario[] = [
     scenarioSummaryBn: 'পরোয়ানা ছাড়া আটক করে ২৪ ঘণ্টার মধ্যে ম্যাজিস্ট্রেটের সামনে হাজির না করার বিরুদ্ধে সাংবিধানিক প্রতিকার।',
     applicableStatutes: [
       {
-        lawId: 'constitution-bd',
+        lawId: 'bd-constitution-1972',
         title: 'Constitution of Bangladesh',
         section: 'Article 32, 33 & 102',
         explanation: 'Mandates production before nearest magistrate within 24 hours and guarantees Habeas Corpus writ remedy.'
       },
       {
-        lawId: 'crpc-1898',
+        lawId: 'bd-crpc-1898',
         title: 'Code of Criminal Procedure 1898',
         section: 'Section 61 & 167',
         explanation: 'Forbids police custody beyond 24 hours without explicit written judicial remand order.'

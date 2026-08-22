@@ -3,6 +3,7 @@
 import React, { useState, useMemo, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
+import { motion, AnimatePresence, type Variants } from 'motion/react';
 import {
   Search,
   Scale,
@@ -32,6 +33,29 @@ import {
   LawSection,
   GlossaryTerm
 } from '@/lib/legal-data';
+
+const resultsContainerVariants: Variants = {
+  hidden: { opacity: 0 },
+  show: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.04,
+      delayChildren: 0.02
+    }
+  }
+};
+
+const resultCardVariants: Variants = {
+  hidden: { opacity: 0, y: 16 },
+  show: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      duration: 0.35,
+      ease: 'easeOut'
+    }
+  }
+};
 
 function SearchContent() {
   const searchParams = useSearchParams();
@@ -211,7 +235,7 @@ function SearchContent() {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search by statutory title, section (e.g. 300, 54, 102), Latin maxim, or legal topic..."
-            className="w-full pl-12 pr-4 py-3.5 text-xs sm:text-sm bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-2xl focus:outline-none focus:ring-2 focus:ring-amber-500/40 text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 font-medium"
+            className="w-full pl-12 pr-4 py-3.5 text-xs sm:text-sm bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-2xl focus:outline-none focus:border-amber-500/70 dark:focus:border-amber-500/60 focus:ring-4 focus:ring-amber-500/15 dark:focus:ring-amber-500/20 focus:shadow-lg focus:shadow-amber-500/10 focus:bg-white dark:focus:bg-zinc-950 text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 font-medium transition-all duration-300 ease-out"
           />
           {query && (
             <button
@@ -374,185 +398,209 @@ function SearchContent() {
       </div>
 
       {/* Results Presentation */}
-      <div className="space-y-10">
-        {/* 1. Direct Statute Matches */}
-        {matchedLaws.length > 0 && (
-          <div className="space-y-4">
-            <h2 className="text-sm font-bold uppercase tracking-wider text-zinc-900 dark:text-white flex items-center space-x-2">
-              <Scale className="w-4 h-4 text-amber-500" />
-              <span>Statutes & Legislative Acts ({matchedLaws.length})</span>
-            </h2>
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={`${query}-${selectedJurisdiction}-${selectedCategory}-${selectedStatus}-${searchScope}-${sortBy}`}
+          variants={resultsContainerVariants}
+          initial="hidden"
+          animate="show"
+          exit="hidden"
+          className="space-y-10"
+        >
+          {/* 1. Direct Statute Matches */}
+          {matchedLaws.length > 0 && (
+            <motion.div variants={resultCardVariants} className="space-y-4">
+              <h2 className="text-sm font-bold uppercase tracking-wider text-zinc-900 dark:text-white flex items-center space-x-2">
+                <Scale className="w-4 h-4 text-amber-500" />
+                <span>Statutes & Legislative Acts ({matchedLaws.length})</span>
+              </h2>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {matchedLaws.map((law) => (
-                <div
-                  key={law.id}
-                  id={`search-result-law-${law.id}`}
-                  className="p-5 rounded-3xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 hover:border-amber-500/40 transition-all flex flex-col justify-between space-y-4 shadow-xs"
-                >
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between gap-2">
-                      <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
-                        {law.jurisdiction} • {law.category}
-                      </span>
-                      <div className="flex items-center space-x-2 text-[11px] text-zinc-400 font-mono">
-                        <span>Enacted {law.enactmentYear}</span>
-                        <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
-                          law.status === 'Active' ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400' : 'bg-zinc-500/10 text-zinc-400'
-                        }`}>
-                          {law.status}
+              <motion.div
+                variants={resultsContainerVariants}
+                className="grid grid-cols-1 md:grid-cols-2 gap-4"
+              >
+                {matchedLaws.map((law) => (
+                  <motion.div
+                    key={law.id}
+                    variants={resultCardVariants}
+                    id={`search-result-law-${law.id}`}
+                    className="p-5 rounded-3xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 hover:border-amber-500/40 transition-all flex flex-col justify-between space-y-4 shadow-xs"
+                  >
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
+                          {law.jurisdiction} • {law.category}
                         </span>
+                        <div className="flex items-center space-x-2 text-[11px] text-zinc-400 font-mono">
+                          <span>Enacted {law.enactmentYear}</span>
+                          <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+                            law.status === 'Active' ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400' : 'bg-zinc-500/10 text-zinc-400'
+                          }`}>
+                            {law.status}
+                          </span>
+                        </div>
                       </div>
+
+                      <h3 className="text-base font-bold text-zinc-900 dark:text-white leading-snug">
+                        {law.title}
+                      </h3>
+                      <p className="text-xs text-emerald-600 dark:text-emerald-400 font-medium font-bangla">
+                        {law.titleBn}
+                      </p>
+                      <p className="text-xs text-zinc-600 dark:text-zinc-400 line-clamp-2 leading-relaxed">
+                        {law.overview}
+                      </p>
                     </div>
 
-                    <h3 className="text-base font-bold text-zinc-900 dark:text-white leading-snug">
-                      {law.title}
-                    </h3>
-                    <p className="text-xs text-emerald-600 dark:text-emerald-400 font-medium font-bangla">
-                      {law.titleBn}
-                    </p>
-                    <p className="text-xs text-zinc-600 dark:text-zinc-400 line-clamp-2 leading-relaxed">
-                      {law.overview}
-                    </p>
-                  </div>
+                    <div className="pt-3 border-t border-zinc-100 dark:border-zinc-800/80 flex items-center justify-between text-xs">
+                      <div className="flex items-center space-x-3 text-zinc-500">
+                        <span>{law.sections.length} Sections</span>
+                        <Link
+                          href={`/ai-assistant?lawId=${law.id}`}
+                          className="hover:text-amber-500 font-semibold flex items-center space-x-1"
+                        >
+                          <Sparkles className="w-3.5 h-3.5" />
+                          <span>Ask AI</span>
+                        </Link>
+                      </div>
 
-                  <div className="pt-3 border-t border-zinc-100 dark:border-zinc-800/80 flex items-center justify-between text-xs">
-                    <div className="flex items-center space-x-3 text-zinc-500">
-                      <span>{law.sections.length} Sections</span>
                       <Link
-                        href={`/ai-assistant?lawId=${law.id}`}
-                        className="hover:text-amber-500 font-semibold flex items-center space-x-1"
+                        href={`/law/${law.id}`}
+                        className="px-3.5 py-1.5 rounded-xl bg-zinc-100 dark:bg-zinc-800 hover:bg-amber-500 hover:text-zinc-950 text-zinc-900 dark:text-zinc-100 font-bold transition-all inline-flex items-center space-x-1 text-xs"
                       >
-                        <Sparkles className="w-3.5 h-3.5" />
-                        <span>Ask AI</span>
+                        <span>Read Statute</span>
+                        <ArrowRight className="w-3.5 h-3.5" />
                       </Link>
                     </div>
+                  </motion.div>
+                ))}
+              </motion.div>
+            </motion.div>
+          )}
 
-                    <Link
-                      href={`/law/${law.id}`}
-                      className="px-3.5 py-1.5 rounded-xl bg-zinc-100 dark:bg-zinc-800 hover:bg-amber-500 hover:text-zinc-950 text-zinc-900 dark:text-zinc-100 font-bold transition-all inline-flex items-center space-x-1 text-xs"
-                    >
-                      <span>Read Statute</span>
-                      <ArrowRight className="w-3.5 h-3.5" />
-                    </Link>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
+          {/* 2. Specific Section & Article Matches */}
+          {matchedSections.length > 0 && (
+            <motion.div variants={resultCardVariants} className="space-y-4">
+              <h2 className="text-sm font-bold uppercase tracking-wider text-zinc-900 dark:text-white flex items-center space-x-2">
+                <FileText className="w-4 h-4 text-emerald-500" />
+                <span>Specific Sections & Articles ({matchedSections.length})</span>
+              </h2>
 
-        {/* 2. Specific Section & Article Matches */}
-        {matchedSections.length > 0 && (
-          <div className="space-y-4">
-            <h2 className="text-sm font-bold uppercase tracking-wider text-zinc-900 dark:text-white flex items-center space-x-2">
-              <FileText className="w-4 h-4 text-emerald-500" />
-              <span>Specific Sections & Articles ({matchedSections.length})</span>
-            </h2>
+              <motion.div
+                variants={resultsContainerVariants}
+                className="grid grid-cols-1 md:grid-cols-2 gap-4"
+              >
+                {matchedSections.map(({ law, section }, idx) => (
+                  <motion.div
+                    key={idx}
+                    variants={resultCardVariants}
+                    id={`search-result-section-${law.id}-${idx}`}
+                    className="p-5 rounded-3xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 hover:border-emerald-500/40 transition-all flex flex-col justify-between space-y-3 shadow-xs"
+                  >
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-mono font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded">
+                          {section.number}
+                        </span>
+                        <span className="text-[11px] text-zinc-400">{law.shortTitle}</span>
+                      </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {matchedSections.map(({ law, section }, idx) => (
-                <div
-                  key={idx}
-                  id={`search-result-section-${law.id}-${idx}`}
-                  className="p-5 rounded-3xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 hover:border-emerald-500/40 transition-all flex flex-col justify-between space-y-3 shadow-xs"
-                >
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs font-mono font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded">
-                        {section.number}
-                      </span>
-                      <span className="text-[11px] text-zinc-400">{law.shortTitle}</span>
+                      <h3 className="text-sm font-bold text-zinc-900 dark:text-white">
+                        {section.title}
+                      </h3>
+                      <p className="text-xs text-zinc-500 dark:text-zinc-400 line-clamp-2 leading-relaxed">
+                        {section.simpleExplanation}
+                      </p>
                     </div>
 
-                    <h3 className="text-sm font-bold text-zinc-900 dark:text-white">
-                      {section.title}
-                    </h3>
-                    <p className="text-xs text-zinc-500 dark:text-zinc-400 line-clamp-2 leading-relaxed">
-                      {section.simpleExplanation}
-                    </p>
-                  </div>
+                    <div className="pt-3 border-t border-zinc-100 dark:border-zinc-800/80 flex items-center justify-between text-xs">
+                      <Link
+                        href={`/ai-assistant?lawId=${law.id}&section=${encodeURIComponent(section.number)}`}
+                        className="text-zinc-500 hover:text-amber-500 flex items-center space-x-1 font-semibold"
+                      >
+                        <Sparkles className="w-3.5 h-3.5" />
+                        <span>Explain in Plain Language</span>
+                      </Link>
 
-                  <div className="pt-3 border-t border-zinc-100 dark:border-zinc-800/80 flex items-center justify-between text-xs">
-                    <Link
-                      href={`/ai-assistant?lawId=${law.id}&section=${encodeURIComponent(section.number)}`}
-                      className="text-zinc-500 hover:text-amber-500 flex items-center space-x-1 font-semibold"
-                    >
-                      <Sparkles className="w-3.5 h-3.5" />
-                      <span>Explain in Plain Language</span>
-                    </Link>
+                      <Link
+                        href={`/law/${law.id}?section=${encodeURIComponent(section.number)}`}
+                        className="text-emerald-600 dark:text-emerald-400 font-bold hover:underline inline-flex items-center space-x-1"
+                      >
+                        <span>View Section</span>
+                        <ArrowRight className="w-3.5 h-3.5" />
+                      </Link>
+                    </div>
+                  </motion.div>
+                ))}
+              </motion.div>
+            </motion.div>
+          )}
 
-                    <Link
-                      href={`/law/${law.id}?section=${encodeURIComponent(section.number)}`}
-                      className="text-emerald-600 dark:text-emerald-400 font-bold hover:underline inline-flex items-center space-x-1"
-                    >
-                      <span>View Section</span>
-                      <ArrowRight className="w-3.5 h-3.5" />
-                    </Link>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
+          {/* 3. Glossary & Terminology Matches */}
+          {matchedGlossary.length > 0 && (
+            <motion.div variants={resultCardVariants} className="space-y-4">
+              <h2 className="text-sm font-bold uppercase tracking-wider text-zinc-900 dark:text-white flex items-center space-x-2">
+                <BookOpen className="w-4 h-4 text-purple-500" />
+                <span>Legal Terminology & Maxims ({matchedGlossary.length})</span>
+              </h2>
 
-        {/* 3. Glossary & Terminology Matches */}
-        {matchedGlossary.length > 0 && (
-          <div className="space-y-4">
-            <h2 className="text-sm font-bold uppercase tracking-wider text-zinc-900 dark:text-white flex items-center space-x-2">
-              <BookOpen className="w-4 h-4 text-purple-500" />
-              <span>Legal Terminology & Maxims ({matchedGlossary.length})</span>
-            </h2>
+              <motion.div
+                variants={resultsContainerVariants}
+                className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"
+              >
+                {matchedGlossary.map((term, idx) => (
+                  <motion.div
+                    key={idx}
+                    variants={resultCardVariants}
+                    id={`search-result-term-${idx}`}
+                    className="p-4 rounded-2xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 space-y-2 shadow-xs"
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-bold text-zinc-900 dark:text-white">{term.term}</span>
+                      <span className="text-[10px] px-2 py-0.5 rounded bg-zinc-100 dark:bg-zinc-800 text-zinc-500">
+                        {term.jurisdiction}
+                      </span>
+                    </div>
+                    <p className="text-xs text-amber-600 dark:text-amber-400 font-medium font-bangla">{term.termBn}</p>
+                    <p className="text-xs text-zinc-600 dark:text-zinc-400 line-clamp-2">{term.simpleExplanation}</p>
+                    <div className="pt-2">
+                      <Link
+                        href={`/ai-assistant?term=${encodeURIComponent(term.term)}`}
+                        className="text-[11px] font-bold text-amber-600 dark:text-amber-400 hover:underline flex items-center space-x-1"
+                      >
+                        <span>Explore in AI Assistant</span>
+                        <ArrowRight className="w-3 h-3" />
+                      </Link>
+                    </div>
+                  </motion.div>
+                ))}
+              </motion.div>
+            </motion.div>
+          )}
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {matchedGlossary.map((term, idx) => (
-                <div
-                  key={idx}
-                  id={`search-result-term-${idx}`}
-                  className="p-4 rounded-2xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 space-y-2 shadow-xs"
-                >
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold text-zinc-900 dark:text-white">{term.term}</span>
-                    <span className="text-[10px] px-2 py-0.5 rounded bg-zinc-100 dark:bg-zinc-800 text-zinc-500">
-                      {term.jurisdiction}
-                    </span>
-                  </div>
-                  <p className="text-xs text-amber-600 dark:text-amber-400 font-medium font-bangla">{term.termBn}</p>
-                  <p className="text-xs text-zinc-600 dark:text-zinc-400 line-clamp-2">{term.simpleExplanation}</p>
-                  <div className="pt-2">
-                    <Link
-                      href={`/ai-assistant?term=${encodeURIComponent(term.term)}`}
-                      className="text-[11px] font-bold text-amber-600 dark:text-amber-400 hover:underline flex items-center space-x-1"
-                    >
-                      <span>Explore in AI Assistant</span>
-                      <ArrowRight className="w-3 h-3" />
-                    </Link>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Empty Search State */}
-        {totalResults === 0 && (
-          <div className="p-12 text-center bg-white dark:bg-zinc-900 rounded-3xl border border-zinc-200 dark:border-zinc-800 space-y-4">
-            <HelpCircle className="w-10 h-10 text-zinc-400 mx-auto" />
-            <h3 className="text-base font-bold text-zinc-900 dark:text-white">No Legal Matches Found</h3>
-            <p className="text-xs text-zinc-500 max-w-sm mx-auto leading-relaxed">
-              We couldn&apos;t find any laws or sections matching &quot;{query}&quot; with current filters. Try relaxing the category or jurisdiction filter.
-            </p>
-            <button
-              type="button"
-              onClick={handleResetFilters}
-              className="px-4 py-2 rounded-xl bg-amber-500 text-zinc-950 font-bold text-xs inline-flex items-center space-x-1.5"
+          {/* Empty Search State */}
+          {totalResults === 0 && (
+            <motion.div
+              variants={resultCardVariants}
+              className="p-12 text-center bg-white dark:bg-zinc-900 rounded-3xl border border-zinc-200 dark:border-zinc-800 space-y-4"
             >
-              <RotateCcw className="w-3.5 h-3.5" />
-              <span>Reset All Filters</span>
-            </button>
-          </div>
-        )}
-      </div>
+              <HelpCircle className="w-10 h-10 text-zinc-400 mx-auto" />
+              <h3 className="text-base font-bold text-zinc-900 dark:text-white">No Legal Matches Found</h3>
+              <p className="text-xs text-zinc-500 max-w-sm mx-auto leading-relaxed">
+                We couldn&apos;t find any laws or sections matching &quot;{query}&quot; with current filters. Try relaxing the category or jurisdiction filter.
+              </p>
+              <button
+                type="button"
+                onClick={handleResetFilters}
+                className="px-4 py-2 rounded-xl bg-amber-500 text-zinc-950 font-bold text-xs inline-flex items-center space-x-1.5 hover:bg-amber-400 transition-colors"
+              >
+                <RotateCcw className="w-3.5 h-3.5" />
+                <span>Reset All Filters</span>
+              </button>
+            </motion.div>
+          )}
+        </motion.div>
+      </AnimatePresence>
     </div>
   );
 }

@@ -35,10 +35,15 @@ import {
   Building2,
   Calendar,
   AlertCircle,
+  AlertTriangle,
   ArrowLeftRight,
   CheckCircle,
   History,
-  FileDown
+  FileDown,
+  GitFork,
+  Link2,
+  Network,
+  Compass
 } from 'lucide-react';
 import {
   LAWS_DATABASE,
@@ -48,22 +53,160 @@ import {
   GLOSSARY_TERMS,
   GlossaryTerm
 } from '@/lib/legal-data';
+
+interface RelatedProvisionResult {
+  section: LawSection;
+  matchScore: number;
+  connectionReason: string;
+  sharedConcepts: string[];
+}
+
+function analyzeRelatedSections(
+  current: LawSection,
+  allSections: LawSection[]
+): RelatedProvisionResult[] {
+  if (!current || !allSections || allSections.length <= 1) return [];
+
+  const otherSections = allSections.filter((s) => s.number !== current.number);
+  const currentConcepts = (current.keyConcepts || []).map((c) => c.toLowerCase());
+  const currentTitleWords = current.title
+    .toLowerCase()
+    .replace(/[^\w\s]/g, '')
+    .split(/\s+/)
+    .filter(
+      (w) =>
+        w.length > 3 &&
+        !['section', 'article', 'order', 'rules', 'shall', 'under', 'with', 'from', 'that', 'this', 'provisions', 'act'].includes(w)
+    );
+
+  const currentIndex = allSections.findIndex((s) => s.number === current.number);
+
+  const scored: RelatedProvisionResult[] = otherSections.map((candidate) => {
+    let score = 0;
+    const reasons: string[] = [];
+    const sharedConcepts: string[] = [];
+    const candidateConcepts = (candidate.keyConcepts || []).map((c) => c.toLowerCase());
+
+    // 1. Shared Legal Concepts
+    candidateConcepts.forEach((concept) => {
+      if (currentConcepts.includes(concept)) {
+        score += 30;
+        const originalConcept =
+          (candidate.keyConcepts || []).find((c) => c.toLowerCase() === concept) || concept;
+        if (!sharedConcepts.includes(originalConcept)) {
+          sharedConcepts.push(originalConcept);
+        }
+      }
+    });
+
+    if (sharedConcepts.length > 0) {
+      reasons.push(`Shared Concept: ${sharedConcepts.slice(0, 2).join(', ')}`);
+    }
+
+    // 2. Direct Section/Article Cross-references
+    const currentNumClean = current.number.toLowerCase();
+    const candidateNumClean = candidate.number.toLowerCase();
+    if (
+      candidate.content.toLowerCase().includes(currentNumClean) ||
+      candidate.simpleExplanation.toLowerCase().includes(currentNumClean)
+    ) {
+      score += 40;
+      reasons.push('Direct Cross-Reference');
+    }
+    if (
+      current.content.toLowerCase().includes(candidateNumClean) ||
+      current.simpleExplanation.toLowerCase().includes(candidateNumClean)
+    ) {
+      score += 40;
+      if (!reasons.includes('Direct Cross-Reference')) {
+        reasons.push('Statutory Reference');
+      }
+    }
+
+    // 3. Penalty / Remedy linkage
+    const candidateTitleLow = candidate.title.toLowerCase();
+    const currentTitleLow = current.title.toLowerCase();
+    const isPunishmentOrRemedy =
+      candidateTitleLow.includes('punishment') ||
+      candidateTitleLow.includes('penalty') ||
+      candidateTitleLow.includes('remedy') ||
+      candidateTitleLow.includes('compensation') ||
+      candidateTitleLow.includes('procedure');
+    const isCurrentOffenseOrRight =
+      currentTitleLow.includes('offence') ||
+      currentTitleLow.includes('murder') ||
+      currentTitleLow.includes('theft') ||
+      currentTitleLow.includes('cheating') ||
+      currentTitleLow.includes('right') ||
+      currentTitleLow.includes('arrest') ||
+      currentTitleLow.includes('inquiry');
+
+    if (isPunishmentOrRemedy && isCurrentOffenseOrRight) {
+      score += 25;
+      reasons.push('Prescribed Remedy / Penalty');
+    }
+
+    // 4. Procedural Sequel or Preceding Basis in Statute order
+    const originalCandidateIndex = allSections.findIndex((s) => s.number === candidate.number);
+    const indexDistance = Math.abs(originalCandidateIndex - currentIndex);
+    if (indexDistance === 1) {
+      score += 18;
+      if (originalCandidateIndex > currentIndex) {
+        reasons.push('Immediate Sequential Procedure');
+      } else {
+        reasons.push('Preceding Definition / Basis');
+      }
+    } else if (indexDistance === 2) {
+      score += 10;
+    }
+
+    // 5. Title word semantic overlap
+    const candidateText = `${candidate.title} ${candidate.simpleExplanation}`.toLowerCase();
+    let titleMatches = 0;
+    currentTitleWords.forEach((word) => {
+      if (candidateText.includes(word)) {
+        score += 8;
+        titleMatches++;
+      }
+    });
+
+    if (titleMatches > 0 && reasons.length === 0) {
+      reasons.push('Thematic Overlap');
+    }
+
+    const primaryReason =
+      reasons[0] ||
+      (candidate.punishmentOrRemedy
+        ? 'Related Remedy / Legal Impact'
+        : 'Related Statutory Context');
+
+    return {
+      section: candidate,
+      matchScore: score,
+      connectionReason: primaryReason,
+      sharedConcepts
+    };
+  });
+
+  scored.sort((a, b) => b.matchScore - a.matchScore);
+
+  // Return top 3-5 provisions (at least 3 if available, up to 5)
+  const targetCount = Math.min(5, Math.max(3, Math.min(otherSections.length, 4)));
+  return scored.slice(0, targetCount);
+}
 import { isLawBookmarked, toggleLocalBookmark } from '@/lib/bookmarks';
 import { addCitationToCollection, isCitationCollected } from '@/lib/research';
 import { SourceVerificationModal } from '@/components/SourceVerificationModal';
 import { CitationModal } from '@/components/CitationModal';
 import { GlossaryModal } from '@/components/GlossaryModal';
 
-function LawDetailContent() {
-  const params = useParams();
-  const searchParams = useSearchParams();
-  const rawId = params?.id as string;
-  const initialSectionParam = searchParams.get('section');
-
-  const law = useMemo(() => {
-    return getEnrichedLaw(rawId);
-  }, [rawId]);
-
+function LawDetailViewer({
+  law,
+  initialSectionParam
+}: {
+  law: LawItem;
+  initialSectionParam: string | null;
+}) {
   // Reading & UI state
   const [activeLanguageView, setActiveLanguageView] = useState<'dual' | 'en' | 'bn' | 'es' | 'fr' | 'de' | 'ar'>('dual');
   const [readingMode, setReadingMode] = useState(false);
@@ -161,6 +304,11 @@ function LawDetailContent() {
 
   const activeSection =
     law.sections.find((s) => s.number === selectedSectionNumber) || law.sections[0];
+
+  const relatedProvisions = useMemo(() => {
+    if (!activeSection || !law.sections) return [];
+    return analyzeRelatedSections(activeSection, law.sections);
+  }, [activeSection, law.sections]);
 
   const relatedLaws = useMemo(() => {
     return LAWS_DATABASE.filter(
@@ -529,6 +677,19 @@ function LawDetailContent() {
         </div>
       </nav>
 
+      {/* Transparency / Curated Subset Notice */}
+      <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/25 flex items-start space-x-3 text-xs">
+        <Info className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+        <div className="space-y-0.5">
+          <p className="font-semibold text-zinc-900 dark:text-white">
+            Curated Statutory View & Key Provisions Notice
+          </p>
+          <p className="text-zinc-600 dark:text-zinc-400 leading-relaxed">
+            This page currently displays selected key provisions ({law.sections.length} core sections of {law.totalStatutorySectionsCount} total statutory provisions). Never imply the displayed content is the full unabridged statute. For complete certified texts and historical amendment gazettes, consult the official legislative publication.
+          </p>
+        </div>
+      </div>
+
       {/* SECTION 1: TOP INFORMATION AREA */}
       <section
         aria-label="Statute Header Information"
@@ -881,7 +1042,7 @@ function LawDetailContent() {
               }`}
             >
               <History className="w-4 h-4" />
-              <span>Version History ({law.timeline.length})</span>
+              <span>Version History ({law.timeline?.length || 0})</span>
             </button>
 
             <button
@@ -1145,6 +1306,106 @@ function LawDetailContent() {
                       </div>
                     </div>
                   )}
+
+                  {/* Related Provisions in Same Statute */}
+                  <div id="related-provisions-panel" className="space-y-4 pt-6 border-t border-zinc-100 dark:border-zinc-800">
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <div className="flex items-center space-x-2.5">
+                        <div className="p-2 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
+                          <GitFork className="w-4 h-4" />
+                        </div>
+                        <div>
+                          <h4 className="text-sm font-bold text-zinc-900 dark:text-white flex items-center gap-2">
+                            <span>Related Provisions in this Statute</span>
+                            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/25">
+                              {relatedProvisions.length} Linked Sections
+                            </span>
+                          </h4>
+                          <p className="text-xs text-zinc-500 dark:text-zinc-400">
+                            Suggested based on statutory procedure, shared concepts, and legal penalties.
+                          </p>
+                        </div>
+                      </div>
+
+                      <Link
+                        href={`/ai-assistant?lawId=${law.id}&lawTitle=${encodeURIComponent(law.title)}&section=${encodeURIComponent(activeSection.number)}&query=${encodeURIComponent(`Analyze the legal interplay and continuity between ${activeSection.number} (${activeSection.title}) and other provisions in ${law.title}.`)}`}
+                        className="text-xs font-semibold text-amber-600 dark:text-amber-400 hover:text-amber-500 flex items-center space-x-1.5 transition-colors px-3 py-1.5 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/20"
+                      >
+                        <Sparkles className="w-3.5 h-3.5" />
+                        <span>Analyze Interplay with AI</span>
+                      </Link>
+                    </div>
+
+                    {relatedProvisions.length > 0 ? (
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                        {relatedProvisions.map(({ section: relSec, connectionReason, sharedConcepts }, idx) => (
+                          <div
+                            key={idx}
+                            id={`related-provision-${idx}`}
+                            className="p-4 rounded-2xl bg-zinc-50 dark:bg-zinc-950 border border-zinc-200/80 dark:border-zinc-800 hover:border-amber-500/50 hover:bg-white dark:hover:bg-zinc-900 transition-all group flex flex-col justify-between space-y-3 shadow-xs"
+                          >
+                            <div className="space-y-2">
+                              <div className="flex items-center justify-between gap-2">
+                                <span className="px-2.5 py-0.5 rounded-md font-mono text-[11px] font-bold bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-500/20">
+                                  {relSec.number}
+                                </span>
+                                <span
+                                  className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-zinc-200/70 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 truncate max-w-[170px]"
+                                  title={connectionReason}
+                                >
+                                  {connectionReason}
+                                </span>
+                              </div>
+
+                              <div>
+                                <h5 className="text-xs sm:text-sm font-bold text-zinc-900 dark:text-white group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors line-clamp-1">
+                                  {relSec.title}
+                                </h5>
+                                {relSec.titleBn && (
+                                  <p className="text-[11px] font-bangla text-zinc-500 dark:text-zinc-400 line-clamp-1">
+                                    {relSec.titleBn}
+                                  </p>
+                                )}
+                              </div>
+
+                              <p className="text-xs text-zinc-600 dark:text-zinc-400 line-clamp-2 leading-relaxed">
+                                {relSec.simpleExplanation}
+                              </p>
+                            </div>
+
+                            <div className="pt-2.5 border-t border-zinc-100 dark:border-zinc-800/80 flex items-center justify-between text-xs">
+                              <div className="flex items-center space-x-1.5">
+                                {sharedConcepts.length > 0 && (
+                                  <span className="text-[10px] text-zinc-400 dark:text-zinc-500 truncate max-w-[130px]">
+                                    {sharedConcepts[0]}
+                                  </span>
+                                )}
+                              </div>
+
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setSelectedSectionNumber(relSec.number);
+                                  const el = document.getElementById('active-section-display-card');
+                                  if (el) {
+                                    el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                                  }
+                                }}
+                                className="inline-flex items-center space-x-1 text-xs font-bold text-amber-600 dark:text-amber-400 hover:text-amber-500 group-hover:translate-x-0.5 transition-all"
+                              >
+                                <span>Jump to Section</span>
+                                <ArrowRight className="w-3.5 h-3.5" />
+                              </button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="p-4 rounded-2xl bg-zinc-50 dark:bg-zinc-950 text-center text-xs text-zinc-500 border border-zinc-200 dark:border-zinc-800">
+                        No additional provisions linked in this statutory excerpt.
+                      </div>
+                    )}
+                  </div>
                 </div>
               ) : (
                 <div className="p-12 text-center text-zinc-500 rounded-3xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800">
@@ -1168,7 +1429,7 @@ function LawDetailContent() {
             </div>
 
             <div className="relative pl-6 space-y-8 before:absolute before:left-2 before:top-2 before:bottom-2 before:w-0.5 before:bg-amber-500/30">
-              {law.timeline.map((event, idx) => (
+              {(law.timeline || []).map((event, idx) => (
                 <div key={idx} className="relative group">
                   {/* Timeline Node */}
                   <div className="absolute -left-[27px] top-1.5 w-3.5 h-3.5 rounded-full bg-amber-500 ring-4 ring-white dark:ring-zinc-900" />
@@ -1334,6 +1595,86 @@ function LawDetailContent() {
       />
     </div>
   );
+}
+
+function LawDetailContent() {
+  const params = useParams();
+  const searchParams = useSearchParams();
+  const rawId = (params?.id as string) || '';
+  const initialSectionParam = searchParams.get('section');
+
+  const law = useMemo(() => {
+    return getEnrichedLaw(rawId);
+  }, [rawId]);
+
+  if (!law) {
+    return (
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-24 text-center space-y-8">
+        <div className="w-16 h-16 rounded-3xl bg-rose-500/10 text-rose-500 flex items-center justify-center mx-auto border border-rose-500/20 shadow-lg">
+          <AlertTriangle className="w-8 h-8" />
+        </div>
+
+        <div className="space-y-3">
+          <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20 text-xs font-semibold">
+            <span>404 Statute Error</span>
+          </div>
+          <h1 className="text-3xl sm:text-4xl font-extrabold text-zinc-900 dark:text-white tracking-tight">
+            404 Law Not Found
+          </h1>
+          <p className="text-sm sm:text-base text-zinc-600 dark:text-zinc-400 max-w-lg mx-auto leading-relaxed">
+            The legal statute identifier <code className="px-2 py-0.5 rounded bg-zinc-100 dark:bg-zinc-800 font-mono text-xs text-rose-600 dark:text-rose-400 border border-zinc-200 dark:border-zinc-700">{rawId}</code> could not be found in the Nyayota legal database.
+          </p>
+        </div>
+
+        <div className="p-6 rounded-3xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-sm max-w-xl mx-auto space-y-4 text-left">
+          <h2 className="text-xs font-bold uppercase tracking-wider text-zinc-500">
+            Available Statutory Repositories:
+          </h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <Link
+              href="/bangladesh-laws"
+              className="p-3.5 rounded-2xl bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 hover:border-emerald-500/50 flex items-center justify-between text-xs font-semibold text-zinc-900 dark:text-white transition-all group"
+            >
+              <div className="flex items-center space-x-2">
+                <Scale className="w-4 h-4 text-emerald-500" />
+                <span>Bangladesh Laws</span>
+              </div>
+              <ArrowRight className="w-3.5 h-3.5 text-zinc-400 group-hover:text-emerald-500 group-hover:translate-x-0.5 transition-all" />
+            </Link>
+
+            <Link
+              href="/international-laws"
+              className="p-3.5 rounded-2xl bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 hover:border-blue-500/50 flex items-center justify-between text-xs font-semibold text-zinc-900 dark:text-white transition-all group"
+            >
+              <div className="flex items-center space-x-2">
+                <Globe className="w-4 h-4 text-blue-500" />
+                <span>International Treaties</span>
+              </div>
+              <ArrowRight className="w-3.5 h-3.5 text-zinc-400 group-hover:text-blue-500 group-hover:translate-x-0.5 transition-all" />
+            </Link>
+          </div>
+
+          <div className="pt-2 flex flex-col sm:flex-row items-center justify-center gap-3">
+            <Link
+              href="/search"
+              className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-zinc-950 font-bold text-xs flex items-center justify-center space-x-2 transition-colors shadow-md shadow-amber-500/20"
+            >
+              <Search className="w-3.5 h-3.5" />
+              <span>Search All Laws</span>
+            </Link>
+            <Link
+              href="/"
+              className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 text-zinc-700 dark:text-zinc-200 font-semibold text-xs flex items-center justify-center transition-colors"
+            >
+              Return to Home
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return <LawDetailViewer law={law} initialSectionParam={initialSectionParam} />;
 }
 
 export default function LawDetailPage() {
