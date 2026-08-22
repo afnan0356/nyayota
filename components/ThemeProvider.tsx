@@ -17,8 +17,10 @@ function applyThemeClass(t: Theme) {
   const root = document.documentElement;
   if (t === 'dark') {
     root.classList.add('dark');
+    root.classList.remove('light');
   } else {
     root.classList.remove('dark');
+    root.classList.add('light');
   }
 }
 
@@ -27,9 +29,10 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     if (typeof window !== 'undefined') {
       try {
         const saved = localStorage.getItem('nyayota_theme') as Theme | null;
-        if (saved === 'light' || saved === 'dark') return saved;
-        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-        return prefersDark ? 'dark' : 'dark';
+        if (saved === 'light' || saved === 'dark') {
+          return saved;
+        }
+        return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
       } catch {
         return 'dark';
       }
@@ -39,15 +42,27 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     applyThemeClass(theme);
+
+    const handleStorage = (e: StorageEvent) => {
+      if (e.key === 'nyayota_theme' && (e.newValue === 'light' || e.newValue === 'dark')) {
+        setThemeState(e.newValue);
+        applyThemeClass(e.newValue);
+      }
+    };
+
+    window.addEventListener('storage', handleStorage);
+    return () => window.removeEventListener('storage', handleStorage);
   }, [theme]);
+
 
   const setTheme = (newTheme: Theme) => {
     setThemeState(newTheme);
     applyThemeClass(newTheme);
     try {
       localStorage.setItem('nyayota_theme', newTheme);
+      window.dispatchEvent(new CustomEvent('nyayota-theme-changed', { detail: newTheme }));
     } catch {
-      // ignore
+      // ignore storage failure
     }
   };
 
@@ -70,3 +85,4 @@ export function useTheme() {
   }
   return context;
 }
+

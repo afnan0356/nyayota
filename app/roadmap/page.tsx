@@ -40,17 +40,17 @@ export default function RoadmapPage() {
       <div className="space-y-4 max-w-3xl">
         <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 text-xs font-semibold">
           <MapPin className="w-3.5 h-3.5" />
-          <span>Strategic Development Plan</span>
+          <span>Development Plan</span>
         </div>
         <h1 className="text-3xl sm:text-4xl font-extrabold text-zinc-900 dark:text-white tracking-tight">
-          Nyayota Project Roadmap & Global Expansion
+          Nyayota Development Roadmap
         </h1>
         <p className="text-sm sm:text-base text-zinc-600 dark:text-zinc-400 leading-relaxed">
-          Our phased development roadmap outlining current launch milestones, near-term functional expansions, and long-term multi-jurisdiction world law navigation.
+          An open overview of what is available today, what we are actively building right now, and what is planned next for public legal research.
         </p>
       </div>
 
-      {/* 1. Launch Version 1.0 (Live Now) */}
+      {/* 1. Available Now */}
       <section className="space-y-6">
         <div className="flex items-center space-x-3">
           <div className="w-8 h-8 rounded-xl bg-emerald-500/20 text-emerald-500 font-bold flex items-center justify-center text-sm border border-emerald-500/30">
@@ -59,14 +59,14 @@ export default function RoadmapPage() {
           <div>
             <div className="flex items-center space-x-2">
               <h2 className="text-xl sm:text-2xl font-bold text-zinc-900 dark:text-white">
-                Launch Scope (v1.0)
+                Available Now
               </h2>
               <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-500 border border-emerald-500/20">
-                LIVE & ACTIVE
+                ACTIVE
               </span>
             </div>
             <p className="text-xs text-zinc-500 dark:text-zinc-400">
-              Foundational architecture, bilingual Bangladesh & International repositories, and AI assistant.
+              Core statutory libraries, bilingual search, plain-language legal explainers, and procedural guides.
             </p>
           </div>
         </div>
@@ -79,7 +79,7 @@ export default function RoadmapPage() {
             >
               <div className="flex items-center justify-between">
                 <CheckCircle2 className="w-4 h-4 text-emerald-500" />
-                <span className="text-[10px] font-mono text-emerald-500 font-bold">100% Implemented</span>
+                <span className="text-[10px] text-emerald-500 font-bold">Active in Platform</span>
               </div>
               <h3 className="text-sm font-bold text-zinc-900 dark:text-white">{feat.title}</h3>
               <p className="text-xs text-zinc-600 dark:text-zinc-400 leading-relaxed">{feat.description}</p>
@@ -88,7 +88,7 @@ export default function RoadmapPage() {
         </div>
       </section>
 
-      {/* 2. Planned Features (v1.2 - v1.5) */}
+      {/* 2. In Development */}
       <section className="space-y-6">
         <div className="flex items-center space-x-3">
           <div className="w-8 h-8 rounded-xl bg-blue-500/20 text-blue-500 font-bold flex items-center justify-center text-sm border border-blue-500/30">
@@ -97,14 +97,14 @@ export default function RoadmapPage() {
           <div>
             <div className="flex items-center space-x-2">
               <h2 className="text-xl sm:text-2xl font-bold text-zinc-900 dark:text-white">
-                Planned Enhancements (v1.2 — v1.5)
+                Currently In Development
               </h2>
               <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-blue-500/10 text-blue-500 border border-blue-500/20">
-                IN ACTIVE DESIGN
+                BEING BUILT
               </span>
             </div>
             <p className="text-xs text-zinc-500 dark:text-zinc-400">
-              Deeper research capabilities, clause diffing, and legislative timeline tracking.
+              Deeper comparison tools, amendment timeline logs, and automated statutory citation generators.
             </p>
           </div>
         </div>
@@ -117,7 +117,7 @@ export default function RoadmapPage() {
             >
               <div className="flex items-center justify-between">
                 <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-blue-500/10 text-blue-500 border border-blue-500/20">
-                  {feat.releaseTarget}
+                  {feat.releaseTarget || 'In Progress'}
                 </span>
                 <Clock className="w-3.5 h-3.5 text-blue-400" />
               </div>
@@ -128,7 +128,7 @@ export default function RoadmapPage() {
         </div>
       </section>
 
-      {/* 3. Global Expansion & World Law Navigator (v2.0+) */}
+      {/* 3. Planned Next */}
       <section className="space-y-6">
         <div className="flex items-center space-x-3">
           <div className="w-8 h-8 rounded-xl bg-purple-500/20 text-purple-500 font-bold flex items-center justify-center text-sm border border-purple-500/30">
@@ -137,14 +137,14 @@ export default function RoadmapPage() {
           <div>
             <div className="flex items-center space-x-2">
               <h2 className="text-xl sm:text-2xl font-bold text-zinc-900 dark:text-white">
-                Global Expansion & World Law Navigator (v2.0+)
+                Planned Next: International Statutes
               </h2>
               <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-purple-500/10 text-purple-500 border border-purple-500/20">
-                FUTURE HORIZON
+                UPCOMING
               </span>
             </div>
             <p className="text-xs text-zinc-500 dark:text-zinc-400">
-              Cross-border comparative jurisprudence, personal encrypted research vaults, and new jurisdictions.
+              Expanding coverage to national legislation from additional common law and civil law jurisdictions.
             </p>
           </div>
         </div>

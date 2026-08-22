@@ -1,1 +1,18 @@
 @import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* Custom scrollbars and theme utilities */
+@layer base {
+  html {
+    color-scheme: light dark;
+  }
+  
+  html.dark {
+    color-scheme: dark;
+  }
+
+  html:not(.dark) {
+    color-scheme: light;
+  }
+}

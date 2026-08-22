@@ -12,16 +12,20 @@ import {
   Building2,
   AlertTriangle,
   ArrowRight,
-  CheckCircle2
+  CheckCircle2,
+  HeartHandshake,
+  FileCheck2,
+  MessageSquareQuote,
+  Mail
 } from 'lucide-react';
 
 export default function AboutPage() {
   const audiences = [
-    { title: 'The General Public', description: 'Citizens seeking to understand their statutory rights, consumer protections, and court procedural stages.', icon: Users },
-    { title: 'Students & Law Learners', description: 'Undergraduate and postgraduate students analyzing legal texts, Latin maxims, and statutory structures.', icon: GraduationCap },
-    { title: 'Researchers & Academics', description: 'Scholars conducting comparative legal research between domestic legislation and international treaties.', icon: BookOpen },
-    { title: 'Journalists & Media', description: 'Reporters verifying legal terminology, constitutional articles, and criminal trial procedures accurately.', icon: Globe },
-    { title: 'Legal Professionals', description: 'Advocates, apprentices, and paralegals quickly searching act numbers, section citations, and legislative amendments.', icon: Scale }
+    { title: 'The General Public', description: 'Citizens navigating everyday legal challenges — from police questioning and rental disputes to consumer rights and cyber harassment.', icon: Users },
+    { title: 'Students & Law Learners', description: 'Undergraduate and postgraduate students analyzing statutes, exploring Latin maxims, and preparing for Bar Council examinations.', icon: GraduationCap },
+    { title: 'Researchers & Scholars', description: 'Academics comparing domestic statutory provisions against international conventions and human rights treaties.', icon: BookOpen },
+    { title: 'Journalists & Fact-Checkers', description: 'Reporters verifying legal terminology, constitutional articles, and trial procedures under tight editorial deadlines.', icon: Globe },
+    { title: 'Apprentice Lawyers & Paralegals', description: 'Legal practitioners quickly searching act numbers, section citations, and legislative amendments.', icon: Scale }
   ];
 
   return (
@@ -33,51 +37,101 @@ export default function AboutPage() {
           <span>About Nyayota</span>
         </div>
         <h1 className="text-3xl sm:text-5xl font-extrabold text-zinc-900 dark:text-white tracking-tight">
-          Democratizing Legal Knowledge and Research
+          Why We Built Nyayota
         </h1>
         <p className="text-base sm:text-lg text-zinc-600 dark:text-zinc-400 leading-relaxed">
-          Nyayota is a free, open-access legal research and knowledge platform built to make codified statutes, international treaties, and judicial procedures understandable to all.
+          An open civic legal resource making statutory law and constitutional rights understandable, searchable, and free for everyone.
         </p>
       </div>
 
-      {/* Core Non-Advisory Notice */}
-      <div className="p-6 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-zinc-900 dark:text-zinc-100 space-y-2">
-        <div className="flex items-center space-x-2 text-amber-700 dark:text-amber-400 font-bold text-sm">
+      {/* The Problem & The Origin Story */}
+      <div className="p-8 rounded-3xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-sm space-y-6">
+        <h2 className="text-2xl font-bold text-zinc-900 dark:text-white">
+          The Problem We Are Trying to Solve
+        </h2>
+        <div className="space-y-4 text-sm sm:text-base text-zinc-600 dark:text-zinc-300 leading-relaxed">
+          <p>
+            In Bangladesh and across many legal systems, the law governs every single aspect of daily life — yet it is largely inaccessible to the people it governs. Statutes are often written in archaic 19th-century colonial phrasing, scattered across unindexed government gazette PDFs, or locked behind expensive proprietary software.
+          </p>
+          <p>
+            When an ordinary person is faced with an eviction notice, an arbitrary arrest, or online harassment, finding out what the law actually says should not require days of searching or thousands of taka in consultation fees just to read a basic statutory protection.
+          </p>
+          <p>
+            <strong>Nyayota</strong> (from the Sanskrit and Bengali concept of <em>Nyay</em> — justice, fairness, and right) was started as an independent civic technology and legal research initiative. Our goal is straightforward: take the official verbatim law, keep it completely authoritative, and place plain-language explanations, bilingual terms, and step-by-step procedural context right alongside it.
+          </p>
+        </div>
+      </div>
+
+      {/* Clear Distinction from Legal Advice */}
+      <div className="p-6 sm:p-7 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-zinc-900 dark:text-zinc-100 space-y-3">
+        <div className="flex items-center space-x-2.5 text-amber-800 dark:text-amber-400 font-bold text-base">
           <AlertTriangle className="w-5 h-5 text-amber-500 shrink-0" />
-          <span>Educational Mandate & Distinction from Legal Advice</span>
+          <span>What Nyayota Is — And What It Is Not</span>
         </div>
-        <p className="text-xs sm:text-sm text-zinc-700 dark:text-zinc-300 leading-relaxed">
-          <strong>Nyayota is not a law firm and does not provide legal advice or legal representation.</strong> All content, statutory interpretations, translations, and AI summaries provided on this platform are for academic, informational, and civic educational purposes only. If you require legal counsel or are party to an active dispute, you should consult a licensed advocate or contact a government-sponsored legal aid authority.
-        </p>
+        <div className="text-xs sm:text-sm text-zinc-700 dark:text-zinc-300 leading-relaxed space-y-2">
+          <p>
+            <strong>Nyayota is an educational legal research platform, not a law firm.</strong> We do not provide legal representation, we do not file petitions on your behalf, and using this site does not create an advocate-client relationship.
+          </p>
+          <p>
+            Our summaries, AI syntheses, and procedural outlines are designed to help you understand what statutes mean and what questions to ask. If you are dealing with an active court case, criminal charges, or immediate property dispute, you should always consult a registered Advocate or reach out to the National Legal Aid Services Authority (Helpline: <strong>16430</strong>).
+          </p>
+        </div>
       </div>
 
-      {/* Mission & Vision */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="p-7 rounded-2xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-sm space-y-3">
-          <h2 className="text-xl font-bold text-zinc-900 dark:text-white flex items-center space-x-2">
-            <span className="w-2 h-2 rounded-full bg-amber-500" />
-            <span>Our Mission</span>
+      {/* Sourcing & Verification Process */}
+      <div className="space-y-6">
+        <div className="space-y-1">
+          <h2 className="text-2xl font-bold text-zinc-900 dark:text-white">
+            How We Source and Verify Legal Texts
           </h2>
-          <p className="text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed">
-            To eliminate the barrier of archaic legal jargon by making statutory laws searchable, multilingual, understandable, and free of cost. We believe that knowledge of the law is a fundamental prerequisite for justice, civic empowerment, and the rule of law.
+          <p className="text-xs sm:text-sm text-zinc-500 dark:text-zinc-400">
+            Trust and accuracy are the foundation of any legal resource. Here is how our data is curated:
           </p>
         </div>
 
-        <div className="p-7 rounded-2xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-sm space-y-3">
-          <h2 className="text-xl font-bold text-zinc-900 dark:text-white flex items-center space-x-2">
-            <span className="w-2 h-2 rounded-full bg-blue-500" />
-            <span>Our Vision</span>
-          </h2>
-          <p className="text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed">
-            To build a comprehensive global legal knowledge infrastructure where any person, anywhere in the world, can explore and compare legal systems across international borders with instant linguistic clarity, historical context, and citation precision.
-          </p>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+          <div className="p-6 rounded-2xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 space-y-3">
+            <div className="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center border border-emerald-500/20">
+              <FileCheck2 className="w-5 h-5" />
+            </div>
+            <h3 className="text-base font-bold text-zinc-900 dark:text-white">
+              Official Government Gazettes
+            </h3>
+            <p className="text-xs text-zinc-600 dark:text-zinc-400 leading-relaxed">
+              Every domestic statute is cross-referenced with the <em>Laws of Bangladesh</em> repository maintained by the Legislative &amp; Parliamentary Affairs Division, Ministry of Law, Justice and Parliamentary Affairs.
+            </p>
+          </div>
+
+          <div className="p-6 rounded-2xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 space-y-3">
+            <div className="w-10 h-10 rounded-xl bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center border border-blue-500/20">
+              <Globe className="w-5 h-5" />
+            </div>
+            <h3 className="text-base font-bold text-zinc-900 dark:text-white">
+              UN &amp; Treaty Registries
+            </h3>
+            <p className="text-xs text-zinc-600 dark:text-zinc-400 leading-relaxed">
+              International conventions (UDHR, Geneva Conventions, UNCLOS, Paris Agreement) are verified directly against the United Nations Treaty Collection (UNTC) and ICRC databases.
+            </p>
+          </div>
+
+          <div className="p-6 rounded-2xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 space-y-3">
+            <div className="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center border border-amber-500/20">
+              <ShieldCheck className="w-5 h-5" />
+            </div>
+            <h3 className="text-base font-bold text-zinc-900 dark:text-white">
+              Human Review &amp; Errata Policy
+            </h3>
+            <p className="text-xs text-zinc-600 dark:text-zinc-400 leading-relaxed">
+              Plain-language summaries and AI educational breakdowns are reviewed to ensure they do not introduce false legal promises or misleading simplifications.
+            </p>
+          </div>
         </div>
       </div>
 
       {/* Who Nyayota Serves */}
       <div className="space-y-6">
         <div className="space-y-1">
-          <h2 className="text-2xl font-bold text-zinc-900 dark:text-white">Who Nyayota Serves</h2>
+          <h2 className="text-2xl font-bold text-zinc-900 dark:text-white">Who Nyayota Is Built For</h2>
           <p className="text-xs sm:text-sm text-zinc-500 dark:text-zinc-400">
             Tailored for diverse audiences seeking verified statutory clarity.
           </p>
@@ -102,39 +156,23 @@ export default function AboutPage() {
         </div>
       </div>
 
-      {/* Platform Values */}
-      <div className="p-8 rounded-3xl bg-zinc-100 dark:bg-zinc-900/80 border border-zinc-200 dark:border-zinc-800 space-y-6">
-        <h2 className="text-xl font-bold text-zinc-900 dark:text-white">Our Core Principles</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs sm:text-sm text-zinc-600 dark:text-zinc-300">
-          <div className="flex items-start space-x-3">
-            <CheckCircle2 className="w-5 h-5 text-emerald-500 shrink-0" />
-            <div>
-              <strong className="text-zinc-900 dark:text-white block">No Paywalls, No Subscriptions</strong>
-              Public legal texts should remain completely open to every citizen without commercial gates.
-            </div>
-          </div>
-          <div className="flex items-start space-x-3">
-            <CheckCircle2 className="w-5 h-5 text-emerald-500 shrink-0" />
-            <div>
-              <strong className="text-zinc-900 dark:text-white block">Uncompromising Accuracy</strong>
-              Directly grounded in official government gazettes, act registries, and UN treaty documents.
-            </div>
-          </div>
-          <div className="flex items-start space-x-3">
-            <CheckCircle2 className="w-5 h-5 text-emerald-500 shrink-0" />
-            <div>
-              <strong className="text-zinc-900 dark:text-white block">Bilingual Accessibility</strong>
-              Bridging English legislative frameworks with native Bengali terminology for domestic inclusivity.
-            </div>
-          </div>
-          <div className="flex items-start space-x-3">
-            <CheckCircle2 className="w-5 h-5 text-emerald-500 shrink-0" />
-            <div>
-              <strong className="text-zinc-900 dark:text-white block">Zero Tracking, Privacy First</strong>
-              Researchers and citizens can read and search without personal profile tracking or commercial cookies.
-            </div>
-          </div>
+      {/* Community Contribution & Feedback */}
+      <div className="p-8 rounded-3xl bg-zinc-100 dark:bg-zinc-900/80 border border-zinc-200 dark:border-zinc-800 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+        <div className="space-y-2 max-w-xl">
+          <h2 className="text-xl font-bold text-zinc-900 dark:text-white">
+            Found an Error or Have a Suggestion?
+          </h2>
+          <p className="text-xs sm:text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed">
+            Legal accuracy requires ongoing vigilance. If you notice a typo in a section number, an outdated amendment reference, or would like to request an act to be added, please let us know.
+          </p>
         </div>
+        <Link
+          href="/contact"
+          className="px-5 py-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-zinc-950 font-bold text-xs sm:text-sm inline-flex items-center space-x-2 transition-colors shrink-0 shadow-sm"
+        >
+          <Mail className="w-4 h-4" />
+          <span>Send Feedback &amp; Corrections</span>
+        </Link>
       </div>
     </div>
   );

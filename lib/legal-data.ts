@@ -66,6 +66,46 @@ export interface LawItem {
   keywords: string[];
 }
 
+export interface GlossaryTerm {
+  term: string;
+  termBn?: string;
+  pronunciation?: string;
+  category: string;
+  definition: string;
+  simpleExplanation: string;
+  jurisdiction?: string;
+  exampleUsage?: string;
+  relatedLawIds?: string[];
+}
+
+export interface LegalPathwayStage {
+  stageNumber: number;
+  title: string;
+  description: string;
+  keyActions: string[];
+  importantRights: string[];
+  commonPitfalls: string[];
+}
+
+export interface EmergencyContactInfo {
+  name: string;
+  number: string;
+  description: string;
+}
+
+export interface LegalOutcomePathway {
+  id: string;
+  title: string;
+  titleBn: string;
+  category: string;
+  jurisdiction: string;
+  estimatedTimeline: string;
+  primaryLegislation: string;
+  summary: string;
+  stages: LegalPathwayStage[];
+  emergencyContacts?: EmergencyContactInfo[];
+}
+
 export interface LegalCategoryInfo {
   id: string;
   slug: string;
@@ -88,7 +128,7 @@ export const LEGAL_CATEGORIES_DATA: LegalCategoryInfo[] = [
     description: 'Substantive offenses, penalties, culpable homicide, theft, fraud, and police arrest standards.',
     descriptionBn: 'দণ্ডবিধি, অপরাধের সংজ্ঞা, শাস্তি, পরোয়ানা এবং ফৌজদারি বিচার ব্যবস্থা।',
     primaryJurisdiction: 'Both',
-    countLabel: '511+ Sections • 2 Acts',
+    countLabel: 'Key provisions with plain explanations',
     iconName: 'Shield',
     href: '/bangladesh-laws?category=Criminal+Law'
   },
@@ -100,7 +140,7 @@ export const LEGAL_CATEGORIES_DATA: LegalCategoryInfo[] = [
     description: 'Supreme law of the state, Fundamental Rights, Article 102 High Court Writs, and separation of powers.',
     descriptionBn: 'মৌলিক অধিকার, রিট আবেদন, আইনের দৃষ্টিতে সমতা ও রাষ্ট্রীয় মূলনীতি।',
     primaryJurisdiction: 'Bangladesh',
-    countLabel: '153 Articles • Supreme Law',
+    countLabel: 'Key fundamental rights & writ remedies',
     iconName: 'Scale',
     href: '/bangladesh-laws?category=Constitutional+Law'
   },
@@ -112,7 +152,7 @@ export const LEGAL_CATEGORIES_DATA: LegalCategoryInfo[] = [
     description: 'Universal declarations, civil and political covenants, anti-torture baselines, and freedom of speech.',
     descriptionBn: 'সার্বজনীন মানবাধিকার ঘোষণাপত্র (UDHR) ও নাগরিক অধিকার বিষয়ক চুক্তি।',
     primaryJurisdiction: 'International',
-    countLabel: '30 Articles • 193 Signatories',
+    countLabel: 'Core UN declarations & covenants',
     iconName: 'Globe',
     href: '/international-laws?category=Human+Rights'
   },
@@ -124,7 +164,7 @@ export const LEGAL_CATEGORIES_DATA: LegalCategoryInfo[] = [
     description: 'Critical information infrastructure, digital impersonation, hacking, data security, and online fraud.',
     descriptionBn: 'অনলাইন প্রতারণা, হ্যাকিং, ডিজিটাল নিরাপত্তা এবং তথ্যপ্রযুক্তি অপরাধ প্রতিরোধ।',
     primaryJurisdiction: 'Bangladesh',
-    countLabel: 'Act XXVII/2023 • 60+ Sections',
+    countLabel: 'Key cyber offenses & reporting standards',
     iconName: 'Sparkles',
     href: '/bangladesh-laws?category=Cyber+%26+Digital'
   },
@@ -136,7 +176,7 @@ export const LEGAL_CATEGORIES_DATA: LegalCategoryInfo[] = [
     description: 'Workplace safety, maximum work hours, overtime compensation, maternity benefits, and trade unions.',
     descriptionBn: 'শ্রমিক কল্যাণ, কর্মঘণ্টা, মাতৃত্বকালীন ছুটি, ট্রেড ইউনিয়ন ও কারখানা নিরাপত্তা।',
     primaryJurisdiction: 'Bangladesh',
-    countLabel: '350+ Sections • Act XLII/2006',
+    countLabel: 'Core worker rights & leave benefits',
     iconName: 'Layers',
     href: '/bangladesh-laws?category=Labor+%26+Employment'
   },
@@ -148,7 +188,7 @@ export const LEGAL_CATEGORIES_DATA: LegalCategoryInfo[] = [
     description: 'International sale of goods (CISG), ocean commerce, maritime economic zones (UNCLOS), and mercantile rules.',
     descriptionBn: 'আন্তর্জাতিক বাণিজ্যিক চুক্তি, সমুদ্র বাণিজ্য ও এক্সক্লুসিভ ইকোনমিক জোন।',
     primaryJurisdiction: 'Both',
-    countLabel: '320+ Articles • Multi-Treaty',
+    countLabel: 'Key trade rules & maritime treaties',
     iconName: 'Compass',
     href: '/international-laws?category=Commercial+%26+Contract'
   },
@@ -160,7 +200,7 @@ export const LEGAL_CATEGORIES_DATA: LegalCategoryInfo[] = [
     description: 'Filing civil suits, plaints, injunctions, execution of decrees, appeals, and property disputes.',
     descriptionBn: 'দেওয়ানি মামলার আরজি, অস্থায়ী নিষেধাজ্ঞা, ডিক্রি জারি ও আপিল কার্যপদ্ধতি।',
     primaryJurisdiction: 'Bangladesh',
-    countLabel: '158 Sections • 51 Orders',
+    countLabel: 'Key procedural steps & injunction rules',
     iconName: 'FileText',
     href: '/bangladesh-laws?category=Civil+Procedure'
   },
@@ -172,7 +212,7 @@ export const LEGAL_CATEGORIES_DATA: LegalCategoryInfo[] = [
     description: 'Marriage registration, dower, maintenance, dissolution of marriage, child custody, and inheritance.',
     descriptionBn: 'বিবাহ নিবন্ধন, দেনমোহর, ভরণপোষণ, তালাক এবং পারিবারিক আদালতের বিচার।',
     primaryJurisdiction: 'Bangladesh',
-    countLabel: 'Ordinance VIII/1961',
+    countLabel: 'Key family court & custody guides',
     iconName: 'Users',
     href: '/bangladesh-laws?category=Family+Law'
   },
@@ -184,7 +224,7 @@ export const LEGAL_CATEGORIES_DATA: LegalCategoryInfo[] = [
     description: 'Pollution control, environmental clearance certificates, ecological critical areas, and Paris Climate Agreement.',
     descriptionBn: 'পরিবেশ দূষণ নিয়ন্ত্রণ, পরিবেশগত ছাড়পত্র ও প্যারিস জলবায়ু চুক্তি।',
     primaryJurisdiction: 'Both',
-    countLabel: 'Act I/1995 & Paris Treaty',
+    countLabel: 'Key conservation statutes & accords',
     iconName: 'Leaf',
     href: '/international-laws?category=Environmental+Law'
   },
@@ -193,49 +233,14 @@ export const LEGAL_CATEGORIES_DATA: LegalCategoryInfo[] = [
     slug: 'international-humanitarian',
     title: 'International Humanitarian Law',
     titleBn: 'আন্তর্জাতিক মানবিক আইন',
-    description: 'Geneva Conventions I-IV, civilian protection during armed conflict, treatment of POWs, and war crime rules.',
-    descriptionBn: 'যুদ্ধকালীন সময়ে সাধারণ নাগরিক ও যুদ্ধবন্দীদের মানবিক সুরক্ষার নিয়মাবলি।',
+    description: 'Geneva Conventions, protection of civilians, rules of armed conflict, prisoners of war, and war crimes accountability.',
+    descriptionBn: 'জেনেভা কনভেনশন, বেসামরিক নাগরিক সুরক্ষা ও সশস্ত্র সংঘাতের নিয়মাবলী।',
     primaryJurisdiction: 'International',
-    countLabel: '4 Conventions • 196 States',
-    iconName: 'ShieldAlert',
+    countLabel: '4 Geneva Accords & Protocols',
+    iconName: 'Shield',
     href: '/international-laws?category=International+Humanitarian'
   }
 ];
-
-export interface GlossaryTerm {
-  term: string;
-  termBn: string;
-  pronunciation?: string;
-  category: string;
-  definition: string;
-  simpleExplanation: string;
-  jurisdiction: 'Universal' | 'Bangladesh' | 'Common Law' | 'Civil Law';
-  exampleUsage: string;
-}
-
-export interface LegalOutcomePathway {
-  id: string;
-  title: string;
-  titleBn: string;
-  category: 'Criminal Procedure' | 'Civil Disputes' | 'Constitutional Remedies' | 'Consumer Grievance' | 'Family Matters' | 'Digital Harassment';
-  jurisdiction: 'Bangladesh' | 'Universal Principles';
-  estimatedTimeline: string;
-  primaryLegislation: string;
-  summary: string;
-  stages: {
-    stageNumber: number;
-    title: string;
-    description: string;
-    keyActions: string[];
-    importantRights: string[];
-    commonPitfalls: string[];
-  }[];
-  emergencyContacts?: {
-    name: string;
-    number: string;
-    description: string;
-  }[];
-}
 
 export const LAWS_DATABASE: LawItem[] = [
   {
@@ -252,24 +257,48 @@ export const LAWS_DATABASE: LawItem[] = [
     enactmentYear: 1860,
     lastAmendedYear: 2023,
     officialGazetteRef: 'Govt. of Bangladesh Legislative Archives Act XLV/1860',
-    overview: 'The Penal Code of 1860 is the foundational substantive criminal code of Bangladesh, defining offenses from murder, theft, and fraud to criminal conspiracy and state security, along with their respective punishments.',
+    officialSource: 'Laws of Bangladesh (bdlaws.minlaw.gov.bd)',
+    sourceOrganization: 'Legislative and Parliamentary Affairs Division, Ministry of Law, Justice and Parliamentary Affairs',
+    sourceVerificationUrl: 'http://bdlaws.minlaw.gov.bd/act-11.html',
+    lastUpdatedDate: 'January 2025',
+    overview: 'The foundational substantive criminal statute of Bangladesh, defining offenses from murder, theft, and fraud to criminal conspiracy and bodily harm, along with their statutory penalties and general exceptions.',
     overviewBn: '১৮৬০ সালের দণ্ডবিধি হলো বাংলাদেশের প্রধান ফৌজদারি আইন যা বিভিন্ন অপরাধের সংজ্ঞা এবং সেগুলোর শাস্তির বিধান নির্ধারণ করে।',
-    simpleSummary: 'This is the main criminal law book in Bangladesh that defines what actions are crimes (like theft, assault, fraud, or murder) and specifies how they are punished.',
+    simpleSummary: 'The primary criminal code in Bangladesh that defines specific unlawful acts (such as theft, assault, fraud, or murder), sets statutory defenses (such as private defense), and determines the penalties judges can impose.',
     fullOfficialTextExcerpt: 'WHEREAS it is expedient to provide a general Penal Code for Bangladesh; It is enacted as follows: This Act shall be called the Penal Code, and shall take effect throughout Bangladesh. Every person shall be liable to punishment under this Code and not otherwise for every act or omission contrary to the provisions thereof, of which he shall be guilty within Bangladesh.',
     keyHighlights: [
-      'Covers 511 sections defining general exceptions, offenses against the state, public tranquility, and bodily harm.',
-      'Defines Mens Rea (guilty mind) and Actus Reus (guilty act) as prerequisites for criminal liability.',
-      'Specifies punishments ranging from fines and simple imprisonment to rigorous imprisonment and capital punishment.'
+      'Contains 511 codified sections covering general exceptions, state security, public order, bodily offenses, and property crimes.',
+      'Establishes the fundamental legal doctrine that criminal liability requires both a guilty intention (Mens Rea) and a prohibited act (Actus Reus).',
+      'Provides general statutory exceptions including self-defense (Sec. 96-106), acts done by children, and acts under genuine accident or duress.'
     ],
     sections: [
+      {
+        number: 'Section 34',
+        title: 'Acts done by several persons in furtherance of common intention',
+        titleBn: 'সাধারণ অভিপ্রায় বাস্তবায়নে একাধিক ব্যক্তি কর্তৃক কৃত কার্য',
+        content: 'When a criminal act is done by several persons, in furtherance of the common intention of all, each of such persons is liable for that act in the same manner as if it were done by him alone.',
+        contentBn: 'যখন একটি অপরাধমূলক কাজ একাধিক ব্যক্তি তাদের সবার সাধারণ উদ্দেশ্য বাস্তবায়নে সম্পাদন করে, তখন তাদের প্রত্যেকে এমনভাবে দায়ী হবে যেন কাজটি সে একাই করেছে।',
+        simpleExplanation: 'If two or more people plan or join together to commit a crime, everyone involved shares full legal responsibility for the resulting offense even if only one person pulled a trigger or stole the money.',
+        punishmentOrRemedy: 'Joint criminal liability equal to the primary offender.',
+        keyConcepts: ['Common intention', 'Joint liability', 'Pre-arranged plan']
+      },
+      {
+        number: 'Section 96',
+        title: 'Things done in private defence',
+        titleBn: 'ব্যক্তিগত আত্মরক্ষার্থে কৃত কাজ',
+        content: 'Nothing is an offence which is done in the exercise of the right of private defence.',
+        contentBn: 'ব্যক্তিগত আত্মরক্ষার অধিকার প্রয়োগের ক্ষেত্রে কৃত কোনো কাজ অপরাধ বলে গণ্য হবে না।',
+        simpleExplanation: 'You have a legally recognized right to defend your own body, other people, or property against unlawful attacks, provided the force you use is proportional to the immediate threat.',
+        punishmentOrRemedy: 'Complete statutory defense against criminal charges.',
+        keyConcepts: ['Self defense', 'Proportional force', 'Immediate threat']
+      },
       {
         number: 'Section 299',
         title: 'Culpable Homicide',
         titleBn: 'অপরাধজনক নরহত্যা',
-        content: 'Whoever causes death by doing an act with the intention of causing death, or with the intention of causing such bodily injury as is likely to cause death, or with the knowledge that he is likely by such act to cause death, commits the offense of culpable homicide.',
+        content: 'Whoever causes death by doing an act with the intention of causing death, or with the intention of causing such bodily injury as is likely to cause death, or with the knowledge that he is likely by such act to cause death, commits the offence of culpable homicide.',
         contentBn: 'যে ব্যক্তি মৃত্যু ঘটানোর উদ্দেশ্যে বা মৃত্যু ঘটার সম্ভাবনাযুক্ত আঘাত করার উদ্দেশ্যে অথবা মৃত্যু ঘটতে পারে জেনে কোনো কাজ করে মৃত্যু ঘটায়, সে অপরাধজনক নরহত্যা করে।',
-        simpleExplanation: 'Causing someone\'s death with the intent or clear knowledge that your action would cause fatal harm.',
-        punishmentOrRemedy: 'Imprisonment up to life or 10 years depending on intent (Section 304).',
+        simpleExplanation: 'Causing someone\'s death with the intent or clear knowledge that your action was likely to be fatal.',
+        punishmentOrRemedy: 'Imprisonment for life or up to 10 years and fine (Section 304).',
         keyConcepts: ['Intention', 'Knowledge of risk', 'Bodily harm']
       },
       {
@@ -278,8 +307,8 @@ export const LAWS_DATABASE: LawItem[] = [
         titleBn: 'খুন',
         content: 'Except in the cases hereinafter excepted, culpable homicide is murder, if the act by which the death is caused is done with the intention of causing death, or with the knowledge that it is so imminently dangerous that it must in all probability cause death.',
         contentBn: 'অপরাধজনক নরহত্যা খুন হিসেবে গণ্য হবে যদি কাজটি মৃত্যু ঘটানোর নিশ্চিত উদ্দেশ্যে বা মারাত্মক ঝুঁকিপূর্ণভাবে করা হয়।',
-        simpleExplanation: 'Intentional killing without valid legal justification or sudden provocation exceptions.',
-        punishmentOrRemedy: 'Death penalty or imprisonment for life, and shall also be liable to fine (Section 302).',
+        simpleExplanation: 'Intentional killing without valid legal justification, subject to strict statutory exceptions like grave and sudden provocation.',
+        punishmentOrRemedy: 'Death penalty or imprisonment for life, and mandatory fine (Section 302).',
         keyConcepts: ['Premeditation', 'Capital offense', 'Non-bailable']
       },
       {
@@ -288,7 +317,7 @@ export const LAWS_DATABASE: LawItem[] = [
         titleBn: 'চুরি',
         content: 'Whoever, intending to take dishonestly any movable property out of the possession of any person without that person\'s consent, moves that property in order to such taking, is said to commit theft.',
         contentBn: 'যে ব্যক্তি কোনো ব্যক্তির অনুমতি ছাড়া অসৎ উদ্দেশ্যে কোনো অস্থাবর সম্পত্তি স্থানান্তরিত করে, সে চুরি করেছে বলে গণ্য হয়।',
-        simpleExplanation: 'Dishonestly moving someone else\'s movable belongings without their consent.',
+        simpleExplanation: 'Dishonestly moving someone else\'s physical belongings without their consent with the intention of keeping or depriving them of it.',
         punishmentOrRemedy: 'Imprisonment up to 3 years, or fine, or both (Section 379).',
         keyConcepts: ['Dishonest intention', 'Movable property', 'Lack of consent']
       },
@@ -298,16 +327,36 @@ export const LAWS_DATABASE: LawItem[] = [
         titleBn: 'প্রতারণা এবং সম্পত্তি হস্তান্তরে অসদুপায় গ্রহণ',
         content: 'Whoever cheats and thereby dishonestly induces the person deceived to deliver any property to any person, or to make, alter or destroy the whole or any part of a valuable security, shall be punished with imprisonment of either description for a term which may extend to seven years, and shall also be liable to fine.',
         contentBn: 'যে ব্যক্তি প্রতারণার মাধ্যমে অপর ব্যক্তিকে কোনো সম্পত্তি হস্তান্তর করতে প্ররোচিত করে, সে অনধিক ৭ বছর পর্যন্ত কারাদণ্ডে এবং অর্থদণ্ডে দণ্ডিত হবে।',
-        simpleExplanation: 'Tricking someone into giving away money or property through false promises or deceit.',
+        simpleExplanation: 'Deceiving someone through deliberate false promises or misleading representations to make them hand over money, land, or valuable assets.',
         punishmentOrRemedy: 'Imprisonment for up to 7 years and mandatory fine.',
         keyConcepts: ['Fraudulent inducement', 'Deception', 'Property transfer']
+      },
+      {
+        number: 'Section 499 & 500',
+        title: 'Defamation and Punishment for Defamation',
+        titleBn: 'মানহানি এবং মানহানির শাস্তি',
+        content: 'Whoever, by words either spoken or intended to be read, or by signs or by visible representations, makes or publishes any imputation concerning any person intending to harm, or knowing or having reason to believe that such imputation will harm, the reputation of such person, is said to defame that person.',
+        contentBn: 'যে ব্যক্তি কারো সুনাম ক্ষুণ্ণ করার উদ্দেশ্যে মৌখিক, লিখিত বা কোনো দৃশ্যমান চিহ্নের মাধ্যমে অসত্য বা ক্ষতিকর তথ্য প্রচার করে, সে মানহানি করে।',
+        simpleExplanation: 'Publishing or publicly making false statements that harm another person\'s personal, professional, or social reputation.',
+        punishmentOrRemedy: 'Simple imprisonment up to 2 years, or fine, or both (Section 500).',
+        keyConcepts: ['Reputation damage', 'Publication', 'Exceptions for public truth']
+      },
+      {
+        number: 'Section 506',
+        title: 'Punishment for criminal intimidation',
+        titleBn: 'অপরাধমূলক ভীতি প্রদর্শনের শাস্তি',
+        content: 'Whoever commits the offence of criminal intimidation shall be punished with imprisonment of either description for a term which may extend to two years, or with fine, or with both; and if the threat be to cause death or grievous hurt, or destruction of property by fire, with imprisonment up to seven years.',
+        contentBn: 'কাউকে হত্যা, গুরুতর আঘাত বা সম্পত্তির ক্ষতি করার হুমকি প্রদর্শন করলে অনধিক ৭ বছর পর্যন্ত কারাদণ্ড হতে পারে।',
+        simpleExplanation: 'Threatening someone with physical injury, property destruction, or ruin to force them to do something they are not legally bound to do.',
+        punishmentOrRemedy: 'Imprisonment up to 2 years, or up to 7 years for death/grievous hurt threats.',
+        keyConcepts: ['Criminal threat', 'Coercion', 'Personal safety']
       }
     ],
     timeline: [
-      { year: '1860', title: 'Original Enactment', description: 'Drafted by Lord Macaulay and enacted under British India.', status: 'enacted' },
-      { year: '1972', title: 'Adoption in Independent Bangladesh', description: 'Adopted through the Laws Continuance Enforcement Order 1972.', status: 'enacted' },
-      { year: '2004', title: 'Speedy Trial Tribunal Amendments', description: 'Cross-referenced with special criminal jurisdiction statutes.', status: 'amended' },
-      { year: '2023', title: 'Fines and Penalties Rationalization', description: 'Updated archaic monetary fine rates across various economic sections.', status: 'amended' }
+      { year: '1860', title: 'Original Enactment', description: 'Drafted by Lord Macaulay and enacted under British India as Act XLV of 1860.', status: 'enacted' },
+      { year: '1972', title: 'Adoption in Independent Bangladesh', description: 'Adopted through the Laws Continuance Enforcement Order 1972 (Presidential Order No. 48 of 1972).', status: 'enacted' },
+      { year: '2004', title: 'Speedy Trial Tribunal Alignments', description: 'Cross-referenced with special procedural jurisdictions for swift adjudication.', status: 'amended' },
+      { year: '2023', title: 'Fines and Penalties Rationalization', description: 'Updated archaic colonial monetary fine rates across various economic sections.', status: 'amended' }
     ],
     relatedLawIds: ['bd-crpc-1898', 'bd-cyber-security-2023', 'bd-evidence-act-1872'],
     citations: {
@@ -315,7 +364,7 @@ export const LAWS_DATABASE: LawItem[] = [
       academic: 'Penal Code 1860, 1860 Act XLV, Legislative & Parliamentary Affairs Division, BD.',
       bluebook: 'Penal Code, Act No. XLV of 1860 (Bangl.).'
     },
-    keywords: ['criminal law', 'murder', 'theft', 'fraud', 'punishment', 'penal code', 'dondobidhi', 'crimes', 'imprisonment', 'assault']
+    keywords: ['criminal law', 'murder', 'theft', 'fraud', 'punishment', 'penal code', 'dondobidhi', 'crimes', 'imprisonment', 'assault', 'self defense', 'section 420', 'section 302']
   },
   {
     id: 'bd-constitution-1972',
@@ -331,14 +380,18 @@ export const LAWS_DATABASE: LawItem[] = [
     enactmentYear: 1972,
     lastAmendedYear: 2018,
     officialGazetteRef: 'Bangladesh Gazette Extraordinary, Dec 14, 1972',
-    overview: 'The Supreme Law of Bangladesh establishing the democratic republic, fundamental principles of state policy, fundamental rights enforceable by the High Court Division under Article 102, and the separation of powers among legislature, executive, and judiciary.',
+    officialSource: 'Laws of Bangladesh (bdlaws.minlaw.gov.bd)',
+    sourceOrganization: 'Parliament of Bangladesh / Ministry of Law, Justice and Parliamentary Affairs',
+    sourceVerificationUrl: 'http://bdlaws.minlaw.gov.bd/act-367.html',
+    lastUpdatedDate: 'January 2025',
+    overview: 'The Supreme Law of Bangladesh establishing the democratic republic, fundamental principles of state policy, fundamental rights enforceable by the High Court Division under Article 102, and the balance of powers among legislature, executive, and judiciary.',
     overviewBn: 'বাংলাদেশের সর্বোচ্চ আইন যা প্রজাতন্ত্রের শাসনতন্ত্র, নাগরিকদের মৌলিক অধিকার এবং রাষ্ট্রের তিনটি অঙ্গের ক্ষমতা ও দায়িত্ব নির্ধারণ করে।',
-    simpleSummary: 'The highest legal authority in Bangladesh. It guarantees basic human rights (like free speech, equality, and protection from unlawful arrest) and defines how the country\'s government and courts operate.',
+    simpleSummary: 'The highest legal authority in Bangladesh. It guarantees basic fundamental human rights (like free speech, equality, and protection from unlawful arrest) and defines how the country\'s government, parliament, and courts operate.',
     fullOfficialTextExcerpt: 'We, the people of Bangladesh, having proclaimed our independence on the 26th day of March, 1971 and through a historic struggle for national liberation, established the independent, sovereign People\'s Republic of Bangladesh; Pledging that the high ideals of nationalism, socialism, democracy and secularism shall be the fundamental principles of the Constitution...',
     keyHighlights: [
-      'Part III guarantees Fundamental Rights including equality before law (Art. 27), right to life and liberty (Art. 31/32), and freedom of speech (Art. 39).',
-      'Article 7 establishes the supremacy of the Constitution: any law inconsistent with this Constitution is void to the extent of inconsistency.',
-      'Article 102 empowers the High Court Division to issue Writs (Habeas Corpus, Mandamus, Certiorari, Prohibition, Quo Warranto) to enforce rights.'
+      'Part III establishes judicially enforceable Fundamental Rights including equality before law (Art. 27), right to life and liberty (Art. 31/32), and freedom of expression (Art. 39).',
+      'Article 7 establishes constitutional supremacy: any ordinary law that conflicts with this Constitution is void to the extent of inconsistency.',
+      'Article 102 empowers the High Court Division to issue constitutional Writs (Habeas Corpus, Mandamus, Certiorari, Prohibition, Quo Warranto) to enforce rights.'
     ],
     sections: [
       {
@@ -347,7 +400,7 @@ export const LAWS_DATABASE: LawItem[] = [
         titleBn: 'আইনের দৃষ্টিতে সমতা',
         content: 'All citizens are equal before law and are entitled to equal protection of law.',
         contentBn: 'সকল নাগরিক আইনের দৃষ্টিতে সমান এবং আইনের সমান আশ্রয় লাভের অধিকারী।',
-        simpleExplanation: 'No person is above the law, and everyone is entitled to the same fair legal treatment regardless of status, wealth, or background.',
+        simpleExplanation: 'No individual or official is above the law. Every person is entitled to the exact same fair legal treatment regardless of their background, financial standing, or social status.',
         punishmentOrRemedy: 'Judicial review and invalidation of discriminatory state actions under Article 102.',
         keyConcepts: ['Non-discrimination', 'Rule of Law', 'Equal protection']
       },
@@ -357,18 +410,38 @@ export const LAWS_DATABASE: LawItem[] = [
         titleBn: 'আইনের আশ্রয়লাভের অধিকার',
         content: 'To enjoy the protection of the law, and to be treated in accordance with law, and only in accordance with law, is the inalienable right of every citizen, wherever he may be, and of every other person for the time being within Bangladesh, and in particular no action detrimental to the life, liberty, body, reputation or property of any person shall be taken except in accordance with law.',
         contentBn: 'আইনের আশ্রয়লাভ এবং আইনানুযায়ী আচরণ লাভ যে কোনো নাগরিকের অবিচ্ছেদ্য অধিকার।',
-        simpleExplanation: 'Government authorities cannot harm your life, freedom, property, or reputation without following legitimate, enacted law.',
-        punishmentOrRemedy: 'Direct constitutional writ remedy in the Supreme Court.',
+        simpleExplanation: 'Government bodies, police, and public authorities cannot deprive you of your liberty, property, or reputation without following legitimate, enacted law.',
+        punishmentOrRemedy: 'Direct constitutional writ petition in the Supreme Court.',
         keyConcepts: ['Due process', 'Inalienable rights', 'Protection from arbitrary power']
+      },
+      {
+        number: 'Article 32',
+        title: 'Protection of right to life and personal liberty',
+        titleBn: 'জীবন ও ব্যক্তি-স্বাধীনতার অধিকার রক্ষণ',
+        content: 'No person shall be deprived of life or personal liberty save in accordance with law.',
+        contentBn: 'আইনানুযায়ী ব্যতীত কোনো ব্যক্তিকে জীবন বা ব্যক্তি-স্বাধীনতা হতে বঞ্চিত করা যাবে না।',
+        simpleExplanation: 'Your life, bodily integrity, and personal freedom are protected. The state cannot detain or harm you unless permitted by lawful due process.',
+        punishmentOrRemedy: 'Habeas Corpus writ under Article 102 to secure release of illegally detained persons.',
+        keyConcepts: ['Right to life', 'Personal liberty', 'Freedom from unlawful detention']
+      },
+      {
+        number: 'Article 33',
+        title: 'Safeguards as to arrest and detention',
+        titleBn: 'গ্রেপ্তার ও আটক সম্পর্কিত রক্ষাকবচ',
+        content: 'No person who is arrested shall be detained in custody without being informed, as soon as may be, of the grounds for such arrest, nor shall he be denied the right to consult and be defended by a legal practitioner of his choice. Every person who is arrested and detained in custody shall be produced before the nearest magistrate within a period of twenty-four hours of such arrest.',
+        contentBn: 'গ্রেপ্তারকৃত ব্যক্তিকে দ্রুত গ্রেপ্তারের কারণ জানাতে হবে, আইনজীবীর সাথে পরামর্শের সুযোগ দিতে হবে এবং ২৪ ঘণ্টার মধ্যে নিকটস্থ ম্যাজিস্ট্রেটের সামনে হাজির করতে হবে।',
+        simpleExplanation: 'Police must immediately explain why you were arrested, allow you to consult a lawyer, and present you before a judge within 24 hours of custody.',
+        punishmentOrRemedy: 'Unlawful detention after 24 hours without court order is illegal and punishable.',
+        keyConcepts: ['24-hour magistrate rule', 'Right to legal counsel', 'Grounds of arrest']
       },
       {
         number: 'Article 39',
         title: 'Freedom of thought, conscience and of speech',
         titleBn: 'চিন্তা ও বিবেকের স্বাধীনতা এবং বাক-স্বাধীনতা',
-        content: '(1) Freedom of thought and conscience is guaranteed. (2) Subject to any reasonable restrictions imposed by law in the interests of the security of the State, friendly relations with foreign states, public order, decency or morality, or in relation to contempt of court, defamation or incitement to an offense - (a) the right of every citizen to freedom of speech and expression; and (b) the freedom of the press, are guaranteed.',
+        content: '(1) Freedom of thought and conscience is guaranteed. (2) Subject to any reasonable restrictions imposed by law in the interests of the security of the State, friendly relations with foreign states, public order, decency or morality, or in relation to contempt of court, defamation or incitement to an offence - (a) the right of every citizen to freedom of speech and expression; and (b) the freedom of the press, are guaranteed.',
         contentBn: 'চিন্তা ও বিবেকের স্বাধীনতা এবং আইনের যুক্তিসঙ্গত বাধানিষেধ সাপেক্ষে বাক-স্বাধীনতা ও সংবাদক্ষেত্রের স্বাধীনতা নিশ্চিত করা হলো।',
-        simpleExplanation: 'Guarantees freedom of opinion, expression, and independent press, subject only to reasonable national security and anti-defamation restrictions.',
-        punishmentOrRemedy: 'Constitutional protection against unlawful censorship.',
+        simpleExplanation: 'Guarantees freedom of opinion, artistic expression, and independent press reporting, subject only to reasonable restrictions on incitement or national security.',
+        punishmentOrRemedy: 'Constitutional invalidation of arbitrary censorship orders.',
         keyConcepts: ['Freedom of expression', 'Press freedom', 'Reasonable restrictions']
       },
       {
@@ -377,15 +450,15 @@ export const LAWS_DATABASE: LawItem[] = [
         titleBn: 'রিট জারির বিষয়ে হাইকোর্ট বিভাগের ক্ষমতা',
         content: 'The High Court Division may, if satisfied that no other equally efficacious remedy is provided by law, on the application of any person aggrieved, make an order directing a person performing any functions in connection with the affairs of the Republic to refrain from doing that which he is not permitted by law to do, or to do that which he is required by law to do, or declare that any act done has been done without lawful authority.',
         contentBn: 'মৌলিক অধিকার বলবৎকরণ ও আইনবহির্ভূত সরকারি কর্মকাণ্ডের বিরুদ্ধে রিট আদেশ প্রদানের মাধ্যমে প্রতিকার দেওয়ার ক্ষমতা।',
-        simpleExplanation: 'Allows any citizen to petition the High Court to halt illegal government actions or free unlawfully detained persons.',
-        punishmentOrRemedy: 'Issuance of constitutional Writs: Mandamus, Certiorari, Habeas Corpus, Prohibition.',
+        simpleExplanation: 'Allows any citizen to petition the High Court to halt unlawful government actions, free illegally detained persons, or force public officials to perform their legal duty.',
+        punishmentOrRemedy: 'Issuance of constitutional Writs: Mandamus, Certiorari, Habeas Corpus, Prohibition, Quo Warranto.',
         keyConcepts: ['Writ jurisdiction', 'Judicial review', 'Enforcement of fundamental rights']
       }
     ],
     timeline: [
       { year: '1972', title: 'Adoption and Commencement', description: 'Passed on 4 November 1972 and took effect on 16 December 1972.', status: 'enacted' },
       { year: '1979', title: '5th Amendment (Historical)', description: 'Later declared illegal and unconstitutional by the Supreme Court in 2010.', status: 'amended' },
-      { year: '2011', title: '15th Amendment', description: 'Restored key original principles of secularism and democracy.', status: 'amended' },
+      { year: '2011', title: '15th Amendment', description: 'Restored key original principles of democracy and rule of law.', status: 'amended' },
       { year: '2018', title: '17th Amendment', description: 'Extended women\'s reserved seats in Parliament for 25 years.', status: 'amended' }
     ],
     relatedLawIds: ['bd-crpc-1898', 'bd-penal-code-1860', 'int-udhr-1948', 'int-iccpr-1966'],
@@ -394,7 +467,7 @@ export const LAWS_DATABASE: LawItem[] = [
       academic: 'Constitution of Bangladesh, Ministry of Law, Justice and Parliamentary Affairs (1972).',
       bluebook: 'Bangl. Const. art. 27.'
     },
-    keywords: ['constitution', 'fundamental rights', 'article 102', 'writ', 'freedom of speech', 'equality', 'supreme court', 'shongbidhan', 'due process']
+    keywords: ['constitution', 'fundamental rights', 'article 102', 'writ', 'freedom of speech', 'equality', 'supreme court', 'shongbidhan', 'due process', 'article 32', 'article 33', 'habeas corpus']
   },
   {
     id: 'bd-crpc-1898',
@@ -410,40 +483,95 @@ export const LAWS_DATABASE: LawItem[] = [
     enactmentYear: 1898,
     lastAmendedYear: 2021,
     officialGazetteRef: 'Legislative Division Archive Act V of 1898',
-    overview: 'The definitive procedural law regulating criminal investigations, arrest procedures, search warrants, bail provisions, trial court hierarchies, and appeals in Bangladesh.',
+    officialSource: 'Laws of Bangladesh (bdlaws.minlaw.gov.bd)',
+    sourceOrganization: 'Legislative and Parliamentary Affairs Division, Ministry of Law, Justice and Parliamentary Affairs',
+    sourceVerificationUrl: 'http://bdlaws.minlaw.gov.bd/act-75.html',
+    lastUpdatedDate: 'January 2025',
+    overview: 'The definitive procedural statute regulating criminal investigations, arrest protocols, search warrants, bail hearings, trial court hierarchies, and judicial appeals across Bangladesh.',
     overviewBn: 'ফৌজদারি অপরাধের তদন্ত, গ্রেপ্তার, জামিন, আদালতের বিচার পদ্ধতি এবং আপিল সংক্রান্ত সামগ্রিক নিয়মাবলি।',
-    simpleSummary: 'The step-by-step rulebook for the police and courts. It outlines how arrests must be made, how bail is granted, and how criminal trials are carried out fairly.',
+    simpleSummary: 'The procedural rulebook for police investigations and criminal court trials. It defines how arrests must be carried out, how bail applications are decided, and how suspect rights are safeguarded during interrogation.',
     fullOfficialTextExcerpt: 'An Act to consolidate and amend the law relating to the Criminal Procedure. Whereas it is expedient to consolidate and amend the law relating to Criminal Procedure; It is hereby enacted as follows: This Act may be called the Code of Criminal Procedure, 1898; and it shall come into force on the first day of July, 1898.',
     keyHighlights: [
-      'Distinguishes between Cognizable offenses (police can arrest without warrant) and Non-cognizable offenses.',
-      'Governs Section 54 (power of arrest without warrant) subject to High Court protective guidelines in the landmark Blast v. Bangladesh case.',
-      'Details Section 497/498 regarding anticipatory and regular bail conditions.'
+      'Classifies offenses into Cognizable (police can arrest without a warrant) and Non-cognizable (warrant required).',
+      'Governs Section 54 warrantless arrest powers, subject to mandatory protective guidelines established in BLAST v. Bangladesh.',
+      'Regulates remand procedures under Section 167 and sets rules for regular, interim, and anticipatory bail under Sections 497 and 498.'
     ],
     sections: [
       {
         number: 'Section 54',
         title: 'When police may arrest without warrant',
         titleBn: 'পরোয়ানা ছাড়া পুলিশ কখন গ্রেপ্তার করতে পারে',
-        content: 'Any police officer may, without an order from a Magistrate and without a warrant, arrest any person who has been concerned in any cognizable offense, or against whom a reasonable complaint has been made, or credible information has been received, or a reasonable suspicion exists.',
+        content: 'Any police officer may, without an order from a Magistrate and without a warrant, arrest any person who has been concerned in any cognizable offence, or against whom a reasonable complaint has been made, or credible information has been received, or a reasonable suspicion exists.',
         contentBn: 'আমলযোগ্য অপরাধে জড়িত থাকার যুক্তিসঙ্গত সন্দেহ বা বিশ্বাসযোগ্য তথ্যের ভিত্তিতে পুলিশ ম্যাজিস্ট্রেট আদেশ ব্যতিরেকে গ্রেপ্তার করতে পারে।',
-        simpleExplanation: 'Authorizes police to arrest suspects for serious crimes without an advance court warrant, but under strict accountability guidelines.',
-        punishmentOrRemedy: 'Safeguards against arbitrary detention under Section 167 and Constitutional guidelines.',
+        simpleExplanation: 'Permits police to arrest suspects for serious crimes without an advance warrant, provided they have credible evidence or a formal complaint and follow statutory guidelines.',
+        punishmentOrRemedy: 'Safeguards against arbitrary detention under Section 167 and BLAST v. Bangladesh judgment.',
         keyConcepts: ['Cognizable offense', 'Reasonable suspicion', 'Arrest guidelines']
       },
       {
+        number: 'Section 61',
+        title: 'Person arrested not to be detained more than twenty-four hours',
+        titleBn: 'গ্রেপ্তারকৃত ব্যক্তিকে চব্বিশ ঘণ্টার বেশি আটক না রাখা',
+        content: 'No police officer shall detain in custody a person arrested without warrant for a longer period than under all the circumstances of the case is reasonable, and such period shall not, in the absence of a special order of a Magistrate under section 167, exceed twenty-four hours exclusive of the time necessary for the journey from the place of arrest to the Magistrate\'s Court.',
+        contentBn: 'ম্যাজিস্ট্রেটের বিশেষ আদেশ ছাড়া কোনো ব্যক্তিকে গ্রেপ্তার করার পর যাতায়াতের সময় বাদে সর্বোচ্চ ২৪ ঘণ্টার বেশি পুলিশ হেফাজতে রাখা যাবে না।',
+        simpleExplanation: 'Police are strictly forbidden from holding anyone in custody for more than 24 hours without taking them to court and getting a magistrate\'s permission.',
+        punishmentOrRemedy: 'Detention beyond 24 hours is illegal confinement actionable by law.',
+        keyConcepts: ['24-hour limit', 'Magistrate oversight', 'Anti-arbitrary detention']
+      },
+      {
+        number: 'Section 154',
+        title: 'Information in cognizable cases (F.I.R.)',
+        titleBn: 'আমলযোগ্য মামলার এজাহার বা এফআইআর (FIR)',
+        content: 'Every information relating to the commission of a cognizable offence, if given orally to an officer in charge of a police station, shall be reduced to writing by him or under his direction, and be read over to the informant; and every such information, whether given in writing or reduced to writing as aforesaid, shall be signed by the person giving it.',
+        contentBn: 'আমলযোগ্য অপরাধের তথ্য থানায় মৌখিক বা লিখিতভাবে প্রদান করা হলে পুলিশ তা নথিভুক্ত করে এজাহার হিসেবে গণ্য করবে এবং বাদীর স্বাক্ষর গ্রহণ করবে।',
+        simpleExplanation: 'The legal procedure for filing a formal First Information Report (FIR) at a police station when a serious crime has occurred.',
+        punishmentOrRemedy: 'Mandatory registration by the officer in charge of the police station.',
+        keyConcepts: ['FIR', 'Cognizable offense', 'Investigation trigger']
+      },
+      {
+        number: 'Section 155',
+        title: 'Information in non-cognizable cases (General Diary / G.D.)',
+        titleBn: 'অ-আমলযোগ্য ঘটনার তথ্য এবং সাধারণ ডায়েরি (GD)',
+        content: 'When information is given to an officer in charge of a police station of the commission within the limits of such station of a non-cognizable offence, he shall enter in a book to be kept as the Government may prescribe the substance of such information and refer the informant to the Magistrate. No police officer shall investigate a non-cognizable case without the order of a Magistrate.',
+        contentBn: 'অ-আমলযোগ্য অপরাধের ক্ষেত্রে পুলিশ তথ্যটি সাধারণ ডায়েরিতে (GD) লিপিবদ্ধ করবে এবং ম্যাজিস্ট্রেটের অনুমতি ছাড়া তদন্ত করতে পারবে না।',
+        simpleExplanation: 'Used for logging lost documents, minor threats, or non-cognizable issues into the police station General Diary (GD).',
+        punishmentOrRemedy: 'Formal official record logged in police GD register.',
+        keyConcepts: ['General Diary', 'GD Entry', 'Non-cognizable offense']
+      },
+      {
+        number: 'Section 167',
+        title: 'Procedure when investigation cannot be completed in twenty-four hours (Remand)',
+        titleBn: 'তদন্ত ২৪ ঘণ্টায় শেষ না হলে করণীয় ও রিমান্ড বিধান',
+        content: 'Whenever any person is arrested and detained in custody, and it appears that the investigation cannot be completed within the period of twenty-four hours, the officer in charge shall forward the accused to the nearest Magistrate. The Magistrate may authorize the detention of the accused in such custody as such Magistrate thinks fit, for a term not exceeding fifteen days in the whole.',
+        contentBn: 'তদন্ত শেষ না হলে আসামিকে ম্যাজিস্ট্রেটের নিকট হাজির করতে হবে এবং আদালত সর্বোচ্চ ১৫ দিন পর্যন্ত রিমান্ড বা হেফাজতে রাখার অনুমতি দিতে পারে।',
+        simpleExplanation: 'Governs how a magistrate can authorize sending an accused person to police questioning (remand) or jail custody, strictly capped at a 15-day maximum.',
+        punishmentOrRemedy: 'High Court guidelines require documented justification and presence of legal counsel.',
+        keyConcepts: ['Police remand', 'Judicial custody', '15-day limit']
+      },
+      {
         number: 'Section 497',
-        title: 'When bail may be taken in case of non-bailable offense',
+        title: 'When bail may be taken in case of non-bailable offence',
         titleBn: 'অজামিনযোগ্য অপরাধে কখন জামিন দেওয়া যাবে',
-        content: 'When any person accused of any non-bailable offense is arrested or detained without warrant, he may be released on bail, but he shall not be so released if there appear reasonable grounds for believing that he has been guilty of an offense punishable with death or imprisonment for life.',
+        content: 'When any person accused of any non-bailable offence is arrested or detained without warrant, he may be released on bail, but he shall not be so released if there appear reasonable grounds for believing that he has been guilty of an offence punishable with death or imprisonment for life.',
         contentBn: 'অজামিনযোগ্য অপরাধের ক্ষেত্রে আদালতের বিবেচনাধীন শর্তে জামিন মঞ্জুর করার নিয়মাবলি।',
-        simpleExplanation: 'Provides rules for when judges can release a suspect on bail before their trial ends.',
+        simpleExplanation: 'Provides rules for when judges can release a suspect on bail before their trial concludes, considering factors like age, health, and evidence strength.',
         punishmentOrRemedy: 'Bail bond execution and conditional release.',
         keyConcepts: ['Discretionary bail', 'Bail bond', 'Presumption of innocence']
+      },
+      {
+        number: 'Section 498',
+        title: 'Power to direct admission to bail or reduction of bail (Anticipatory Bail)',
+        titleBn: 'জামিন মঞ্জুর বা জামিনের শর্ত শিথিলের বিষয়ে হাইকোর্ট ও দায়রা আদালতের ক্ষমতা',
+        content: 'The amount of every bond executed under this Chapter shall be fixed with due regard to the circumstances of the case, and shall not be excessive; and the High Court Division or Court of Session may, in any case, whether there be an appeal on conviction or not, direct that any person be admitted to bail.',
+        contentBn: 'হাইকোর্ট বিভাগ বা দায়রা জজ আদালত যেকোনো পরিস্থিতিতে জামিন মঞ্জুর বা আগাম জামিন (Anticipatory Bail) প্রদান করতে পারে।',
+        simpleExplanation: 'Empowers higher courts to grant anticipatory bail to individuals who have genuine reason to fear unlawful arrest on politically motivated or false charges.',
+        punishmentOrRemedy: 'Protection from arrest prior to surrender in trial court.',
+        keyConcepts: ['Anticipatory bail', 'High Court discretion', 'Protection from arrest']
       }
     ],
     timeline: [
       { year: '1898', title: 'Original Promulgation', description: 'Enacted to standardize criminal administration across South Asia.', status: 'enacted' },
-      { year: '2007', title: 'Separation of Judiciary Ordinance', description: 'Formally separated Judicial Magistrates from Executive Magistrates in compliance with the historic Masdar Hossain judgment.', status: 'amended' }
+      { year: '2007', title: 'Separation of Judiciary Ordinance', description: 'Formally separated Judicial Magistrates from Executive Magistrates in compliance with the historic Masdar Hossain judgment.', status: 'amended' },
+      { year: '2016', title: 'BLAST v. Bangladesh Appellate Division Ruling', description: 'Supreme Court laid down 15 mandatory directives to prevent abuse of Section 54 and Section 167 remand powers.', status: 'upheld' }
     ],
     relatedLawIds: ['bd-penal-code-1860', 'bd-constitution-1972', 'bd-evidence-act-1872'],
     citations: {
@@ -451,7 +579,7 @@ export const LAWS_DATABASE: LawItem[] = [
       academic: 'CrPC 1898, Act No. V of 1898, Bangladesh Government Press.',
       bluebook: 'Code Crim. Proc., Act No. V of 1898 (Bangl.).'
     },
-    keywords: ['crpc', 'criminal procedure', 'bail', 'arrest', 'section 54', 'police powers', 'fir', 'general diary', 'magistrate']
+    keywords: ['crpc', 'criminal procedure', 'bail', 'arrest', 'section 54', 'police powers', 'fir', 'general diary', 'magistrate', 'remand', 'anticipatory bail', 'section 167', 'section 497']
   },
   {
     id: 'bd-cyber-security-2023',
@@ -1740,4 +1868,821 @@ export function getEnrichedLaw(id: string): EnrichedLawItem {
 export function getAllEnrichedLaws(): EnrichedLawItem[] {
   return LAWS_DATABASE.map((l) => getEnrichedLaw(l.id));
 }
+
+// ----------------------------------------------------
+// LAW RECOMMENDATIONS ENGINE (Prompt 04)
+// ----------------------------------------------------
+
+export function getLawRecommendations(currentLawId: string, limit: number = 3): LawItem[] {
+  const currentLaw = LAWS_DATABASE.find((l) => l.id === currentLawId);
+  if (!currentLaw) return LAWS_DATABASE.slice(0, limit);
+
+  // Score candidate laws
+  const scored = LAWS_DATABASE.filter((l) => l.id !== currentLawId).map((candidate) => {
+    let score = 0;
+
+    // Explicitly linked in relatedLawIds
+    if (currentLaw.relatedLawIds?.includes(candidate.id)) {
+      score += 10;
+    }
+
+    // Matching category
+    if (candidate.category === currentLaw.category) {
+      score += 5;
+    }
+
+    // Matching jurisdiction
+    if (candidate.jurisdiction === currentLaw.jurisdiction) {
+      score += 3;
+    }
+
+    // Overlapping keywords
+    const commonKeywords = candidate.keywords.filter((kw) =>
+      currentLaw.keywords.some((ckw) => ckw.toLowerCase() === kw.toLowerCase())
+    );
+    score += commonKeywords.length * 2;
+
+    return { law: candidate, score };
+  });
+
+  scored.sort((a, b) => b.score - a.score);
+  return scored.slice(0, limit).map((s) => s.law);
+}
+
+// ----------------------------------------------------
+// POPULAR SEARCHES & TRENDING TOPICS (Prompt 04)
+// ----------------------------------------------------
+
+export interface PopularSearchItem {
+  id: string;
+  query: string;
+  queryBn?: string;
+  category: string;
+  countLabel: string;
+  type: 'statute' | 'section' | 'topic' | 'concept';
+  targetHref: string;
+}
+
+export const POPULAR_SEARCHES_DATA: PopularSearchItem[] = [
+  {
+    id: 'ps-1',
+    query: 'Penal Code Section 300',
+    queryBn: 'দণ্ডবিধি ধারা ৩০০',
+    category: 'Criminal Law',
+    countLabel: '14.2k searches',
+    type: 'section',
+    targetHref: '/law/penal-code-1860?section=Section+300'
+  },
+  {
+    id: 'ps-2',
+    query: 'Cyber Security Act Defamation',
+    queryBn: 'সাইবার সুরক্ষা আইন ও মানহানি',
+    category: 'Cyber & Digital',
+    countLabel: '12.8k searches',
+    type: 'topic',
+    targetHref: '/law/cyber-security-act-2023'
+  },
+  {
+    id: 'ps-3',
+    query: 'Article 102 Writ Jurisdiction',
+    queryBn: 'অনুচ্ছেদ ১০২ রিট আবেদন',
+    category: 'Constitutional Law',
+    countLabel: '11.5k searches',
+    type: 'section',
+    targetHref: '/law/constitution-bd?section=Article+102'
+  },
+  {
+    id: 'ps-4',
+    query: 'Arrest without warrant Section 54',
+    queryBn: 'বিনা পরোয়ানায় গ্রেপ্তার ধারা ৫৪',
+    category: 'Criminal Procedure',
+    countLabel: '9.7k searches',
+    type: 'section',
+    targetHref: '/law/crpc-1898?section=Section+54'
+  },
+  {
+    id: 'ps-5',
+    query: 'Breach of Commercial Contract',
+    queryBn: 'চুক্তি ভঙ্গ ও ক্ষতিপূরণ',
+    category: 'Commercial Law',
+    countLabel: '8.4k searches',
+    type: 'topic',
+    targetHref: '/law/contract-act-1872'
+  },
+  {
+    id: 'ps-6',
+    query: 'Universal Declaration of Human Rights',
+    queryBn: 'মানবাধিকার সার্বজনীন ঘোষণাপত্র',
+    category: 'Human Rights',
+    countLabel: '7.9k searches',
+    type: 'statute',
+    targetHref: '/law/udhr-1948'
+  },
+  {
+    id: 'ps-7',
+    query: 'Labor Act Maternity & Gratuity',
+    queryBn: 'শ্রম আইন মাতৃত্বকালীন সুবিধা',
+    category: 'Labor Law',
+    countLabel: '6.5k searches',
+    type: 'topic',
+    targetHref: '/law/labor-act-2006'
+  },
+  {
+    id: 'ps-8',
+    query: 'Habeas Corpus & Unlawful Detention',
+    queryBn: 'হেবিয়াস কর্পাস ও বেআইনি আটক',
+    category: 'Constitutional Law',
+    countLabel: '6.1k searches',
+    type: 'concept',
+    targetHref: '/concepts#concept-habeas-corpus'
+  }
+];
+
+// ----------------------------------------------------
+// LEGAL CONCEPTS ENCYCLOPEDIA (Prompt 04)
+// ----------------------------------------------------
+
+export interface LegalConcept {
+  id: string;
+  slug: string;
+  name: string;
+  nameBn: string;
+  latinName?: string;
+  category: 'Criminal Law' | 'Civil Law' | 'Constitutional Law' | 'Evidence & Procedure' | 'Commercial & Contract';
+  definition: string;
+  simpleExplanation: string;
+  explainLike15: string;
+  courtroomExample: string;
+  relatedStatuteIds: string[];
+  relatedConcepts: string[];
+  keyElements: string[];
+}
+
+export const LEGAL_CONCEPTS_DATA: LegalConcept[] = [
+  {
+    id: 'concept-negligence',
+    slug: 'negligence',
+    name: 'Negligence & Duty of Care',
+    nameBn: 'অবহেলা ও সতর্কতার দায়িত্ব',
+    latinName: 'Culpa',
+    category: 'Civil Law',
+    definition: 'A failure to behave with the level of care that a person of ordinary prudence would have exercised under the same circumstances.',
+    simpleExplanation: 'When someone acts carelessly, ignoring their basic responsibility to avoid harming others, resulting in foreseeable injury or financial loss.',
+    explainLike15: 'Imagine driving while texting and crashing into a neighbor parked bicycle. You did not intend to crash, but because you were careless when you should have paid attention, you are legally responsible to pay for the damage.',
+    courtroomExample: 'A building developer fails to install mandatory scaffolding safety nets, and falling debris injures a pedestrian. The court holds the developer liable for tortious negligence.',
+    relatedStatuteIds: ['penal-code-1860', 'contract-act-1872'],
+    relatedConcepts: ['Strict Liability', 'Vicarious Liability', 'Damages', 'Causation'],
+    keyElements: ['Existence of a legal Duty of Care', 'Breach of that duty by defendant', 'Direct Causation of harm', 'Actual measurable damage or loss']
+  },
+  {
+    id: 'concept-mens-rea',
+    slug: 'mens-rea',
+    name: 'Mens Rea (Guilty Mind)',
+    nameBn: 'অপরাধমূলক মানসিকতা',
+    latinName: 'Actus non facit reum nisi mens sit rea',
+    category: 'Criminal Law',
+    definition: 'The mental element of a person\'s intention to commit a crime; or knowledge that one\'s action or lack of action would cause a crime to be committed.',
+    simpleExplanation: 'An act alone does not make a person guilty unless their mind was also guilty. Criminal law usually requires proving both the physical crime and wrongful intention.',
+    explainLike15: 'If you take an identical black umbrella by accident from a restaurant rack thinking it is yours, you do not have Mens Rea (no crime). If you knew it was not yours and took it to keep it, you have Mens Rea (theft).',
+    courtroomExample: 'In a homicide trial under Penal Code Section 300, the prosecution must prove beyond reasonable doubt that the accused intended to cause bodily injury likely to cause death.',
+    relatedStatuteIds: ['penal-code-1860', 'crpc-1898'],
+    relatedConcepts: ['Actus Reus', 'Intention', 'Recklessness', 'Criminal Negligence'],
+    keyElements: ['Intentional conduct', 'Knowledge of consequences', 'Reckless disregard of danger', 'Absence of bona fide mistake']
+  },
+  {
+    id: 'concept-habeas-corpus',
+    slug: 'habeas-corpus',
+    name: 'Habeas Corpus (Produce the Body)',
+    nameBn: 'হেবিয়াস কর্পাস (বেআইনি আটকের বিরুদ্ধে রিট)',
+    latinName: 'Habeas Corpus Ad Subjiciendum',
+    category: 'Constitutional Law',
+    definition: 'A fundamental prerogative writ issued by a superior court commanding an authority who has another person in custody to bring them before the court to determine the legality of detention.',
+    simpleExplanation: 'The ultimate constitutional shield against unlawful arrest or secret police detention. The High Court forces the state to immediately bring the detainee to court or release them.',
+    explainLike15: 'If police secretly lock someone in a room without presenting them to a magistrate within 24 hours, their family can file a Habeas Corpus petition. The High Court judges will order the police: "Bring this person to court immediately and prove your legal authority, or let them walk free today."',
+    courtroomExample: 'Under Article 102(2)(b)(i) of the Bangladesh Constitution, a citizen unlawfully held without charge is ordered released immediately by the High Court Division.',
+    relatedStatuteIds: ['constitution-bd', 'crpc-1898', 'iccpr-1966'],
+    relatedConcepts: ['Due Process', 'Ultra Vires', 'Fundamental Rights', 'Judicial Review'],
+    keyElements: ['Actual physical detention or custody', 'Lack of valid statutory authority or procedure', 'Urgent High Court jurisdiction', 'Immediate release order if detention is illegal']
+  },
+  {
+    id: 'concept-breach-of-contract',
+    slug: 'breach-of-contract',
+    name: 'Breach of Contract & Liquidated Damages',
+    nameBn: 'চুক্তি ভঙ্গ ও ক্ষতিপূরণ',
+    latinName: 'Pacta Sunt Servanda',
+    category: 'Commercial & Contract',
+    definition: 'A violation of any binding agreement, promise, or covenant, by non-performance or interference with the other contracting party\'s performance.',
+    simpleExplanation: 'When one party fails to perform their side of a legally binding promise without a valid legal excuse, entitling the innocent party to compensation or specific enforcement.',
+    explainLike15: 'You pay a web designer $500 to build your website by Friday. Friday arrives, they refuse to deliver the code and keep your money. They have breached the contract, and you can demand your money back plus any business loss.',
+    courtroomExample: 'Under Section 73 of the Contract Act 1872, an export company sues a logistics supplier for failing to ship perishable cargo on agreed dates, recovering compensation for lost market sales.',
+    relatedStatuteIds: ['contract-act-1872'],
+    relatedConcepts: ['Specific Performance', 'Quantum Meruit', 'Injunction', 'Consideration'],
+    keyElements: ['Valid enforceable contract with consideration', 'Performance obligations fulfilled by claimant', 'Failure or repudiation by defendant', 'Measurable commercial loss']
+  },
+  {
+    id: 'concept-strict-liability',
+    slug: 'strict-liability',
+    name: 'Strict & Absolute Liability',
+    nameBn: 'চরম দায়বদ্ধতা (কঠোর দায়)',
+    latinName: 'Rylands v. Fletcher Doctrine',
+    category: 'Civil Law',
+    definition: 'Legal responsibility for damages or injury, even if the person or corporation was not negligent, fault-free, or acted without malicious intent.',
+    simpleExplanation: 'Liability imposed on dangerous activities (like handling toxic chemicals or wild explosives). Even if you took every imaginable precaution, if it escapes and hurts someone, you must pay.',
+    explainLike15: 'If a chemical factory owner stores dangerous explosive gas and an earthquake causes a tiny leak that damages nearby homes, the factory owner must pay for the damage even though they were careful. The danger was so high that they bear absolute responsibility.',
+    courtroomExample: 'Industrial gas leak cases where the Supreme Court rules that enterprises engaged in inherently hazardous activities have an absolute and non-delegable duty to indemnify all victims.',
+    relatedStatuteIds: ['penal-code-1860', 'contract-act-1872'],
+    relatedConcepts: ['Tort Liability', 'Public Nuisance', 'Environmental Justice', 'Duty of Care'],
+    keyElements: ['Bringing inherently hazardous substance onto land', 'Non-natural use of property', 'Escape of the hazardous element', 'Consequent damage to person or property']
+  },
+  {
+    id: 'concept-ultra-vires',
+    slug: 'ultra-vires',
+    name: 'Ultra Vires (Beyond the Powers)',
+    nameBn: 'ক্ষমতাবহির্ভূত কাজ (আল্ট্রা ভাইয়ার্স)',
+    latinName: 'Ultra Vires',
+    category: 'Constitutional Law',
+    definition: 'An act done beyond the scope of legal power, authority, or statutory jurisdiction granted to an officer, administrative agency, or corporation.',
+    simpleExplanation: 'When a government official, board, or minister makes a rule or decision they had no legal authority to make. The court strikes it down as completely void and null.',
+    explainLike15: 'Imagine your school traffic guard tries to issue you a fine for not doing your math homework. They have no legal authority over homework, so their order is "Ultra Vires" (powerless) and you do not have to obey it.',
+    courtroomExample: 'A municipal council passes a by-law banning imported books. The High Court strikes it down under Article 102 as Ultra Vires the Municipalities Act.',
+    relatedStatuteIds: ['constitution-bd'],
+    relatedConcepts: ['Judicial Review', 'Natural Justice', 'Rule of Law', 'Subordinate Legislation'],
+    keyElements: ['Statute establishing bounded authority', 'Exercise of decision beyond those bounds', 'Nullity of resulting decision', 'Judicial declaration of invalidity']
+  },
+  {
+    id: 'concept-res-judicata',
+    slug: 'res-judicata',
+    name: 'Res Judicata (A Matter Already Judged)',
+    nameBn: 'রেস জুডিকাটা (বিচারিত বিষয়)',
+    latinName: 'Res Judicata Pro Veritate Accipitur',
+    category: 'Evidence & Procedure',
+    definition: 'A matter that has been adjudicated by a competent court and may not be pursued further by the same parties involving the same cause of action.',
+    simpleExplanation: 'Prevents endless lawsuits over the same dispute. Once a final decision is delivered after hearing both sides, neither party can sue again on the exact same facts.',
+    explainLike15: 'If your landlord sues you claiming you didn\'t pay rent for June, and the court looks at bank receipts and rules you paid in full, your landlord cannot sue you again next week for the same June rent. The case is finished forever.',
+    courtroomExample: 'Under Section 11 of the Civil Procedure Code 1908, a second partition lawsuit between the same heirs over previously partitioned land is dismissed.',
+    relatedStatuteIds: ['crpc-1898', 'constitution-bd'],
+    relatedConcepts: ['Double Jeopardy', 'Estoppel', 'Finality of Judgments', 'Limitation'],
+    keyElements: ['Former suit between same parties or representatives', 'Matter directly and substantially in issue', 'Court of competent jurisdiction', 'Final hearing and decision on merits']
+  },
+  {
+    id: 'concept-arbitration',
+    slug: 'arbitration',
+    name: 'Arbitration & Alternate Dispute Resolution (ADR)',
+    nameBn: 'সালিশি ও বিকল্প বিরোধ নিষ্পত্তি',
+    latinName: 'Compromissum',
+    category: 'Commercial & Contract',
+    definition: 'A private procedure for the settlement of disputes by one or more impartial arbitral judges chosen by the parties whose binding award is enforceable by courts.',
+    simpleExplanation: 'Resolving business or international contract fights outside lengthy court trials using an agreed neutral expert. Faster, confidential, and globally enforceable.',
+    explainLike15: 'Instead of spending 6 years in court arguing about a software delivery milestone, two companies hire a neutral senior tech lawyer for a 3-day private hearing. Whatever the arbitrator decides is final and legally binding.',
+    courtroomExample: 'Two multinational shipping companies arbitrate a breach under international maritime arbitration rules, and enforce the arbitral award in local high court.',
+    relatedStatuteIds: ['contract-act-1872'],
+    relatedConcepts: ['Mediation', 'Enforcement of Foreign Awards', 'Arbitral Tribunal', 'Jurisdiction'],
+    keyElements: ['Written arbitration agreement', 'Appointment of neutral tribunal', 'Principles of natural justice', 'Final and binding arbitral award']
+  }
+];
+
+// ----------------------------------------------------
+// KNOWLEDGE PATHS LEARNING ENGINE (Prompt 04)
+// ----------------------------------------------------
+
+export interface KnowledgePathMilestone {
+  id: string;
+  stepNumber: number;
+  title: string;
+  titleBn: string;
+  durationMinutes: number;
+  summary: string;
+  keyStatutes: { lawId: string; title: string; section?: string }[];
+  takeaways: string[];
+  selfCheckQuestion: string;
+  selfCheckAnswer: string;
+}
+
+export interface KnowledgePath {
+  id: string;
+  slug: string;
+  title: string;
+  titleBn: string;
+  description: string;
+  level: 'Beginner' | 'Intermediate' | 'Advanced';
+  category: string;
+  totalTimeEstimate: string;
+  milestonesCount: number;
+  iconName: string;
+  colorTheme: string;
+  milestones: KnowledgePathMilestone[];
+}
+
+export const KNOWLEDGE_PATHS_DATA: KnowledgePath[] = [
+  {
+    id: 'path-cyber-law',
+    slug: 'cyber-law-fundamentals',
+    title: 'Cyber Law & Digital Rights in Practice',
+    titleBn: 'সাইবার আইন ও ডিজিটাল অধিকার রূপরেখা',
+    description: 'Master digital evidence, online defamation safeguards, data privacy principles, and computer system offenses.',
+    level: 'Beginner',
+    category: 'Cyber & Digital',
+    totalTimeEstimate: '45 mins',
+    milestonesCount: 4,
+    iconName: 'Shield',
+    colorTheme: 'blue',
+    milestones: [
+      {
+        id: 'cl-1',
+        stepNumber: 1,
+        title: 'Unauthorized Computer System Access & Hacking',
+        titleBn: 'কম্পিউটার সিস্টেমে অননুমোদিত প্রবেশ ও হ্যাকিং',
+        durationMinutes: 10,
+        summary: 'Understanding legal definitions of critical information infrastructure, illegal intrusion, and denial-of-service attacks.',
+        keyStatutes: [
+          { lawId: 'cyber-security-act-2023', title: 'Cyber Security Act 2023', section: 'Section 17-19' }
+        ],
+        takeaways: [
+          'Accessing a password-protected server without authorization is a statutory crime even without data theft.',
+          'Critical Information Infrastructure (CII) attacks attract heightened mandatory sentences.'
+        ],
+        selfCheckQuestion: 'Can an employee log into a colleague\'s email using their saved password without permission?',
+        selfCheckAnswer: 'No. Accessing an account without explicit authorization is illegal computer intrusion regardless of intent.'
+      },
+      {
+        id: 'cl-2',
+        stepNumber: 2,
+        title: 'Online Defamation, False Information & Digital Identity',
+        titleBn: 'অনলাইনে মানহানি, ভুয়া তথ্য ও পরিচয় জালিয়াতি',
+        durationMinutes: 12,
+        summary: 'How codified statutes distinguish fair comment from malicious electronic character assassination and identity spoofing.',
+        keyStatutes: [
+          { lawId: 'cyber-security-act-2023', title: 'Cyber Security Act 2023', section: 'Section 24-25' },
+          { lawId: 'penal-code-1860', title: 'Penal Code 1860', section: 'Section 499-500' }
+        ],
+        takeaways: [
+          'Digital defamation requires proving publication to third parties and reputational harm.',
+          'Spoofing social media profiles to deceive the public constitutes electronic impersonation.'
+        ],
+        selfCheckQuestion: 'What is the key difference between civil defamation and criminal cyber defamation?',
+        selfCheckAnswer: 'Civil defamation seeks financial damages; criminal cyber defamation involves state prosecution and statutory imprisonment.'
+      },
+      {
+        id: 'cl-3',
+        stepNumber: 3,
+        title: 'Digital Forensic Evidence & Chain of Custody',
+        titleBn: 'ডিজিটাল ফরেনসিক সাক্ষ্য ও প্রমাণ সংরক্ষণ',
+        durationMinutes: 11,
+        summary: 'Requirements for screenshots, server logs, hash values, and forensic mirrors to be admissible in a court of law.',
+        keyStatutes: [
+          { lawId: 'crpc-1898', title: 'Code of Criminal Procedure 1898', section: 'Section 103' }
+        ],
+        takeaways: [
+          'Raw screenshots can be contested as forged unless backed by server logs or forensic notary certification.',
+          'The forensic chain of custody must document who seized, stored, and analyzed digital media.'
+        ],
+        selfCheckQuestion: 'Why is a bare screenshot rarely sufficient in high-stakes cyber trials?',
+        selfCheckAnswer: 'Because image files can be manipulated; courts require metadata, server logs, or cryptographic hashes to verify integrity.'
+      },
+      {
+        id: 'cl-4',
+        stepNumber: 4,
+        title: 'Remedies for Cyber Harassment & Extortion',
+        titleBn: 'সাইবার হেনস্তা ও ব্ল্যাকমেইলের বিরুদ্ধে আইনি প্রতিকার',
+        durationMinutes: 12,
+        summary: 'Emergency reporting channels, cyber police complaints, search warrants, and High Court writ protections.',
+        keyStatutes: [
+          { lawId: 'cyber-security-act-2023', title: 'Cyber Security Act 2023', section: 'Section 28' },
+          { lawId: 'constitution-bd', title: 'Constitution of Bangladesh', section: 'Article 102' }
+        ],
+        takeaways: [
+          'Victims of electronic extortion can file direct police complaints or approach specialized cyber tribunals.',
+          'High Court writs can mandate internet service providers to remove non-consensual imagery.'
+        ],
+        selfCheckQuestion: 'Where can a victim of cyber extortion file a first information report (FIR)?',
+        selfCheckAnswer: 'At any local police station or specialized Cyber Crime Investigation Division.'
+      }
+    ]
+  },
+  {
+    id: 'path-constitution',
+    slug: 'constitution-and-fundamental-rights',
+    title: 'Constitutional Law & Fundamental Rights Mastery',
+    titleBn: 'সংবিধান ও মৌলিক অধিকার পাঠশালা',
+    description: 'Learn the supreme law framework, Part III fundamental rights, equality before law, and Article 102 High Court writs.',
+    level: 'Intermediate',
+    category: 'Constitutional Law',
+    totalTimeEstimate: '50 mins',
+    milestonesCount: 4,
+    iconName: 'Scale',
+    colorTheme: 'amber',
+    milestones: [
+      {
+        id: 'const-1',
+        stepNumber: 1,
+        title: 'Supremacy of the Constitution & Separation of Powers',
+        titleBn: 'সংবিধানের সর্বোচ্চ প্রাধান্য ও ক্ষমতার পৃথকীকরণ',
+        durationMinutes: 12,
+        summary: 'Article 7 supremacy principle: any law inconsistent with the Constitution is void to the extent of inconsistency.',
+        keyStatutes: [
+          { lawId: 'constitution-bd', title: 'Constitution of Bangladesh', section: 'Article 7' }
+        ],
+        takeaways: [
+          'Parliament cannot pass statutes violating fundamental basic constitutional provisions.',
+          'Judiciary acts as the ultimate guardian and interpreter of constitutional legitimacy.'
+        ],
+        selfCheckQuestion: 'What happens if a new parliament act contradicts Article 27 of the Constitution?',
+        selfCheckAnswer: 'The judiciary declares the conflicting parts null, void, and of no legal effect.'
+      },
+      {
+        id: 'const-2',
+        stepNumber: 2,
+        title: 'Equality Before Law & Non-Discrimination (Part III)',
+        titleBn: 'আইনের দৃষ্টিতে সমতা ও বৈষম্যহীনতা (তৃতীয় ভাগ)',
+        durationMinutes: 14,
+        summary: 'Detailed study of Article 27 (Equality), Article 31 (Protection of Law), and Article 32 (Right to Life and Liberty).',
+        keyStatutes: [
+          { lawId: 'constitution-bd', title: 'Constitution of Bangladesh', section: 'Articles 27, 31, 32' },
+          { lawId: 'udhr-1948', title: 'Universal Declaration of Human Rights', section: 'Articles 1-3' }
+        ],
+        takeaways: [
+          'Every citizen is entitled to equal protection of law without arbitrary state discrimination.',
+          'No person can be deprived of life or personal liberty except in accordance with established fair law.'
+        ],
+        selfCheckQuestion: 'Can the government arbitrarily freeze an individual\'s passport without statutory process?',
+        selfCheckAnswer: 'No; Article 31 and Article 36 protect freedom of movement and right to fair statutory procedure.'
+      },
+      {
+        id: 'const-3',
+        stepNumber: 3,
+        title: 'Freedom of Speech, Assembly & Association',
+        titleBn: 'বাক-স্বাধীনতা, সমাবেশ ও সংগঠনের অধিকার',
+        durationMinutes: 12,
+        summary: 'Balancing constitutional freedoms under Article 39 with reasonable restrictions imposed in interests of public order.',
+        keyStatutes: [
+          { lawId: 'constitution-bd', title: 'Constitution of Bangladesh', section: 'Articles 37-39' },
+          { lawId: 'iccpr-1966', title: 'International Covenant on Civil and Political Rights', section: 'Article 19' }
+        ],
+        takeaways: [
+          'Freedom of speech includes freedom of the press and public critique of governance.',
+          'Restrictions on speech must be reasonable, statutory, and strictly proportional to legitimate state interests.'
+        ],
+        selfCheckQuestion: 'Are constitutional rights to speech absolute and unrestricted in every scenario?',
+        selfCheckAnswer: 'No, they are subject to reasonable restrictions by law for security, public decency, or contempt of court.'
+      },
+      {
+        id: 'const-4',
+        stepNumber: 4,
+        title: 'Enforcing Rights via Article 102 Writs (High Court)',
+        titleBn: 'অনুচ্ছেদ ১০২ অনুযায়ী রিট পিটিশন ও সাংবিধানিক প্রতিকার',
+        durationMinutes: 12,
+        summary: 'Mastering the five classical writs: Mandamus, Prohibition, Certiorari, Habeas Corpus, and Quo Warranto.',
+        keyStatutes: [
+          { lawId: 'constitution-bd', title: 'Constitution of Bangladesh', section: 'Article 102' }
+        ],
+        takeaways: [
+          'Writ of Mandamus compels a public official to perform a mandatory statutory duty.',
+          'Writ of Certiorari quashes unlawful administrative or lower-court proceedings.',
+          'Writ of Habeas Corpus orders production of unlawfully detained persons.'
+        ],
+        selfCheckQuestion: 'Which writ is used when a public officer refuses to issue a mandatory trade license required by statute?',
+        selfCheckAnswer: 'A Writ of Mandamus to direct the public official to perform their statutory duty.'
+      }
+    ]
+  },
+  {
+    id: 'path-criminal-justice',
+    slug: 'criminal-justice-and-procedural-safeguards',
+    title: 'Criminal Justice & Procedural Safeguards',
+    titleBn: 'ফৌজদারি বিচার ও প্রক্রিয়াগত সুরক্ষা',
+    description: 'Explore offenses, police arrest powers, bailable vs non-bailable standards, first information reports (FIR), and trials.',
+    level: 'Beginner',
+    category: 'Criminal Law',
+    totalTimeEstimate: '40 mins',
+    milestonesCount: 3,
+    iconName: 'Shield',
+    colorTheme: 'red',
+    milestones: [
+      {
+        id: 'crim-1',
+        stepNumber: 1,
+        title: 'Understanding Offenses: Culpability & Penalties',
+        titleBn: 'অপরাধের প্রকারভেদ: দায়বদ্ধতা ও দণ্ড',
+        durationMinutes: 14,
+        summary: 'How the Penal Code 1860 structures offenses against person (murder, assault) and property (theft, extortion, cheating).',
+        keyStatutes: [
+          { lawId: 'penal-code-1860', title: 'Penal Code 1860', section: 'Sections 299, 300, 378, 415' }
+        ],
+        takeaways: [
+          'Theft requires dishonest taking of movable property out of possession without consent.',
+          'Cheating requires fraudulent inducement leading to property transfer or financial harm.'
+        ],
+        selfCheckQuestion: 'Is taking an item with honest belief of ownership considered criminal theft?',
+        selfCheckAnswer: 'No, because dishonest intention (Mens Rea) is an essential missing ingredient.'
+      },
+      {
+        id: 'crim-2',
+        stepNumber: 2,
+        title: 'Police Arrest Powers & Section 54 Safeguards',
+        titleBn: 'পুলিশের গ্রেপ্তার ক্ষমতা ও ধারা ৫৪ সংক্রান্ত নির্দেশিকা',
+        durationMinutes: 14,
+        summary: 'Limits on warrantless arrest, mandatory 24-hour magistrate presentation, and Supreme Court arrest guidelines.',
+        keyStatutes: [
+          { lawId: 'crpc-1898', title: 'Code of Criminal Procedure 1898', section: 'Section 54, 61' },
+          { lawId: 'constitution-bd', title: 'Constitution of Bangladesh', section: 'Article 33' }
+        ],
+        takeaways: [
+          'Police must produce any arrested person before a judicial magistrate within 24 hours of arrest.',
+          'Detainees have the immediate constitutional right to consult a legal counsel of their choice.'
+        ],
+        selfCheckQuestion: 'Can police keep an arrested suspect in station lockup for 48 hours without court permission?',
+        selfCheckAnswer: 'No; Article 33 and Section 61 strictly limit warrantless detention to 24 hours maximum.'
+      },
+      {
+        id: 'crim-3',
+        stepNumber: 3,
+        title: 'Bail Standards, FIR Filing & Fair Trial Rights',
+        titleBn: 'জামিন নীতি, এজাহার দায়ের ও ন্যায়বিচারের অধিকার',
+        durationMinutes: 12,
+        summary: 'Bailable offenses (matter of right) vs Non-bailable offenses (judicial discretion), anticipatory bail, and presumption of innocence.',
+        keyStatutes: [
+          { lawId: 'crpc-1898', title: 'Code of Criminal Procedure 1898', section: 'Section 496, 497' },
+          { lawId: 'constitution-bd', title: 'Constitution of Bangladesh', section: 'Article 35' }
+        ],
+        takeaways: [
+          'In bailable offenses, release on bail is a statutory right upon furnishing surety.',
+          'Accused is presumed innocent until guilt is established beyond reasonable doubt in court.'
+        ],
+        selfCheckQuestion: 'Is bail guaranteed in non-bailable offenses?',
+        selfCheckAnswer: 'No; bail in non-bailable offenses is subject to judicial discretion based on evidence gravity.'
+      }
+    ]
+  }
+];
+
+// ----------------------------------------------------
+// LEGAL OUTCOME SCENARIOS MATRIX (Prompt 04)
+// ----------------------------------------------------
+
+export interface LegalOutcomeScenario {
+  id: string;
+  jurisdiction: 'Bangladesh' | 'International';
+  legalArea: string;
+  topicTitle: string;
+  topicTitleBn: string;
+  scenarioSummary: string;
+  scenarioSummaryBn?: string;
+  applicableStatutes: { lawId: string; title: string; section: string; explanation: string }[];
+  proceduralClassification: {
+    cognizableStatus: 'Cognizable (Arrest without warrant)' | 'Non-Cognizable (Warrant required)';
+    bailStatus: 'Bailable as of right' | 'Non-Bailable (Court discretion)' | 'Compoundable with permission';
+    trialCourt: string;
+    filingMechanism: 'First Information Report (FIR) at Thana' | 'Complaint Case (CR) before Magistrate' | 'Civil Suit in District Court';
+  };
+  statutoryConsequences: {
+    potentialPenalties: string[];
+    civilRemedies: string[];
+  };
+  outcomeFactors: {
+    aggravating: string[];
+    mitigating: string[];
+  };
+  evidentiaryRequirements: string[];
+  proceduralSteps: { step: number; title: string; description: string }[];
+}
+
+export const LEGAL_OUTCOME_SCENARIOS_DATA: LegalOutcomeScenario[] = [
+  {
+    id: 'scenario-cyber-extortion',
+    jurisdiction: 'Bangladesh',
+    legalArea: 'Cyber & Digital Law',
+    topicTitle: 'Cyber Blackmail, Data Extortion & Non-Consensual Media',
+    topicTitleBn: 'সাইবার ব্ল্যাকমেইল, তথ্য হাতিয়ে চাঁদা দাবি ও আপত্তিকর ছবি ছড়ানো',
+    scenarioSummary: 'An individual threatens to leak confidential private photos, personal data, or server credentials unless a financial ransom is paid.',
+    scenarioSummaryBn: 'কোনো ব্যক্তি গোপন ছবি বা পাসওয়ার্ড ইন্টারনেটে ছড়িয়ে দেওয়ার হুমকি দিয়ে অর্থ দাবি করলে প্রযোজ্য আইনি ফলাফল।',
+    applicableStatutes: [
+      {
+        lawId: 'cyber-security-act-2023',
+        title: 'Cyber Security Act 2023',
+        section: 'Section 24 & 28',
+        explanation: 'Criminalizes electronic identity spoofing, hacking, and cyber extortion with strict non-bailable prison terms.'
+      },
+      {
+        lawId: 'penal-code-1860',
+        title: 'Penal Code 1860',
+        section: 'Section 383 & 384',
+        explanation: 'Defines Extortion (putting any person in fear of injury and dishonestly inducing them to deliver property).'
+      }
+    ],
+    proceduralClassification: {
+      cognizableStatus: 'Cognizable (Arrest without warrant)',
+      bailStatus: 'Non-Bailable (Court discretion)',
+      trialCourt: 'Cyber Tribunal / Special Sessions Judge',
+      filingMechanism: 'First Information Report (FIR) at Thana'
+    },
+    statutoryConsequences: {
+      potentialPenalties: [
+        'Imprisonment up to 5 to 7 years for electronic extortion and unauthorized digital transmission.',
+        'Heavy statutory monetary fines payable to the state or victim.',
+        'Confiscation of computers, hard drives, and mobile devices used in the offense.'
+      ],
+      civilRemedies: [
+        'Mandatory injunctive order forcing internet service providers and platforms to permanently delete media.',
+        'Civil damages suit for defamation and mental harassment.'
+      ]
+    },
+    outcomeFactors: {
+      aggravating: [
+        'Targeting a minor or vulnerable individual.',
+        'Demanding large financial sums or repeat harassment over extended duration.',
+        'Distribution of compromised data to public social media groups.'
+      ],
+      mitigating: [
+        'Immediate surrender of all digital files without public distribution.',
+        'First-time juvenile offender acting under bad peer influence.',
+        'Full cooperation with digital forensic investigators.'
+      ]
+    },
+    evidentiaryRequirements: [
+      'Preserved chat transcripts, email headers, or WhatsApp communication with timestamps.',
+      'Server IP connection logs and digital transaction IDs if money was transferred.',
+      'Forensic device mirror certified by government cyber forensic laboratory.'
+    ],
+    proceduralSteps: [
+      { step: 1, title: 'Preserve Evidence Immediately', description: 'Do not delete chat logs; capture full screenshots with visible timestamps and URLs.' },
+      { step: 2, title: 'Lodge FIR / Cyber Police Complaint', description: 'File a formal complaint with Cyber Crime Investigation Division or local Thana.' },
+      { step: 3, title: 'Magistrate Seizure & Forensic Audit', description: 'Police obtain warrant to seize offender devices and extract raw memory images.' },
+      { step: 4, title: 'Cyber Tribunal Trial', description: 'Formal charge sheet submission followed by fast-track trial and verdict.' }
+    ]
+  },
+  {
+    id: 'scenario-theft-fraud',
+    jurisdiction: 'Bangladesh',
+    legalArea: 'Criminal Law',
+    topicTitle: 'Theft & Fraudulent Misappropriation of Property',
+    topicTitleBn: 'চুরি ও প্রতারণামূলকভাবে সম্পত্তি আত্মসাৎ',
+    scenarioSummary: 'An employee or stranger dishonestly takes physical inventory, funds, or assets without the owner\'s consent.',
+    scenarioSummaryBn: 'অনুমতি ছাড়া অসদুপায়ে অন্যের মালামাল বা অর্থ হস্তগত করার আইনি ফলাফল।',
+    applicableStatutes: [
+      {
+        lawId: 'penal-code-1860',
+        title: 'Penal Code 1860',
+        section: 'Section 378, 379 & 408',
+        explanation: 'Defines Theft (3 years imprisonment) and Criminal Breach of Trust by Clerk/Servant (up to 7 years imprisonment).'
+      },
+      {
+        lawId: 'crpc-1898',
+        title: 'Code of Criminal Procedure 1898',
+        section: 'Schedule II & Section 497',
+        explanation: 'Sets Cognizability, non-bailable status for higher offenses, and compounding rules.'
+      }
+    ],
+    proceduralClassification: {
+      cognizableStatus: 'Cognizable (Arrest without warrant)',
+      bailStatus: 'Non-Bailable (Court discretion)',
+      trialCourt: 'Chief Judicial Magistrate / Metropolitan Magistrate',
+      filingMechanism: 'First Information Report (FIR) at Thana'
+    },
+    statutoryConsequences: {
+      potentialPenalties: [
+        'Imprisonment for a term which may extend to 3 years (simple theft) or 7 years (breach of trust by clerk).',
+        'Mandatory criminal fine alongside imprisonment.'
+      ],
+      civilRemedies: [
+        'Restitution order for the immediate recovery and return of seized goods to rightful owner.'
+      ]
+    },
+    outcomeFactors: {
+      aggravating: [
+        'Theft involving house-breaking during nighttime or use of deadly weapons.',
+        'High monetary valuation or breach of fiduciary office trust.',
+        'Prior criminal conviction record (recidivism).'
+      ],
+      mitigating: [
+        'Voluntary restitution and returning stolen items before charge framing.',
+        'Extreme poverty or duress without physical violence.',
+        'Plea bargain / compounding with the victim with court permission.'
+      ]
+    },
+    evidentiaryRequirements: [
+      'CCTV video footage or eyewitness testimony establishing physical removal.',
+      'Purchase receipts proving ownership and value of missing property.',
+      'Recovery memo prepared by police during search and seizure.'
+    ],
+    proceduralSteps: [
+      { step: 1, title: 'Lodge FIR at Local Thana', description: 'State exact description and serial numbers of missing property.' },
+      { step: 2, title: 'Police Investigation & Seizure', description: 'Investigating Officer conducts raids and issues recovery seizure list.' },
+      { step: 3, title: 'Bail Hearing at Magistrate Court', description: 'Court assesses severity of offense and flight risk before granting bail.' },
+      { step: 4, title: 'Trial & Judgment', description: 'Witness examination, cross-examination, and judicial sentencing.' }
+    ]
+  },
+  {
+    id: 'scenario-commercial-contract-breach',
+    jurisdiction: 'Bangladesh',
+    legalArea: 'Commercial & Contract Law',
+    topicTitle: 'Commercial Breach of Contract & Non-Payment',
+    topicTitleBn: 'ব্যবসায়িক চুক্তি ভঙ্গ ও অর্থ অনাদায়',
+    scenarioSummary: 'A supplier delivers raw materials or software services as agreed, but the buyer refuses to make payment citing unverified defects.',
+    scenarioSummaryBn: 'চুক্তি অনুযায়ী পণ্য বা সেবা সরবরাহের পর অর্থ পরিশোধে অস্বীকৃতির আইনি প্রতিকার।',
+    applicableStatutes: [
+      {
+        lawId: 'contract-act-1872',
+        title: 'Contract Act 1872',
+        section: 'Section 73 & 74',
+        explanation: 'Provides that the party who suffers by breach is entitled to receive compensation for any loss or damage caused to them.'
+      }
+    ],
+    proceduralClassification: {
+      cognizableStatus: 'Non-Cognizable (Warrant required)',
+      bailStatus: 'Bailable as of right',
+      trialCourt: 'Joint District Judge (Civil Jurisdiction) / Commercial Bench',
+      filingMechanism: 'Civil Suit in District Court'
+    },
+    statutoryConsequences: {
+      potentialPenalties: [
+        'No direct criminal imprisonment (pure civil contract dispute unless deliberate fraud/cheating is proven).'
+      ],
+      civilRemedies: [
+        'Money decree for full invoice principal amount plus statutory interest from due date.',
+        'Liquidated damages for proven commercial opportunity loss.',
+        'Attachment of defaulting company bank accounts to satisfy judgment.'
+      ]
+    },
+    outcomeFactors: {
+      aggravating: [
+        'Intentional bad-faith repudiation after consuming the goods.',
+        'Dishonored payment cheques (triggers additional criminal action under Negotiable Instruments Act Section 138).'
+      ],
+      mitigating: [
+        'Genuine technical dispute regarding non-conforming product specifications.',
+        'Willingness to submit to neutral arbitration or mediation.'
+      ]
+    },
+    evidentiaryRequirements: [
+      'Signed agreement, purchase orders, and accepted delivery challans.',
+      'Invoices, tax returns, and email acknowledgment of receipt.',
+      'Formal legal notice sent via registered post with acknowledgment due (AD).'
+    ],
+    proceduralSteps: [
+      { step: 1, title: 'Serve Statutory Legal Notice', description: 'Give 15 to 30 days demand notice demanding outstanding dues.' },
+      { step: 2, title: 'Arbitration / Mediation Attempt', description: 'Invoke contractual ADR clauses for rapid settlement.' },
+      { step: 3, title: 'File Money Suit in Civil Court', description: 'Submit plaint with court fee and documentation in competent District Court.' },
+      { step: 4, title: 'Execution Proceedings', description: 'Enforce civil money decree through attachment of defendant property.' }
+    ]
+  },
+  {
+    id: 'scenario-unlawful-arrest',
+    jurisdiction: 'Bangladesh',
+    legalArea: 'Constitutional Law',
+    topicTitle: 'Unlawful Police Detention & Lack of 24-Hour Production',
+    topicTitleBn: 'বেআইনি পুলিশি আটক ও ২৪ ঘণ্টার মধ্যে আদালতে হাজির না করা',
+    scenarioSummary: 'A citizen is detained by law enforcement officers without formal warrant and held in secret custody past 24 hours without court presentation.',
+    scenarioSummaryBn: 'পরোয়ানা ছাড়া আটক করে ২৪ ঘণ্টার মধ্যে ম্যাজিস্ট্রেটের সামনে হাজির না করার বিরুদ্ধে সাংবিধানিক প্রতিকার।',
+    applicableStatutes: [
+      {
+        lawId: 'constitution-bd',
+        title: 'Constitution of Bangladesh',
+        section: 'Article 32, 33 & 102',
+        explanation: 'Mandates production before nearest magistrate within 24 hours and guarantees Habeas Corpus writ remedy.'
+      },
+      {
+        lawId: 'crpc-1898',
+        title: 'Code of Criminal Procedure 1898',
+        section: 'Section 61 & 167',
+        explanation: 'Forbids police custody beyond 24 hours without explicit written judicial remand order.'
+      }
+    ],
+    proceduralClassification: {
+      cognizableStatus: 'Cognizable (Arrest without warrant)',
+      bailStatus: 'Bailable as of right',
+      trialCourt: 'High Court Division (Supreme Court of Bangladesh)',
+      filingMechanism: 'Complaint Case (CR) before Magistrate'
+    },
+    statutoryConsequences: {
+      potentialPenalties: [
+        'Departmental proceedings and criminal prosecution against offending officers under Penal Code for wrongful confinement.'
+      ],
+      civilRemedies: [
+        'Writ of Habeas Corpus ordering immediate release of detainee.',
+        'High Court award of constitutional damages/compensation for violation of fundamental rights.'
+      ]
+    },
+    outcomeFactors: {
+      aggravating: [
+        'Physical torture or denial of medical treatment in custody.',
+        'Falsifying arrest logs or claiming arrest at a later date.'
+      ],
+      mitigating: [
+        'Immediate rectification upon notice and lawful presentation before magistrate.'
+      ]
+    },
+    evidentiaryRequirements: [
+      'Affidavit from family members stating time and place of abduction/detention.',
+      'CCTV recordings from detention location or eye-witness statements.',
+      'GD (General Diary) copy lodged at local police station inquiring about missing relative.'
+    ],
+    proceduralSteps: [
+      { step: 1, title: 'Lodge GD and Inquire at Thana', description: 'Document missing person status and identify detaining agency.' },
+      { step: 2, title: 'Draft Emergency Writ of Habeas Corpus', description: 'Advocate on Record files urgent petition in High Court Division under Article 102.' },
+      { step: 3, title: 'High Court Rule Nisi & Production Order', description: 'Bench orders police chief to produce detainee in courtroom within designated hours.' },
+      { step: 4, title: 'Release & Inquiry', description: 'Detainee released if detention was unlawful; inquiry ordered into offending officers.' }
+    ]
+  }
+];
+
 

@@ -269,18 +269,141 @@ export default function HomePage() {
       </section>
 
       {/* ========================================================================= */}
-      {/* SECTION 2 — Quick Access Cards: 4 Core Platform Pillars                   */}
+      {/* SECTION 2 — Real-World Situations & Immediate Guidance                    */}
       {/* ========================================================================= */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
         <div className="mb-6">
           <p className="text-xs font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400">
-            Core Repositories & Utilities
+            Real-World Guidance
           </p>
           <h2 className="text-2xl sm:text-3xl font-bold text-zinc-900 dark:text-white mt-1">
-            Quick Access Gateways
+            What situation brings you here today?
           </h2>
           <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">
-            Direct entry into primary legal libraries, interactive procedural pathways, and AI assistance.
+            Immediate statutory explanations and procedural steps for real challenges citizens and students face.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+          {/* Situation 1 */}
+          <div className="p-5 sm:p-6 rounded-2xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 hover:border-amber-500/40 shadow-sm transition-all flex flex-col justify-between space-y-4">
+            <div className="space-y-2.5">
+              <div className="w-10 h-10 rounded-xl bg-rose-500/10 text-rose-600 dark:text-rose-400 flex items-center justify-center border border-rose-500/20">
+                <ShieldAlert className="w-5 h-5" />
+              </div>
+              <h3 className="text-base font-bold text-zinc-900 dark:text-white">
+                Arrest or Police Custody
+              </h3>
+              <p className="text-xs text-zinc-600 dark:text-zinc-400 leading-relaxed">
+                What happens after an arrest? Learn mandatory 24-hour court production, right to an advocate, and bail procedures.
+              </p>
+              <div className="pt-1 text-[11px] text-zinc-500 space-y-1 font-mono">
+                <div>• Art. 33 (Constitution)</div>
+                <div>• CrPC Sec. 54 &amp; 167 (Remand limits)</div>
+              </div>
+            </div>
+            <Link
+              href="/legal-outcome-guide?topic=arrest-and-bail-rights"
+              className="pt-3 border-t border-zinc-100 dark:border-zinc-800 text-xs font-bold text-rose-600 dark:text-rose-400 hover:underline flex items-center justify-between"
+            >
+              <span>View Arrest &amp; Bail Steps</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
+          </div>
+
+          {/* Situation 2 */}
+          <div className="p-5 sm:p-6 rounded-2xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 hover:border-amber-500/40 shadow-sm transition-all flex flex-col justify-between space-y-4">
+            <div className="space-y-2.5">
+              <div className="w-10 h-10 rounded-xl bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center border border-blue-500/20">
+                <Sparkles className="w-5 h-5" />
+              </div>
+              <h3 className="text-base font-bold text-zinc-900 dark:text-white">
+                Cyber Harassment &amp; Threats
+              </h3>
+              <p className="text-xs text-zinc-600 dark:text-zinc-400 leading-relaxed">
+                Facing online blackmail, fake profiles, or leaked data? Understand punishable offenses and reporting channels.
+              </p>
+              <div className="pt-1 text-[11px] text-zinc-500 space-y-1 font-mono">
+                <div>• Cyber Security Act 2023</div>
+                <div>• Police Cyber Helpline: 01320-010148</div>
+              </div>
+            </div>
+            <Link
+              href="/law/bd-cyber-security-2023"
+              className="pt-3 border-t border-zinc-100 dark:border-zinc-800 text-xs font-bold text-blue-600 dark:text-blue-400 hover:underline flex items-center justify-between"
+            >
+              <span>Review Cyber Protections</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
+          </div>
+
+          {/* Situation 3 */}
+          <div className="p-5 sm:p-6 rounded-2xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 hover:border-amber-500/40 shadow-sm transition-all flex flex-col justify-between space-y-4">
+            <div className="space-y-2.5">
+              <div className="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center border border-amber-500/20">
+                <FileText className="w-5 h-5" />
+              </div>
+              <h3 className="text-base font-bold text-zinc-900 dark:text-white">
+                Eviction &amp; Land Disputes
+              </h3>
+              <p className="text-xs text-zinc-600 dark:text-zinc-400 leading-relaxed">
+                Received an eviction notice or boundary threat? Explore temporary injunctions and civil suit filing procedures.
+              </p>
+              <div className="pt-1 text-[11px] text-zinc-500 space-y-1 font-mono">
+                <div>• CPC 1908 (Order 39 Injunctions)</div>
+                <div>• Section 9 Civil Jurisdiction</div>
+              </div>
+            </div>
+            <Link
+              href="/law/bd-cpc-1908"
+              className="pt-3 border-t border-zinc-100 dark:border-zinc-800 text-xs font-bold text-amber-600 dark:text-amber-400 hover:underline flex items-center justify-between"
+            >
+              <span>Explore Civil Remedies</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
+          </div>
+
+          {/* Situation 4 */}
+          <div className="p-5 sm:p-6 rounded-2xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 hover:border-amber-500/40 shadow-sm transition-all flex flex-col justify-between space-y-4">
+            <div className="space-y-2.5">
+              <div className="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center border border-emerald-500/20">
+                <BookOpen className="w-5 h-5" />
+              </div>
+              <h3 className="text-base font-bold text-zinc-900 dark:text-white">
+                Studying for Law Exams
+              </h3>
+              <p className="text-xs text-zinc-600 dark:text-zinc-400 leading-relaxed">
+                Preparing for Bar Council, judicial service, or university exams? Review doctrine paths, Latin maxims, and citations.
+              </p>
+              <div className="pt-1 text-[11px] text-zinc-500 space-y-1 font-mono">
+                <div>• Latin Maxims &amp; Glossary</div>
+                <div>• Standard Bluebook Citations</div>
+              </div>
+            </div>
+            <Link
+              href="/knowledge-paths"
+              className="pt-3 border-t border-zinc-100 dark:border-zinc-800 text-xs font-bold text-emerald-600 dark:text-emerald-400 hover:underline flex items-center justify-between"
+            >
+              <span>Start Learning Path</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* ========================================================================= */}
+      {/* SECTION 3 — Quick Access Gateways                                         */}
+      {/* ========================================================================= */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
+        <div className="mb-6">
+          <p className="text-xs font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400">
+            Legal Resources
+          </p>
+          <h2 className="text-2xl sm:text-3xl font-bold text-zinc-900 dark:text-white mt-1">
+            Where would you like to start?
+          </h2>
+          <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">
+            Browse codified statutory libraries, step-by-step procedural guides, and interactive AI assistance.
           </p>
         </div>
 
@@ -688,7 +811,7 @@ export default function HomePage() {
               {/* Sample Prompts Interactive Switcher */}
               <div className="space-y-2">
                 <span className="text-xs font-semibold text-zinc-400 block">
-                  Select a live query to preview AI explainer:
+                  Select a live question to preview explanation:
                 </span>
                 <div className="flex flex-col gap-2">
                   {sampleAIQuestions.map((item) => (
@@ -739,23 +862,23 @@ export default function HomePage() {
                 <div className="flex items-center justify-between border-b border-zinc-800/80 pb-3 text-xs">
                   <div className="flex items-center space-x-2">
                     <div className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
-                    <span className="font-semibold text-amber-400">Live AI Output Preview</span>
+                    <span className="font-semibold text-amber-400">Plain Language Legal Explanation</span>
                   </div>
-                  <span className="text-[10px] px-2 py-0.5 rounded bg-zinc-800 text-zinc-400 font-mono">
-                    gemini-2.5-flash
+                  <span className="text-[10px] px-2 py-0.5 rounded bg-zinc-800 text-zinc-300 font-medium">
+                    Verified Statutory Synthesis
                   </span>
                 </div>
 
                 <div className="space-y-3">
                   <div className="p-2.5 rounded-lg bg-zinc-900 border border-zinc-800/80">
-                    <span className="text-[10px] uppercase font-bold text-zinc-500 block">Query</span>
+                    <span className="text-[10px] uppercase font-bold text-zinc-500 block">Question</span>
                     <p className="text-xs font-semibold text-zinc-200 mt-0.5">{selectedAIQuestion.question}</p>
                     <p className="text-[11px] text-zinc-400">{selectedAIQuestion.questionBn}</p>
                   </div>
 
                   <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/20 space-y-2">
                     <div className="flex items-center justify-between">
-                      <span className="text-xs font-bold text-amber-300">Plain Language Breakdown:</span>
+                      <span className="text-xs font-bold text-amber-300">Plain Meaning Breakdown:</span>
                       <span className="text-[10px] text-zinc-400 font-mono">{selectedAIQuestion.lawRef}</span>
                     </div>
                     <p className="text-xs text-zinc-300 leading-relaxed">
@@ -766,7 +889,7 @@ export default function HomePage() {
                   <div className="pt-2 flex items-center justify-between text-[11px] text-zinc-500">
                     <span className="flex items-center space-x-1">
                       <AlertCircle className="w-3.5 h-3.5 text-zinc-400" />
-                      <span>Educational info • Not legal advice</span>
+                      <span>Educational research • Not legal representation</span>
                     </span>
                     <Link
                       href={selectedAIQuestion.targetUrl}
@@ -878,20 +1001,20 @@ export default function HomePage() {
       </section>
 
       {/* ========================================================================= */}
-      {/* SECTION 7 — Roadmap & Global Expansion Preview                            */}
+      {/* SECTION 7 — What We Are Working On (Roadmap Preview)                       */}
       {/* ========================================================================= */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
         <div className="border-t border-zinc-200 dark:border-zinc-800/80 pt-10 space-y-8">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
             <div>
               <p className="text-xs font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400">
-                Strategic Evolution
+                Future Development
               </p>
               <h2 className="text-2xl sm:text-3xl font-bold text-zinc-900 dark:text-white mt-0.5">
-                Nyayota Platform Roadmap & Expansion
+                What We Are Working On
               </h2>
               <p className="text-xs sm:text-sm text-zinc-500 dark:text-zinc-400 mt-0.5">
-                Our phased development journey from national foundations to universal legal navigation.
+                Our ongoing progress from core national legislation toward cross-border legal understanding.
               </p>
             </div>
             <Link
@@ -899,66 +1022,66 @@ export default function HomePage() {
               id="home-view-full-roadmap-btn"
               className="text-xs font-semibold text-amber-600 dark:text-amber-400 hover:underline flex items-center space-x-1"
             >
-              <span>View Comprehensive Roadmap</span>
+              <span>View Full Development Plan</span>
               <ArrowRight className="w-3.5 h-3.5" />
             </Link>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {/* Live Now */}
+            {/* Available Now */}
             <div className="p-6 rounded-2xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-sm space-y-3">
               <div className="flex items-center justify-between">
                 <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
-                  Live Now • Launch v1.0
+                  Available Now
                 </span>
                 <CheckCircle2 className="w-4 h-4 text-emerald-500" />
               </div>
               <h3 className="text-base font-bold text-zinc-900 dark:text-white">
-                Bangladesh & International Libraries
+                Core Bangladesh &amp; International Statutes
               </h3>
               <p className="text-xs text-zinc-600 dark:text-zinc-400 leading-relaxed">
-                Foundational statutory codes, international treaties, intelligent autocomplete search, server-side AI explanations, and educational outcome guides.
+                Foundational acts with plain explanations, multilateral treaties, fast bilingual search, AI research assistant, and procedural guides.
               </p>
               <div className="pt-2 text-[11px] text-emerald-600 dark:text-emerald-400 font-semibold">
-                100% Operational • Free Public Access
+                Active &amp; Open to All
               </div>
             </div>
 
-            {/* Next Release */}
+            {/* In Development */}
             <div className="p-6 rounded-2xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-sm space-y-3">
               <div className="flex items-center justify-between">
                 <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20">
-                  Target: v1.2 — v1.5
+                  In Development
                 </span>
                 <Clock className="w-4 h-4 text-blue-500" />
               </div>
               <h3 className="text-base font-bold text-zinc-900 dark:text-white">
-                Law Comparison & Legislative Timelines
+                Section Comparisons &amp; Gazette Timelines
               </h3>
               <p className="text-xs text-zinc-600 dark:text-zinc-400 leading-relaxed">
-                Clause-by-clause comparative analysis engine, amendment history timelines, automated Bluebook citation downloads, and authenticated PDF exports.
+                Clause-by-clause comparative tools, complete amendment history logs, automatic citation generator, and print-ready research exports.
               </p>
               <div className="pt-2 text-[11px] text-blue-600 dark:text-blue-400 font-semibold">
-                In Active Architecture & Design
+                Currently Being Built
               </div>
             </div>
 
-            {/* Future Global Expansion */}
+            {/* Planned Next */}
             <div className="p-6 rounded-2xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-sm space-y-3">
               <div className="flex items-center justify-between">
                 <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-500/20">
-                  Phase 1 & Phase 2 • v2.0+
+                  Planned Next
                 </span>
                 <Globe className="w-4 h-4 text-purple-500" />
               </div>
               <h3 className="text-base font-bold text-zinc-900 dark:text-white">
-                Global Jurisdictions & World Law
+                Expanded International Jurisdictions
               </h3>
               <p className="text-xs text-zinc-600 dark:text-zinc-400 leading-relaxed">
-                Statutory integration for United States, United Kingdom, European Union, Germany, France, Japan, and UAE, with encrypted research vaults.
+                Adding national statutes from the UK, US, European Union, and Asian jurisdictions, alongside private saved research notes.
               </p>
               <div className="pt-2 text-[11px] text-purple-600 dark:text-purple-400 font-semibold">
-                Strategic Phased Rollout
+                Next Stage of Work
               </div>
             </div>
           </div>

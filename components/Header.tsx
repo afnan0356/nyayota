@@ -49,14 +49,16 @@ export function Header() {
   }, []);
 
   const navLinks = [
+    { href: '/discover', label: 'Discover', icon: Compass },
+    { href: '/search', label: 'Search', icon: Search },
     { href: '/bangladesh-laws', label: 'BD Laws', icon: Scale },
     { href: '/international-laws', label: 'International', icon: Globe },
     { href: '/categories', label: 'Categories', icon: Layers },
-    { href: '/compare', label: 'Compare', icon: ArrowLeftRight },
-    { href: '/glossary', label: 'Glossary', icon: BookOpen },
+    { href: '/knowledge-paths', label: 'Paths', icon: Layers },
+    { href: '/concepts', label: 'Concepts', icon: BookOpen },
     { href: '/legal-outcome-guide', label: 'Outcome Guide', icon: Compass },
+    { href: '/research', label: 'Research', icon: FileText },
     { href: '/ai-assistant', label: 'AI Assistant', icon: Sparkles },
-    { href: '/roadmap', label: 'Roadmap', icon: MapPin },
   ];
 
   return (
