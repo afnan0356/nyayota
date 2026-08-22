@@ -19,6 +19,20 @@ export interface LawTimelineEvent {
   versionLabel?: string;
 }
 
+export type SourceReliabilityStatus =
+  | 'Official Government Source'
+  | 'Official International Organization'
+  | 'Official Treaty Source'
+  | 'Educational Reference'
+  | 'Archived Material'
+  | 'Draft Material';
+
+export type ContentQualityStatus =
+  | 'Verified'
+  | 'Pending Review'
+  | 'Updated Recently'
+  | 'Archived';
+
 export interface LawItem {
   id: string;
   slug: string;
@@ -30,6 +44,10 @@ export interface LawItem {
   jurisdictionCode: 'BD' | 'INT';
   category: 'Criminal Law' | 'Constitutional Law' | 'Human Rights' | 'Cyber & Digital' | 'Commercial & Contract' | 'Civil Procedure' | 'Family Law' | 'Environmental Law' | 'International Humanitarian' | 'Labor & Employment';
   status: 'Active' | 'Amended' | 'Repealed' | 'Draft' | 'In Force' | 'Active Treaty' | 'Customary Law';
+  sourceReliabilityStatus?: SourceReliabilityStatus;
+  contentQualityStatus?: ContentQualityStatus;
+  publishingAuthority?: string;
+  topics?: string[];
   enactmentYear: number;
   effectiveDate?: string;
   publicationDate?: string;
@@ -1786,6 +1804,9 @@ export const ROADMAP_DATA = {
 
 export interface EnrichedLawItem extends LawItem {
   status: 'Active' | 'Amended' | 'Repealed' | 'Draft' | 'In Force' | 'Active Treaty';
+  sourceReliabilityStatus: SourceReliabilityStatus;
+  contentQualityStatus: ContentQualityStatus;
+  publishingAuthority: string;
   effectiveDate: string;
   publicationDate: string;
   lastUpdatedDate: string;
@@ -1820,6 +1841,9 @@ export function getEnrichedLaw(id: string): EnrichedLawItem {
   return {
     ...baseLaw,
     status: (baseLaw.status || 'Active') as any,
+    sourceReliabilityStatus: baseLaw.sourceReliabilityStatus || (baseLaw.jurisdiction === 'Bangladesh' ? 'Official Government Source' : 'Official Treaty Source'),
+    contentQualityStatus: baseLaw.contentQualityStatus || 'Verified',
+    publishingAuthority: baseLaw.publishingAuthority || baseLaw.sourceOrganization || (baseLaw.jurisdiction === 'Bangladesh' ? 'Legislative and Parliamentary Affairs Division, Ministry of Law' : 'United Nations Secretariat / Treaty Section'),
     effectiveDate: baseLaw.effectiveDate || `${baseLaw.enactmentYear}`,
     publicationDate: baseLaw.publicationDate || `${baseLaw.enactmentYear}`,
     lastUpdatedDate: baseLaw.lastUpdatedDate || (baseLaw.lastAmendedYear ? `${baseLaw.lastAmendedYear}` : `${baseLaw.enactmentYear}`),
@@ -2138,6 +2162,291 @@ export const LEGAL_CONCEPTS_DATA: LegalConcept[] = [
     relatedStatuteIds: ['contract-act-1872'],
     relatedConcepts: ['Mediation', 'Enforcement of Foreign Awards', 'Arbitral Tribunal', 'Jurisdiction'],
     keyElements: ['Written arbitration agreement', 'Appointment of neutral tribunal', 'Principles of natural justice', 'Final and binding arbitral award']
+  },
+  {
+    id: 'concept-due-process',
+    slug: 'due-process',
+    name: 'Due Process of Law',
+    nameBn: 'যথাযথ আইনি প্রক্রিয়া (ডিউ প্রসেস অব ল)',
+    latinName: 'Per Legem Terrae',
+    category: 'Constitutional Law',
+    definition: 'A fundamental constitutional guarantee that all legal proceedings will be fair, that one will be given notice and an opportunity to be heard before government deprives life, liberty, or property.',
+    simpleExplanation: 'The government cannot arbitrarily punish you, freeze your bank account, or seize your house without following clear, pre-established fair rules, proper notice, and an independent judge.',
+    explainLike15: 'Before the school suspends a student based on a rumor, the principal must tell the student the exact accusation, show the evidence, and give the student a chance to explain their side. That fair process is Due Process.',
+    courtroomExample: 'Under Article 31 & 32 of the Constitution of Bangladesh, executive action taken without affording the citizen statutory notice and a fair hearing is quashed for violating due process of law.',
+    relatedStatuteIds: ['bd-constitution-1972', 'int-iccpr-1966', 'int-udhr-1948'],
+    relatedConcepts: ['Natural Justice', 'Habeas Corpus', 'Rule of Law', 'Equal Protection'],
+    keyElements: ['Advance notice of charges or intended action', 'Impartial adjudicator or tribunal', 'Opportunity to present defense and cross-examine', 'Reasoned judicial decision based on evidence']
+  },
+  {
+    id: 'concept-jurisdiction',
+    slug: 'jurisdiction',
+    name: 'Jurisdiction & Judicial Competence',
+    nameBn: 'আদালতের এখতিয়ার ও বিচারিক সক্ষমতা',
+    latinName: 'Jurisdictio',
+    category: 'Evidence & Procedure',
+    definition: 'The official power, legal authority, and geographic or subject-matter scope of a court or tribunal to hear and determine a lawsuit or legal dispute.',
+    simpleExplanation: 'The specific boundary of what a court is authorized to judge. If a family court tries to issue a murder conviction, or a local magistrate rules on foreign maritime borders, they lack jurisdiction and the ruling is invalid.',
+    explainLike15: 'A referee for a basketball match cannot run onto a neighboring football pitch and blow their whistle to give a red card. Every referee has their specific court, just like every judge has their jurisdiction.',
+    courtroomExample: 'Under Section 9 and 15-20 of the Code of Civil Procedure 1908, a civil plaint filed in a district where neither the defendant resides nor the disputed property is situated is returned for lack of territorial jurisdiction.',
+    relatedStatuteIds: ['bd-crpc-1898', 'bd-constitution-1972', 'int-unclos-1982'],
+    relatedConcepts: ['Locus Standi', 'Ultra Vires', 'Territorial Competence', 'Subject Matter Jurisdiction'],
+    keyElements: ['Territorial jurisdiction over geographic limits', 'Pecuniary jurisdiction over financial claim limits', 'Subject-matter authority granted by parent statute', 'Personal jurisdiction over the parties']
+  },
+  {
+    id: 'concept-liability',
+    slug: 'liability',
+    name: 'Legal Liability & Vicarious Responsibility',
+    nameBn: 'আইনি দায় ও প্রতিনিধিত্বমূলক দায়',
+    latinName: 'Qui Facit Per Alium Facit Per Se',
+    category: 'Civil Law',
+    definition: 'The state of being legally bound, responsible, or obligated to compensate for damages resulting from civil wrongs, breaches of contract, or statutory violations, including liability for acts of agents.',
+    simpleExplanation: 'Legal accountability: when you or your company must legally pay for harm caused. Under vicarious liability, an employer is also responsible if their employee causes damage while doing their job.',
+    explainLike15: 'If a delivery driver employed by a logistics company hits a pedestrian while rushing on a scheduled delivery route, the logistics company is vicariously liable to pay medical damages because the driver was acting on company business.',
+    courtroomExample: 'In a workplace compensation suit, the High Court holds the corporate factory owner jointly and severally liable with the contractor for safety breaches under labor statutes.',
+    relatedStatuteIds: ['bd-penal-code-1860', 'bd-labor-act-2006', 'bd-contract-act-1872'],
+    relatedConcepts: ['Strict Liability', 'Negligence', 'Joint Liability', 'Damages & Indemnity'],
+    keyElements: ['Existence of legal obligation or master-servant relationship', 'Act committed within the course of employment/agency', 'Direct causal nexus to claimant injury', 'Statutory or common-law indemnity obligations']
+  },
+  {
+    id: 'concept-contract-consideration',
+    slug: 'contract-consideration',
+    name: 'Contract & Lawful Consideration',
+    nameBn: 'চুক্তি ও বৈধ প্রতিদান',
+    latinName: 'Quid Pro Quo (Pacta Sunt Servanda)',
+    category: 'Commercial & Contract',
+    definition: 'The essential element of an enforceable contract consisting of something of value given by both parties to induce them to enter into the agreement.',
+    simpleExplanation: 'A valid contract is not just a one-sided promise. There must be an exchange of value ("something for something"), such as money paid in exchange for software, services, or goods.',
+    explainLike15: 'If a friend casually says "I will gift you my bike tomorrow" but you give nothing in return, you cannot sue them if they change their mind. But if you agreed to pay $50 for the bike and gave them the deposit, it is an enforceable contract with valid consideration.',
+    courtroomExample: 'Under Section 2(d) and Section 25 of the Contract Act 1872, an agreement made without consideration is void, unless registered as a gift between near relations.',
+    relatedStatuteIds: ['bd-contract-act-1872', 'int-cisg-1980'],
+    relatedConcepts: ['Breach of Contract', 'Specific Performance', 'Privity of Contract', 'Free Consent'],
+    keyElements: ['Offer and unconditional acceptance', 'Lawful consideration moving between parties', 'Competency of contracting parties', 'Lawful object and absence of coercion']
+  },
+  {
+    id: 'concept-presumption-innocence',
+    slug: 'presumption-of-innocence',
+    name: 'Presumption of Innocence & Burden of Proof',
+    nameBn: 'নির্দোষতার আইনি অনুমান ও প্রমাণের দায়',
+    latinName: 'Ei Incumbit Probatio Qui Dicit, Non Qui Negat',
+    category: 'Criminal Law',
+    definition: 'The universal principle that an accused person is presumed innocent until proven guilty beyond reasonable doubt according to law by the prosecution.',
+    simpleExplanation: 'You do not have to prove you are innocent. The state and police must bring solid, convincing evidence proving your guilt beyond any reasonable doubt before a court can convict you.',
+    explainLike15: 'If someone points at you and accuses you of taking their watch, the police cannot throw you in jail and demand you prove you were elsewhere. The accuser and police must bring timestamped video or forensic proof that you took it.',
+    courtroomExample: 'Under Article 14(2) of ICCPR and Evidence Act 1872, where any reasonable doubt remains in the prosecution case, the benefit of doubt is awarded to the accused as a matter of fundamental right.',
+    relatedStatuteIds: ['bd-penal-code-1860', 'bd-crpc-1898', 'int-iccpr-1966', 'int-udhr-1948'],
+    relatedConcepts: ['Mens Rea', 'Due Process', 'Standard of Proof', 'Right to Silence'],
+    keyElements: ['Presumption of innocence from initial arrest through verdict', 'Prosecution bears exclusive burden of proof', 'Standard of proof beyond reasonable doubt in criminal trials', 'Accused cannot be compelled to testify against themselves']
+  },
+  {
+    id: 'concept-natural-justice',
+    slug: 'natural-justice',
+    name: 'Principles of Natural Justice (Audi Alteram Partem)',
+    nameBn: 'প্রাকৃতিক ন্যায়বিচারের মূলনীতি (উভয় পক্ষের বক্তব্য শ্রবণ)',
+    latinName: 'Audi Alteram Partem & Nemo Judex In Causa Sua',
+    category: 'Constitutional Law',
+    definition: 'Fundamental procedural rules of fair play: the right to be heard by an unbiased decision maker and that no person shall judge their own case.',
+    simpleExplanation: 'Two supreme rules of justice: 1. Always hear both sides before deciding. 2. A judge or official with a personal financial or family stake in a dispute can never be the judge in that dispute.',
+    explainLike15: 'A teacher whose own child is competing in an essay contest cannot be the sole judge grading the essays, and they cannot disqualify another student without letting them speak.',
+    courtroomExample: 'Under Article 102, the High Court sets aside an administrative dismissal of a public servant because the inquiry committee never gave the employee a copy of the complaint or an opportunity to defend.',
+    relatedStatuteIds: ['bd-constitution-1972', 'bd-crpc-1898'],
+    relatedConcepts: ['Due Process', 'Ultra Vires', 'Judicial Review', 'Right to a Fair Trial'],
+    keyElements: ['Audi Alteram Partem (Hear the other side with sufficient notice)', 'Nemo Judex In Causa Sua (Rule against personal or pecuniary bias)', 'Duty to give reasons for administrative decisions', 'Fair, transparent hearing procedures']
+  }
+];
+
+// ----------------------------------------------------
+// SCALABLE GLOBAL JURISDICTIONS ARCHITECTURE (Prompt 07)
+// ----------------------------------------------------
+
+export interface JurisdictionInfo {
+  id: string;
+  name: string;
+  nativeName: string;
+  code: string;
+  flagEmoji: string;
+  region: string;
+  status: 'Active Repository' | 'Codification in Progress' | 'Upcoming';
+  systemType:
+    | 'Common Law'
+    | 'Civil Law'
+    | 'International Law'
+    | 'Hybrid System'
+    | 'Civil Law / Supranational'
+    | 'Civil Law / Islamic Law / Financial Free Zone Common Law (DIFC/ADGM)'
+    | 'Civil Law / Hybrid';
+  totalStatutesCount: number;
+  featuredStatutes: string[];
+  officialGazetteName: string;
+  apexCourt: string;
+  description: string;
+}
+
+export const JURISDICTIONS_DATA: JurisdictionInfo[] = [
+  {
+    id: 'bangladesh',
+    name: 'Bangladesh',
+    nativeName: 'গণপ্রজাতন্ত্রী বাংলাদেশ',
+    code: 'BD',
+    flagEmoji: '🇧🇩',
+    region: 'South Asia',
+    status: 'Active Repository',
+    systemType: 'Common Law',
+    totalStatutesCount: 12,
+    featuredStatutes: ['The Penal Code 1860', 'The Constitution of Bangladesh 1972', 'Code of Criminal Procedure 1898', 'Cyber Security Act 2023'],
+    officialGazetteName: 'The Bangladesh Gazette (বাংলাদেশ গেজেট)',
+    apexCourt: 'Supreme Court of Bangladesh (Appellate Division & High Court Division)',
+    description: 'Fully indexed statutory repository with dual English-Bengali codified texts, Section-level plain language explainers, and High Court writ analysis.'
+  },
+  {
+    id: 'international',
+    name: 'International Law',
+    nativeName: 'International Legal Frameworks',
+    code: 'INT',
+    flagEmoji: '🌐',
+    region: 'Global / Multilateral',
+    status: 'Active Repository',
+    systemType: 'International Law',
+    totalStatutesCount: 8,
+    featuredStatutes: ['Universal Declaration of Human Rights (UDHR)', 'Geneva Conventions (I-IV)', 'Paris Climate Agreement 2015', 'UN Convention on Contracts (CISG 1980)'],
+    officialGazetteName: 'United Nations Treaty Series (UNTS)',
+    apexCourt: 'International Court of Justice (ICJ) & International Criminal Court (ICC)',
+    description: 'Key multilateral conventions, human rights treaties, international humanitarian accords, and UNCITRAL commercial conventions.'
+  },
+  {
+    id: 'united-states',
+    name: 'United States',
+    nativeName: 'United States of America',
+    code: 'US',
+    flagEmoji: '🇺🇸',
+    region: 'North America',
+    status: 'Codification in Progress',
+    systemType: 'Common Law',
+    totalStatutesCount: 0,
+    featuredStatutes: ['U.S. Constitution (1787)', 'Title 18 U.S. Code (Crimes)', 'Federal Rules of Civil Procedure (FRCP)', 'Uniform Commercial Code (UCC)'],
+    officialGazetteName: 'Federal Register / United States Code (U.S.C.)',
+    apexCourt: 'Supreme Court of the United States (SCOTUS)',
+    description: 'Federal statutory framework, constitutional amendments, and interstate uniform commercial acts.'
+  },
+  {
+    id: 'united-kingdom',
+    name: 'United Kingdom',
+    nativeName: 'United Kingdom of Great Britain and Northern Ireland',
+    code: 'UK',
+    flagEmoji: '🇬🇧',
+    region: 'Europe',
+    status: 'Codification in Progress',
+    systemType: 'Common Law',
+    totalStatutesCount: 0,
+    featuredStatutes: ['Human Rights Act 1998', 'Data Protection Act 2018 (UK GDPR)', 'Sale of Goods Act 1979', 'Constitutional Reform Act 2005'],
+    officialGazetteName: 'The London Gazette / UK Legislation Database',
+    apexCourt: 'Supreme Court of the United Kingdom',
+    description: 'Acts of Parliament, UK unwritten constitutional conventions, and common law precedent structures.'
+  },
+  {
+    id: 'european-union',
+    name: 'European Union',
+    nativeName: 'European Union',
+    code: 'EU',
+    flagEmoji: '🇪🇺',
+    region: 'Europe',
+    status: 'Codification in Progress',
+    systemType: 'Civil Law / Supranational',
+    totalStatutesCount: 0,
+    featuredStatutes: ['General Data Protection Regulation (GDPR)', 'Treaty on European Union (TEU / Lisbon)', 'EU AI Act (2024)', 'Digital Services Act (DSA)'],
+    officialGazetteName: 'Official Journal of the European Union (OJEU)',
+    apexCourt: 'Court of Justice of the European Union (CJEU)',
+    description: 'Directives, EU Regulations, and supranational digital rights frameworks.'
+  },
+  {
+    id: 'germany',
+    name: 'Germany',
+    nativeName: 'Bundesrepublik Deutschland',
+    code: 'DE',
+    flagEmoji: '🇩🇪',
+    region: 'Western Europe',
+    status: 'Upcoming',
+    systemType: 'Civil Law',
+    totalStatutesCount: 0,
+    featuredStatutes: ['Basic Law (Grundgesetz)', 'German Civil Code (BGB)', 'German Criminal Code (StGB)', 'German Commercial Code (HGB)'],
+    officialGazetteName: 'Bundesgesetzblatt (BGBl.)',
+    apexCourt: 'Federal Constitutional Court (Bundesverfassungsgericht)',
+    description: 'Civil law codified statutes, constitutional rights jurisprudence, and European harmonization.'
+  },
+  {
+    id: 'france',
+    name: 'France',
+    nativeName: 'République française',
+    code: 'FR',
+    flagEmoji: '🇫🇷',
+    region: 'Western Europe',
+    status: 'Upcoming',
+    systemType: 'Civil Law',
+    totalStatutesCount: 0,
+    featuredStatutes: ['French Civil Code (Code civil / Napoleonic Code)', 'French Penal Code (Code pénal)', 'Declaration of the Rights of Man 1789'],
+    officialGazetteName: 'Journal Officiel de la République Française (JORF / Légifrance)',
+    apexCourt: 'Court of Cassation & Constitutional Council (Conseil constitutionnel)',
+    description: 'Codified Napoleonic civil law heritage and administrative jurisprudence.'
+  },
+  {
+    id: 'italy',
+    name: 'Italy',
+    nativeName: 'Repubblica Italiana',
+    code: 'IT',
+    flagEmoji: '🇮🇹',
+    region: 'Southern Europe',
+    status: 'Upcoming',
+    systemType: 'Civil Law',
+    totalStatutesCount: 0,
+    featuredStatutes: ['Costituzione della Repubblica Italiana (1947)', 'Codice Civile (Civil Code 1942)', 'Codice Penale'],
+    officialGazetteName: 'Gazzetta Ufficiale della Repubblica Italiana',
+    apexCourt: 'Corte Suprema di Cassazione & Corte Costituzionale',
+    description: 'Italian constitutional protections and statutory codifications.'
+  },
+  {
+    id: 'japan',
+    name: 'Japan',
+    nativeName: '日本国 (Nihon-koku)',
+    code: 'JP',
+    flagEmoji: '🇯🇵',
+    region: 'East Asia',
+    status: 'Upcoming',
+    systemType: 'Civil Law / Hybrid',
+    totalStatutesCount: 0,
+    featuredStatutes: ['Constitution of Japan (1947)', 'Six Codes of Japan (Roppō)', 'Civil Code (Minpō)', 'Personal Information Protection Act (APPI)'],
+    officialGazetteName: 'Kanpō (Official Gazette of Japan)',
+    apexCourt: 'Supreme Court of Japan (最高裁判所)',
+    description: 'Six Codes framework and Asian privacy & corporate law principles.'
+  },
+  {
+    id: 'south-korea',
+    name: 'South Korea',
+    nativeName: '대한민국 (Daehan Minguk)',
+    code: 'KR',
+    flagEmoji: '🇰🇷',
+    region: 'East Asia',
+    status: 'Upcoming',
+    systemType: 'Civil Law',
+    totalStatutesCount: 0,
+    featuredStatutes: ['Constitution of the Republic of Korea', 'Personal Information Protection Act (PIPA)', 'Criminal Act of Korea'],
+    officialGazetteName: 'Gwanbo (Official Gazette of the Republic of Korea)',
+    apexCourt: 'Constitutional Court of Korea & Supreme Court of Korea',
+    description: 'Constitutional jurisprudence and technology compliance statutes.'
+  },
+  {
+    id: 'united-arab-emirates',
+    name: 'United Arab Emirates',
+    nativeName: 'الإمارات العربية المتحدة',
+    code: 'AE',
+    flagEmoji: '🇦🇪',
+    region: 'Middle East',
+    status: 'Upcoming',
+    systemType: 'Civil Law / Islamic Law / Financial Free Zone Common Law (DIFC/ADGM)',
+    totalStatutesCount: 0,
+    featuredStatutes: ['Federal Decree-Law on Commercial Transactions', 'Federal Law on Personal Status', 'DIFC Court Laws & Arbitration Regulations'],
+    officialGazetteName: 'UAE Federal Official Gazette',
+    apexCourt: 'Federal Supreme Court of the United Arab Emirates',
+    description: 'Dual civil and common-law free-zone arbitration jurisprudence.'
   }
 ];
 
