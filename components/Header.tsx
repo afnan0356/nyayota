@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { motion, AnimatePresence } from 'motion/react';
 import {
   Scale,
   Sun,
@@ -23,6 +24,14 @@ import { useTheme } from '@/components/ThemeProvider';
 import { GlobalSearch } from '@/components/GlobalSearch';
 import { BookmarkDrawer } from '@/components/BookmarkDrawer';
 import { getLocalBookmarks } from '@/lib/bookmarks';
+import {
+  TRANSITION_FAST,
+  popoverVariants,
+  navContainerVariants,
+  navItemVariants,
+  fastStaggerContainerVariants,
+  staggerItemVariants,
+} from '@/lib/motion';
 
 export function Header() {
   const pathname = usePathname();
@@ -67,9 +76,14 @@ export function Header() {
             id="header-brand-logo"
             className="flex items-center space-x-2.5 group focus:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400 rounded-lg py-1"
           >
-            <div className="w-8 h-8 rounded-lg bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 flex items-center justify-center font-bold shadow-xs transition-transform group-hover:scale-105">
+            <motion.div
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              transition={{ duration: 0.15, ease: 'easeOut' }}
+              className="w-8 h-8 rounded-lg bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 flex items-center justify-center font-bold shadow-xs"
+            >
               <Scale className="w-4 h-4" />
-            </div>
+            </motion.div>
             <div className="flex flex-col">
               <div className="flex items-center space-x-1.5">
                 <span className="text-lg font-bold tracking-tight text-zinc-900 dark:text-zinc-100 font-serif">
@@ -93,28 +107,44 @@ export function Header() {
 
         {/* Right Side: Main Navigation, Bookmarks & Theme Toggle (Desktop) */}
         <div className="hidden lg:flex items-center space-x-1 shrink-0">
-          {primaryNavLinks.map((link) => {
-            const isActive = pathname === link.href || (link.href !== '/' && pathname.startsWith(link.href));
-            return (
-              <Link
-                key={link.href}
-                href={link.href}
-                id={`header-nav-${link.label.toLowerCase().replace(/\s+/g, '-')}`}
-                className={`px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors ${
-                  isActive
-                    ? 'text-zinc-950 dark:text-white bg-zinc-100 dark:bg-zinc-800/90 font-semibold shadow-xs'
-                    : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-50 dark:hover:bg-zinc-900/60'
-                }`}
-              >
-                <span>{link.label}</span>
-              </Link>
-            );
-          })}
+          <motion.nav
+            variants={navContainerVariants}
+            initial="hidden"
+            animate="visible"
+            aria-label="Main statutory navigation"
+            className="flex items-center space-x-1"
+          >
+            {primaryNavLinks.map((link) => {
+              const isActive = pathname === link.href || (link.href !== '/' && pathname.startsWith(link.href));
+              return (
+                <motion.div
+                  key={link.href}
+                  variants={navItemVariants}
+                  whileHover={{ y: -1 }}
+                  whileTap={{ scale: 0.97 }}
+                  transition={{ duration: 0.12, ease: 'easeOut' }}
+                >
+                  <Link
+                    href={link.href}
+                    id={`header-nav-${link.label.toLowerCase().replace(/\s+/g, '-')}`}
+                    className={`relative px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors block ${
+                      isActive
+                        ? 'text-zinc-950 dark:text-white bg-zinc-100 dark:bg-zinc-800/90 font-semibold shadow-xs'
+                        : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-50 dark:hover:bg-zinc-900/60'
+                    }`}
+                  >
+                    <span>{link.label}</span>
+                  </Link>
+                </motion.div>
+              );
+            })}
+          </motion.nav>
 
           <div className="h-4 w-px bg-zinc-200 dark:bg-zinc-800 mx-1.5" />
 
           {/* Bookmarks Toggle */}
-          <button
+          <motion.button
+            whileTap={{ scale: 0.92 }}
             type="button"
             id="header-bookmarks-toggle-btn"
             onClick={() => setBookmarkDrawerOpen(true)}
@@ -122,15 +152,25 @@ export function Header() {
             className="relative p-2 rounded-lg text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-800/80 transition-colors focus:outline-none focus:ring-2 focus:ring-zinc-400"
           >
             <Bookmark className="w-4 h-4" />
-            {bookmarkCount > 0 && (
-              <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-amber-600 dark:bg-amber-500 text-white dark:text-zinc-950 font-bold text-[10px] flex items-center justify-center shadow-xs">
-                {bookmarkCount}
-              </span>
-            )}
-          </button>
+            <AnimatePresence>
+              {bookmarkCount > 0 && (
+                <motion.span
+                  key="bookmark-badge"
+                  initial={{ scale: 0, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  exit={{ scale: 0, opacity: 0 }}
+                  transition={{ duration: 0.18, ease: 'easeOut' }}
+                  className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-amber-600 dark:bg-amber-500 text-white dark:text-zinc-950 font-bold text-[10px] flex items-center justify-center shadow-xs"
+                >
+                  {bookmarkCount}
+                </motion.span>
+              )}
+            </AnimatePresence>
+          </motion.button>
 
           {/* Theme Toggle */}
-          <button
+          <motion.button
+            whileTap={{ scale: 0.9, rotate: 15 }}
             type="button"
             id="header-theme-toggle-btn"
             onClick={toggleTheme}
@@ -138,16 +178,17 @@ export function Header() {
             className="p-2 rounded-lg text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-800/80 transition-colors focus:outline-none focus:ring-2 focus:ring-zinc-400"
           >
             {theme === 'dark' ? (
-              <Sun className="w-4 h-4 text-zinc-300 hover:text-white" />
+              <Sun className="w-4 h-4 text-zinc-300 hover:text-white transition-transform" />
             ) : (
-              <Moon className="w-4 h-4 text-zinc-700 hover:text-zinc-950" />
+              <Moon className="w-4 h-4 text-zinc-700 hover:text-zinc-950 transition-transform" />
             )}
-          </button>
+          </motion.button>
         </div>
 
         {/* Mobile Controls (Search + Bookmark + Theme + Hamburger) */}
         <div className="flex lg:hidden items-center space-x-1">
-          <button
+          <motion.button
+            whileTap={{ scale: 0.9 }}
             type="button"
             id="mobile-search-toggle-btn"
             onClick={() => setMobileSearchOpen(!mobileSearchOpen)}
@@ -155,9 +196,10 @@ export function Header() {
             aria-label="Open search bar"
           >
             <Search className="w-4 h-4" />
-          </button>
+          </motion.button>
 
-          <button
+          <motion.button
+            whileTap={{ scale: 0.9 }}
             type="button"
             id="mobile-bookmarks-btn"
             onClick={() => setBookmarkDrawerOpen(true)}
@@ -170,9 +212,10 @@ export function Header() {
                 {bookmarkCount}
               </span>
             )}
-          </button>
+          </motion.button>
 
-          <button
+          <motion.button
+            whileTap={{ scale: 0.9, rotate: 15 }}
             type="button"
             id="mobile-theme-toggle-btn"
             onClick={toggleTheme}
@@ -180,9 +223,10 @@ export function Header() {
             aria-label="Toggle theme"
           >
             {theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
-          </button>
+          </motion.button>
 
-          <button
+          <motion.button
+            whileTap={{ scale: 0.9 }}
             type="button"
             id="mobile-menu-toggle-btn"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
@@ -190,104 +234,128 @@ export function Header() {
             aria-label="Open menu"
           >
             {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-          </button>
+          </motion.button>
         </div>
       </div>
 
       {/* Mobile Search Expandable Area */}
-      {mobileSearchOpen && (
-        <div className="lg:hidden px-4 pb-3 pt-1 border-t border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950">
-          <GlobalSearch isModal onClose={() => setMobileSearchOpen(false)} />
-        </div>
-      )}
+      <AnimatePresence>
+        {mobileSearchOpen && (
+          <motion.div
+            key="mobile-search-area"
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={TRANSITION_FAST}
+            className="lg:hidden px-4 pb-3 pt-1 border-t border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 overflow-hidden"
+          >
+            <GlobalSearch isModal onClose={() => setMobileSearchOpen(false)} />
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Mobile Navigation Drawer */}
-      {mobileMenuOpen && (
-        <div
-          id="mobile-nav-drawer"
-          className="lg:hidden border-t border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 px-4 py-4 space-y-3 shadow-xl animate-in slide-in-from-top-2"
-        >
-          <div className="space-y-1">
-            <p className="text-[11px] font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400 px-3 py-1">
-              Legal Libraries & Research
-            </p>
-            {primaryNavLinks.map((link) => {
-              const isActive = pathname === link.href;
-              return (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  onClick={() => setMobileMenuOpen(false)}
-                  className={`flex items-center space-x-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors ${
-                    isActive
-                      ? 'bg-zinc-100 dark:bg-zinc-800 text-zinc-950 dark:text-white font-semibold'
-                      : 'text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-900'
-                  }`}
-                >
-                  <span>{link.label}</span>
-                </Link>
-              );
-            })}
-            <Link
-              href="/knowledge-paths"
-              onClick={() => setMobileMenuOpen(false)}
-              className="flex items-center space-x-3 px-3 py-2.5 rounded-xl text-sm font-medium text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-900"
+      <AnimatePresence>
+        {mobileMenuOpen && (
+          <motion.div
+            key="mobile-nav-drawer"
+            id="mobile-nav-drawer"
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={TRANSITION_FAST}
+            className="lg:hidden border-t border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 px-4 py-4 space-y-3 shadow-xl overflow-hidden"
+          >
+            <motion.div
+              variants={fastStaggerContainerVariants}
+              initial="hidden"
+              animate="visible"
+              className="space-y-1"
             >
-              <span>Learning Paths</span>
-            </Link>
-          </div>
+              <p className="text-[11px] font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400 px-3 py-1">
+                Legal Libraries & Research
+              </p>
+              {primaryNavLinks.map((link) => {
+                const isActive = pathname === link.href;
+                return (
+                  <motion.div key={link.href} variants={staggerItemVariants}>
+                    <Link
+                      href={link.href}
+                      onClick={() => setMobileMenuOpen(false)}
+                      className={`flex items-center space-x-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors ${
+                        isActive
+                          ? 'bg-zinc-100 dark:bg-zinc-800 text-zinc-950 dark:text-white font-semibold'
+                          : 'text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-900'
+                      }`}
+                    >
+                      <span>{link.label}</span>
+                    </Link>
+                  </motion.div>
+                );
+              })}
+              <motion.div variants={staggerItemVariants}>
+                <Link
+                  href="/knowledge-paths"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="flex items-center space-x-3 px-3 py-2.5 rounded-xl text-sm font-medium text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-900"
+                >
+                  <span>Learning Paths</span>
+                </Link>
+              </motion.div>
+            </motion.div>
 
-          <div className="border-t border-zinc-200 dark:border-zinc-800 pt-3 space-y-1">
-            <p className="text-[11px] font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400 px-3 py-1">
-              Governance & Policies
-            </p>
-            <div className="grid grid-cols-2 gap-1 text-xs">
-              <Link
-                href="/about"
-                onClick={() => setMobileMenuOpen(false)}
-                className="px-3 py-2 rounded-lg text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-900"
-              >
-                About Mission
-              </Link>
-              <Link
-                href="/contact"
-                onClick={() => setMobileMenuOpen(false)}
-                className="px-3 py-2 rounded-lg text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-900"
-              >
-                Contact
-              </Link>
-              <Link
-                href="/disclaimer"
-                onClick={() => setMobileMenuOpen(false)}
-                className="px-3 py-2 rounded-lg text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-900"
-              >
-                Legal Disclaimer
-              </Link>
-              <Link
-                href="/accessibility"
-                onClick={() => setMobileMenuOpen(false)}
-                className="px-3 py-2 rounded-lg text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-900"
-              >
-                Accessibility
-              </Link>
-              <Link
-                href="/terms"
-                onClick={() => setMobileMenuOpen(false)}
-                className="px-3 py-2 rounded-lg text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-900"
-              >
-                Terms of Service
-              </Link>
-              <Link
-                href="/privacy"
-                onClick={() => setMobileMenuOpen(false)}
-                className="px-3 py-2 rounded-lg text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-900"
-              >
-                Privacy Policy
-              </Link>
+            <div className="border-t border-zinc-200 dark:border-zinc-800 pt-3 space-y-1">
+              <p className="text-[11px] font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400 px-3 py-1">
+                Governance & Policies
+              </p>
+              <div className="grid grid-cols-2 gap-1 text-xs">
+                <Link
+                  href="/about"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="px-3 py-2 rounded-lg text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-900"
+                >
+                  About Mission
+                </Link>
+                <Link
+                  href="/contact"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="px-3 py-2 rounded-lg text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-900"
+                >
+                  Contact
+                </Link>
+                <Link
+                  href="/disclaimer"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="px-3 py-2 rounded-lg text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-900"
+                >
+                  Legal Disclaimer
+                </Link>
+                <Link
+                  href="/accessibility"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="px-3 py-2 rounded-lg text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-900"
+                >
+                  Accessibility
+                </Link>
+                <Link
+                  href="/terms"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="px-3 py-2 rounded-lg text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-900"
+                >
+                  Terms of Service
+                </Link>
+                <Link
+                  href="/privacy"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="px-3 py-2 rounded-lg text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-900"
+                >
+                  Privacy Policy
+                </Link>
+              </div>
             </div>
-          </div>
-        </div>
-      )}
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Local Bookmarks Drawer */}
       <BookmarkDrawer isOpen={bookmarkDrawerOpen} onClose={() => setBookmarkDrawerOpen(false)} />

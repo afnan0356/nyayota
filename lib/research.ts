@@ -58,6 +58,28 @@ export function getResearchNotes(): ResearchNote[] {
   }
 }
 
+export function getNotesForSection(lawId: string, sectionNumber?: string): ResearchNote[] {
+  const allNotes = getResearchNotes();
+  return allNotes.filter((n) => {
+    if (n.lawId !== lawId) return false;
+    if (sectionNumber) {
+      return n.sectionNumber === sectionNumber;
+    }
+    return true;
+  });
+}
+
+export function getSectionNotesCountMap(lawId: string): Record<string, number> {
+  const allNotes = getResearchNotes();
+  const map: Record<string, number> = {};
+  for (const n of allNotes) {
+    if (n.lawId === lawId && n.sectionNumber) {
+      map[n.sectionNumber] = (map[n.sectionNumber] || 0) + 1;
+    }
+  }
+  return map;
+}
+
 export function saveResearchNote(note: Omit<ResearchNote, 'id' | 'createdAt' | 'updatedAt'> & { id?: string }): ResearchNote {
   const notes = getResearchNotes();
   const now = new Date().toISOString();

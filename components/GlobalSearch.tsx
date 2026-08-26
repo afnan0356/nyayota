@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { useRouter } from 'next/navigation';
+import { motion, AnimatePresence } from 'motion/react';
 import {
   Search,
   X,
@@ -17,6 +18,7 @@ import {
   FolderTree,
   FileText
 } from 'lucide-react';
+import { popoverVariants } from '@/lib/motion';
 import {
   LAWS_DATABASE,
   GLOSSARY_TERMS,
@@ -514,13 +516,18 @@ export function GlobalSearch({ isModal = false, onClose }: { isModal?: boolean; 
       </div>
 
       {/* Autocomplete & Search History Dropdown */}
-      {isOpen && (
-        <div
-          ref={dropdownRef}
-          id="global-search-dropdown"
-          className="absolute left-0 right-0 top-full mt-2 bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800/90 rounded-2xl shadow-2xl overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-150"
-        >
-          {/* Recent Searches Section (Last 5 Queries) */}
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            ref={dropdownRef}
+            id="global-search-dropdown"
+            variants={popoverVariants}
+            initial="hidden"
+            animate="visible"
+            exit="exit"
+            className="absolute left-0 right-0 top-full mt-2 bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800/90 rounded-2xl shadow-2xl overflow-hidden z-50 origin-top"
+          >
+            {/* Recent Searches Section (Last 5 Queries) */}
           {!query.trim() && history.length > 0 && (
             <div id="search-history-container" className="p-3 bg-zinc-50/80 dark:bg-zinc-900/50 border-b border-zinc-200 dark:border-zinc-800/80">
               <div className="flex items-center justify-between text-xs font-semibold text-zinc-500 dark:text-zinc-400 mb-2 px-1">
@@ -672,8 +679,9 @@ export function GlobalSearch({ isModal = false, onClose }: { isModal?: boolean; 
               </button>
             </div>
           )}
-        </div>
-      )}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

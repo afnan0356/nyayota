@@ -3,6 +3,7 @@
 import React, { useState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
+import { motion, AnimatePresence } from 'motion/react';
 import {
   Compass,
   Scale,
@@ -29,6 +30,11 @@ import {
   LEGAL_OUTCOME_SCENARIOS_DATA,
   LegalOutcomeScenario
 } from '@/lib/legal-data';
+import {
+  tabContentVariants,
+  TRANSITION_NORMAL,
+  TRANSITION_FAST
+} from '@/lib/motion';
 
 function LegalOutcomeGuideContent() {
   const searchParams = useSearchParams();
@@ -203,239 +209,247 @@ function LegalOutcomeGuideContent() {
 
         {/* Right Column: Active Scenario Deep Dive (8 cols) */}
         <div className="lg:col-span-8 space-y-6">
-          {/* Active Scenario Card */}
-          <div className="p-6 sm:p-8 rounded-3xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-sm space-y-6">
-            {/* Top Tag & Title */}
-            <div className="space-y-2 border-b border-zinc-100 dark:border-zinc-800 pb-5">
-              <div className="flex flex-wrap items-center justify-between gap-2">
-                <span className="px-3 py-1 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 text-xs font-bold">
-                  {activeScenario.legalArea} • {activeScenario.jurisdiction}
-                </span>
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={activeScenario.id}
+              variants={tabContentVariants}
+              initial="hidden"
+              animate="visible"
+              exit="exit"
+              className="p-6 sm:p-8 rounded-3xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-sm space-y-6"
+            >
+              {/* Top Tag & Title */}
+              <div className="space-y-2 border-b border-zinc-100 dark:border-zinc-800 pb-5">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <span className="px-3 py-1 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 text-xs font-bold">
+                    {activeScenario.legalArea} • {activeScenario.jurisdiction}
+                  </span>
 
-                <Link
-                  href={`/ai-assistant?query=${encodeURIComponent(`Explain procedural rights and statutory remedies for the scenario: ${activeScenario.topicTitle}`)}`}
-                  className="px-3.5 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-zinc-950 font-bold text-xs inline-flex items-center space-x-1.5 shadow-sm transition-colors"
-                >
-                  <Sparkles className="w-3.5 h-3.5" />
-                  <span>Ask AI About This Scenario</span>
-                </Link>
-              </div>
+                  <Link
+                    href={`/ai-assistant?query=${encodeURIComponent(`Explain procedural rights and statutory remedies for the scenario: ${activeScenario.topicTitle}`)}`}
+                    className="px-3.5 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-zinc-950 font-bold text-xs inline-flex items-center space-x-1.5 shadow-sm transition-colors"
+                  >
+                    <Sparkles className="w-3.5 h-3.5" />
+                    <span>Ask AI About This Scenario</span>
+                  </Link>
+                </div>
 
-              <div>
-                <h2 className="text-xl sm:text-2xl font-extrabold text-zinc-900 dark:text-white">
-                  {activeScenario.topicTitle}
-                </h2>
-                <p className="text-sm font-bold text-amber-600 dark:text-amber-400 font-bangla">
-                  {activeScenario.topicTitleBn}
+                <div>
+                  <h2 className="text-xl sm:text-2xl font-extrabold text-zinc-900 dark:text-white">
+                    {activeScenario.topicTitle}
+                  </h2>
+                  <p className="text-sm font-bold text-amber-600 dark:text-amber-400 font-bangla">
+                    {activeScenario.topicTitleBn}
+                  </p>
+                </div>
+
+                <p className="text-xs sm:text-sm text-zinc-600 dark:text-zinc-300 leading-relaxed">
+                  {activeScenario.scenarioSummary}
                 </p>
               </div>
 
-              <p className="text-xs sm:text-sm text-zinc-600 dark:text-zinc-300 leading-relaxed">
-                {activeScenario.scenarioSummary}
-              </p>
-            </div>
+              {/* Procedural Classification Badges */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
+                <div className="p-3 rounded-2xl bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 space-y-0.5">
+                  <span className="text-[10px] font-bold uppercase text-zinc-400 block">Cognizability:</span>
+                  <span className="font-semibold text-zinc-800 dark:text-zinc-200 text-[11px] leading-tight block">
+                    {activeScenario.proceduralClassification.cognizableStatus}
+                  </span>
+                </div>
 
-            {/* Procedural Classification Badges */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
-              <div className="p-3 rounded-2xl bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 space-y-0.5">
-                <span className="text-[10px] font-bold uppercase text-zinc-400 block">Cognizability:</span>
-                <span className="font-semibold text-zinc-800 dark:text-zinc-200 text-[11px] leading-tight block">
-                  {activeScenario.proceduralClassification.cognizableStatus}
-                </span>
+                <div className="p-3 rounded-2xl bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 space-y-0.5">
+                  <span className="text-[10px] font-bold uppercase text-zinc-400 block">Bail Category:</span>
+                  <span className="font-semibold text-amber-600 dark:text-amber-400 text-[11px] leading-tight block">
+                    {activeScenario.proceduralClassification.bailStatus}
+                  </span>
+                </div>
+
+                <div className="p-3 rounded-2xl bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 space-y-0.5">
+                  <span className="text-[10px] font-bold uppercase text-zinc-400 block">Trial Court:</span>
+                  <span className="font-semibold text-zinc-800 dark:text-zinc-200 text-[11px] leading-tight block">
+                    {activeScenario.proceduralClassification.trialCourt}
+                  </span>
+                </div>
+
+                <div className="p-3 rounded-2xl bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 space-y-0.5">
+                  <span className="text-[10px] font-bold uppercase text-zinc-400 block">Filing Mode:</span>
+                  <span className="font-semibold text-zinc-800 dark:text-zinc-200 text-[11px] leading-tight block">
+                    {activeScenario.proceduralClassification.filingMechanism}
+                  </span>
+                </div>
               </div>
 
-              <div className="p-3 rounded-2xl bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 space-y-0.5">
-                <span className="text-[10px] font-bold uppercase text-zinc-400 block">Bail Category:</span>
-                <span className="font-semibold text-amber-600 dark:text-amber-400 text-[11px] leading-tight block">
-                  {activeScenario.proceduralClassification.bailStatus}
-                </span>
-              </div>
-
-              <div className="p-3 rounded-2xl bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 space-y-0.5">
-                <span className="text-[10px] font-bold uppercase text-zinc-400 block">Trial Court:</span>
-                <span className="font-semibold text-zinc-800 dark:text-zinc-200 text-[11px] leading-tight block">
-                  {activeScenario.proceduralClassification.trialCourt}
-                </span>
-              </div>
-
-              <div className="p-3 rounded-2xl bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 space-y-0.5">
-                <span className="text-[10px] font-bold uppercase text-zinc-400 block">Filing Mode:</span>
-                <span className="font-semibold text-zinc-800 dark:text-zinc-200 text-[11px] leading-tight block">
-                  {activeScenario.proceduralClassification.filingMechanism}
-                </span>
-              </div>
-            </div>
-
-            {/* Applicable Statutes & Sections */}
-            <div className="space-y-3">
-              <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-500 dark:text-zinc-400 flex items-center space-x-2">
-                <Scale className="w-4 h-4 text-amber-500" />
-                <span>Applicable Codified Statutes & Sections</span>
-              </h3>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {activeScenario.applicableStatutes.map((statute, idx) => (
-                  <div
-                    key={idx}
-                    className="p-3.5 rounded-2xl bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 space-y-1.5"
-                  >
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs font-bold text-zinc-900 dark:text-white">
-                        {statute.title}
-                      </span>
-                      <Link
-                        href={`/law/${statute.lawId}`}
-                        className="text-[11px] font-bold text-amber-600 dark:text-amber-400 hover:underline inline-flex items-center space-x-0.5"
-                      >
-                        <span>View</span>
-                        <ExternalLink className="w-3 h-3" />
-                      </Link>
-                    </div>
-                    <span className="px-2 py-0.5 rounded-md bg-amber-500/10 text-amber-700 dark:text-amber-300 text-[10px] font-mono font-bold inline-block">
-                      {statute.section}
-                    </span>
-                    <p className="text-[11px] text-zinc-600 dark:text-zinc-400 leading-relaxed">
-                      {statute.explanation}
-                    </p>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Procedural Step-by-Step Roadmap */}
-            <div className="space-y-3">
-              <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-500 dark:text-zinc-400 flex items-center space-x-2">
-                <Compass className="w-4 h-4 text-emerald-500" />
-                <span>Step-by-Step Practical Rights & Procedures</span>
-              </h3>
-
+              {/* Applicable Statutes & Sections */}
               <div className="space-y-3">
-                {activeScenario.proceduralSteps.map((step, idx) => (
-                  <div
-                    key={idx}
-                    className="p-4 rounded-2xl bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 flex items-start space-x-3.5"
-                  >
-                    <div className="w-6 h-6 rounded-full bg-emerald-500 text-zinc-950 text-xs font-bold flex items-center justify-center shrink-0 mt-0.5">
-                      {step.step}
-                    </div>
-                    <div className="space-y-1">
-                      <h4 className="text-xs sm:text-sm font-bold text-zinc-900 dark:text-white">
-                        {step.title}
-                      </h4>
-                      <p className="text-xs text-zinc-600 dark:text-zinc-400 leading-relaxed">
-                        {step.description}
+                <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-500 dark:text-zinc-400 flex items-center space-x-2">
+                  <Scale className="w-4 h-4 text-amber-500" />
+                  <span>Applicable Codified Statutes & Sections</span>
+                </h3>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {activeScenario.applicableStatutes.map((statute, idx) => (
+                    <div
+                      key={idx}
+                      className="p-3.5 rounded-2xl bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 space-y-1.5"
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-bold text-zinc-900 dark:text-white">
+                          {statute.title}
+                        </span>
+                        <Link
+                          href={`/law/${statute.lawId}`}
+                          className="text-[11px] font-bold text-amber-600 dark:text-amber-400 hover:underline inline-flex items-center space-x-0.5"
+                        >
+                          <span>View</span>
+                          <ExternalLink className="w-3 h-3" />
+                        </Link>
+                      </div>
+                      <span className="px-2 py-0.5 rounded-md bg-amber-500/10 text-amber-700 dark:text-amber-300 text-[10px] font-mono font-bold inline-block">
+                        {statute.section}
+                      </span>
+                      <p className="text-[11px] text-zinc-600 dark:text-zinc-400 leading-relaxed">
+                        {statute.explanation}
                       </p>
                     </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Evidence Checklist + Consequences Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {/* Evidence Checklist */}
-              <div className="p-4 sm:p-5 rounded-2xl bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 space-y-3">
-                <h4 className="text-xs font-bold uppercase tracking-wider text-zinc-900 dark:text-white flex items-center space-x-2">
-                  <FileCheck className="w-4 h-4 text-amber-500" />
-                  <span>Evidence Preservation Checklist</span>
-                </h4>
-                <ul className="space-y-2">
-                  {activeScenario.evidentiaryRequirements.map((ev, idx) => (
-                    <li key={idx} className="flex items-start space-x-2 text-xs text-zinc-700 dark:text-zinc-300">
-                      <CheckCircle2 className="w-3.5 h-3.5 text-amber-500 shrink-0 mt-0.5" />
-                      <span>{ev}</span>
-                    </li>
                   ))}
-                </ul>
+                </div>
               </div>
 
-              {/* Statutory Consequences & Remedies */}
-              <div className="p-4 sm:p-5 rounded-2xl bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 space-y-3">
-                <h4 className="text-xs font-bold uppercase tracking-wider text-zinc-900 dark:text-white flex items-center space-x-2">
-                  <Gavel className="w-4 h-4 text-purple-500" />
-                  <span>Consequences & Remedies</span>
-                </h4>
+              {/* Procedural Step-by-Step Roadmap */}
+              <div className="space-y-3">
+                <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-500 dark:text-zinc-400 flex items-center space-x-2">
+                  <Compass className="w-4 h-4 text-emerald-500" />
+                  <span>Step-by-Step Practical Rights & Procedures</span>
+                </h3>
 
-                <div className="space-y-2 text-xs">
-                  <div>
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-400 block">
-                      Potential Penalties:
-                    </span>
-                    <ul className="space-y-1 pt-1">
-                      {activeScenario.statutoryConsequences.potentialPenalties.map((pen, pIdx) => (
-                        <li key={pIdx} className="text-xs text-rose-700 dark:text-rose-400 font-medium">
-                          • {pen}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
+                <div className="space-y-3">
+                  {activeScenario.proceduralSteps.map((step, idx) => (
+                    <div
+                      key={idx}
+                      className="p-4 rounded-2xl bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 flex items-start space-x-3.5"
+                    >
+                      <div className="w-6 h-6 rounded-full bg-emerald-500 text-zinc-950 text-xs font-bold flex items-center justify-center shrink-0 mt-0.5">
+                        {step.step}
+                      </div>
+                      <div className="space-y-1">
+                        <h4 className="text-xs sm:text-sm font-bold text-zinc-900 dark:text-white">
+                          {step.title}
+                        </h4>
+                        <p className="text-xs text-zinc-600 dark:text-zinc-400 leading-relaxed">
+                          {step.description}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
 
-                  <div className="pt-2 border-t border-zinc-200 dark:border-zinc-800">
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-400 block">
-                      Civil Remedies / Restitution:
-                    </span>
-                    <ul className="space-y-1 pt-1">
-                      {activeScenario.statutoryConsequences.civilRemedies.map((rem, rIdx) => (
-                        <li key={rIdx} className="text-xs text-emerald-700 dark:text-emerald-400 font-medium">
-                          • {rem}
-                        </li>
-                      ))}
-                    </ul>
+              {/* Evidence Checklist + Consequences Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Evidence Checklist */}
+                <div className="p-4 sm:p-5 rounded-2xl bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 space-y-3">
+                  <h4 className="text-xs font-bold uppercase tracking-wider text-zinc-900 dark:text-white flex items-center space-x-2">
+                    <FileCheck className="w-4 h-4 text-amber-500" />
+                    <span>Evidence Preservation Checklist</span>
+                  </h4>
+                  <ul className="space-y-2">
+                    {activeScenario.evidentiaryRequirements.map((ev, idx) => (
+                      <li key={idx} className="flex items-start space-x-2 text-xs text-zinc-700 dark:text-zinc-300">
+                        <CheckCircle2 className="w-3.5 h-3.5 text-amber-500 shrink-0 mt-0.5" />
+                        <span>{ev}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                {/* Statutory Consequences & Remedies */}
+                <div className="p-4 sm:p-5 rounded-2xl bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 space-y-3">
+                  <h4 className="text-xs font-bold uppercase tracking-wider text-zinc-900 dark:text-white flex items-center space-x-2">
+                    <Gavel className="w-4 h-4 text-purple-500" />
+                    <span>Consequences & Remedies</span>
+                  </h4>
+
+                  <div className="space-y-2 text-xs">
+                    <div>
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-400 block">
+                        Potential Penalties:
+                      </span>
+                      <ul className="space-y-1 pt-1">
+                        {activeScenario.statutoryConsequences.potentialPenalties.map((pen, pIdx) => (
+                          <li key={pIdx} className="text-xs text-rose-700 dark:text-rose-400 font-medium">
+                            • {pen}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+
+                    <div className="pt-2 border-t border-zinc-200 dark:border-zinc-800">
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-400 block">
+                        Civil Remedies / Restitution:
+                      </span>
+                      <ul className="space-y-1 pt-1">
+                        {activeScenario.statutoryConsequences.civilRemedies.map((rem, rIdx) => (
+                          <li key={rIdx} className="text-xs text-emerald-700 dark:text-emerald-400 font-medium">
+                            • {rem}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
 
-            {/* Aggravating & Mitigating Factors */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="p-4 rounded-2xl bg-rose-500/5 border border-rose-500/20 space-y-2 text-xs">
-                <span className="font-bold text-rose-700 dark:text-rose-400 flex items-center space-x-1.5">
-                  <AlertTriangle className="w-3.5 h-3.5" />
-                  <span>Aggravating Factors (Harsher Sentence):</span>
-                </span>
-                <ul className="space-y-1">
-                  {activeScenario.outcomeFactors.aggravating.map((agg, idx) => (
-                    <li key={idx} className="text-zinc-700 dark:text-zinc-300">
-                      • {agg}
-                    </li>
-                  ))}
-                </ul>
+              {/* Aggravating & Mitigating Factors */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="p-4 rounded-2xl bg-rose-500/5 border border-rose-500/20 space-y-2 text-xs">
+                  <span className="font-bold text-rose-700 dark:text-rose-400 flex items-center space-x-1.5">
+                    <AlertTriangle className="w-3.5 h-3.5" />
+                    <span>Aggravating Factors (Harsher Sentence):</span>
+                  </span>
+                  <ul className="space-y-1">
+                    {activeScenario.outcomeFactors.aggravating.map((agg, idx) => (
+                      <li key={idx} className="text-zinc-700 dark:text-zinc-300">
+                        • {agg}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                <div className="p-4 rounded-2xl bg-emerald-500/5 border border-emerald-500/20 space-y-2 text-xs">
+                  <span className="font-bold text-emerald-700 dark:text-emerald-400 flex items-center space-x-1.5">
+                    <Check className="w-3.5 h-3.5" />
+                    <span>Mitigating Factors (Leniency / Relief):</span>
+                  </span>
+                  <ul className="space-y-1">
+                    {activeScenario.outcomeFactors.mitigating.map((mit, idx) => (
+                      <li key={idx} className="text-zinc-700 dark:text-zinc-300">
+                        • {mit}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
               </div>
 
-              <div className="p-4 rounded-2xl bg-emerald-500/5 border border-emerald-500/20 space-y-2 text-xs">
-                <span className="font-bold text-emerald-700 dark:text-emerald-400 flex items-center space-x-1.5">
-                  <Check className="w-3.5 h-3.5" />
-                  <span>Mitigating Factors (Leniency / Relief):</span>
-                </span>
-                <ul className="space-y-1">
-                  {activeScenario.outcomeFactors.mitigating.map((mit, idx) => (
-                    <li key={idx} className="text-zinc-700 dark:text-zinc-300">
-                      • {mit}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </div>
+              {/* Bottom Official Legal Aid Link Banner */}
+              <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs">
+                <div className="space-y-0.5">
+                  <span className="font-bold text-zinc-900 dark:text-white block">
+                    Need official state legal aid assistance for this matter?
+                  </span>
+                  <span className="text-zinc-600 dark:text-zinc-400 text-[11px]">
+                    Eligible citizens can receive free government advocates via the National Legal Aid Services Organization (NLASO).
+                  </span>
+                </div>
 
-            {/* Bottom Official Legal Aid Link Banner */}
-            <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs">
-              <div className="space-y-0.5">
-                <span className="font-bold text-zinc-900 dark:text-white block">
-                  Need official state legal aid assistance for this matter?
-                </span>
-                <span className="text-zinc-600 dark:text-zinc-400 text-[11px]">
-                  Eligible citizens can receive free government advocates via the National Legal Aid Services Organization (NLASO).
-                </span>
+                <div className="flex items-center space-x-2 shrink-0">
+                  <span className="px-3 py-1.5 rounded-xl bg-amber-500 text-zinc-950 font-bold text-xs flex items-center space-x-1">
+                    <PhoneCall className="w-3 h-3" />
+                    <span>Call 16430</span>
+                  </span>
+                </div>
               </div>
-
-              <div className="flex items-center space-x-2 shrink-0">
-                <span className="px-3 py-1.5 rounded-xl bg-amber-500 text-zinc-950 font-bold text-xs flex items-center space-x-1">
-                  <PhoneCall className="w-3 h-3" />
-                  <span>Call 16430</span>
-                </span>
-              </div>
-            </div>
-          </div>
+            </motion.div>
+          </AnimatePresence>
         </div>
       </div>
     </div>

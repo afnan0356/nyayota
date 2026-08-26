@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { motion, AnimatePresence } from 'motion/react';
 import {
   Scale,
   Globe,
@@ -37,6 +38,15 @@ import {
   ROADMAP_DATA,
   LawItem
 } from '@/lib/legal-data';
+import {
+  fadeUpVariants,
+  staggerContainerVariants,
+  staggerItemVariants,
+  tabContentVariants,
+  TRANSITION_NORMAL,
+  TRANSITION_GENTLE,
+  cardHoverProps
+} from '@/lib/motion';
 
 export default function HomePage() {
   const router = useRouter();
@@ -194,27 +204,32 @@ export default function HomePage() {
       {/* SECTION 1 — Hero Area: Institutional Search Gateway                        */}
       {/* ========================================================================= */}
       <section className="relative pt-12 pb-16 md:pt-20 md:pb-24 border-b border-zinc-200 dark:border-zinc-800/80 bg-zinc-50/50 dark:bg-zinc-950">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-7">
+        <motion.div
+          variants={staggerContainerVariants}
+          initial="hidden"
+          animate="visible"
+          className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-7"
+        >
           {/* Institutional Badge */}
-          <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-md bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-700 dark:text-zinc-300 text-xs font-medium">
+          <motion.div variants={staggerItemVariants} className="inline-flex items-center space-x-2 px-3 py-1 rounded-md bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-700 dark:text-zinc-300 text-xs font-medium">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 dark:bg-emerald-400" />
             <span className="font-serif italic">Nyayota Legal Knowledge Repository</span>
             <span className="text-zinc-300 dark:text-zinc-700">•</span>
             <span className="text-zinc-500 font-normal">Open Public Access</span>
-          </div>
+          </motion.div>
 
           {/* Editorial Headline & Mission */}
-          <div className="space-y-3.5 max-w-3xl mx-auto">
+          <motion.div variants={staggerItemVariants} className="space-y-3.5 max-w-3xl mx-auto">
             <h1 className="text-3xl sm:text-5xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100 font-serif leading-[1.18]">
               Search, Learn, and Understand Law
             </h1>
             <p className="text-base sm:text-lg text-zinc-600 dark:text-zinc-400 max-w-2xl mx-auto leading-relaxed">
               Explore official statutory codifications, international treaties, and plain-language judicial guides across jurisdictions.
             </p>
-          </div>
+          </motion.div>
 
           {/* Centralized Search Desk */}
-          <div className="max-w-2xl mx-auto pt-2">
+          <motion.div variants={staggerItemVariants} className="max-w-2xl mx-auto pt-2">
             <div className="bg-white dark:bg-zinc-900 p-2 rounded-xl shadow-sm border border-zinc-300 dark:border-zinc-700/80 transition-all">
               <GlobalSearch isModal={false} />
             </div>
@@ -235,8 +250,8 @@ export default function HomePage() {
                 </Link>
               ))}
             </div>
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
       </section>
 
       {/* ========================================================================= */}
@@ -622,137 +637,160 @@ export default function HomePage() {
           </div>
         </div>
 
-        {/* Tab 1: Featured Laws */}
-        {activeLawTab === 'featured' && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {featuredLaws.map((law) => (
-              <div
-                key={law.id}
-                className="p-6 sm:p-7 rounded-2xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 hover:border-amber-500/40 shadow-sm transition-all flex flex-col justify-between space-y-4"
-              >
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between gap-2">
-                    <span
-                      className={`text-[11px] font-bold px-2.5 py-0.5 rounded-full border ${
-                        law.jurisdiction === 'Bangladesh'
-                          ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20'
-                          : 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20'
-                      }`}
-                    >
-                      {law.jurisdiction}
-                    </span>
-                    <span className="text-xs text-zinc-400 font-medium">
-                      {law.actNumber || `Enacted ${law.enactmentYear}`}
-                    </span>
-                  </div>
+        {/* Tab Content with Smooth Animation */}
+        <AnimatePresence mode="wait">
+          {activeLawTab === 'featured' && (
+            <motion.div
+              key="tab-featured"
+              variants={tabContentVariants}
+              initial="hidden"
+              animate="visible"
+              exit="exit"
+              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+            >
+              {featuredLaws.map((law) => (
+                <div
+                  key={law.id}
+                  className="p-6 sm:p-7 rounded-2xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 hover:border-amber-500/40 shadow-sm transition-all flex flex-col justify-between space-y-4"
+                >
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between gap-2">
+                      <span
+                        className={`text-[11px] font-bold px-2.5 py-0.5 rounded-full border ${
+                          law.jurisdiction === 'Bangladesh'
+                            ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20'
+                            : 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20'
+                        }`}
+                      >
+                        {law.jurisdiction}
+                      </span>
+                      <span className="text-xs text-zinc-400 font-medium">
+                        {law.actNumber || `Enacted ${law.enactmentYear}`}
+                      </span>
+                    </div>
 
-                  <div>
-                    <h3 className="text-lg font-bold text-zinc-900 dark:text-white line-clamp-1">
-                      {law.title}
-                    </h3>
-                    <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">{law.titleBn}</p>
-                  </div>
+                    <div>
+                      <h3 className="text-lg font-bold text-zinc-900 dark:text-white line-clamp-1">
+                        {law.title}
+                      </h3>
+                      <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">{law.titleBn}</p>
+                    </div>
 
-                  <p className="text-xs text-zinc-600 dark:text-zinc-400 line-clamp-3 leading-relaxed">
-                    {law.overview}
-                  </p>
-
-                  <div className="p-3 rounded-xl bg-zinc-50 dark:bg-zinc-950 border border-zinc-100 dark:border-zinc-800/80">
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400 block mb-1">
-                      Plain Language Summary
-                    </span>
-                    <p className="text-zinc-600 dark:text-zinc-300 text-xs line-clamp-2 leading-relaxed">
-                      {law.simpleSummary}
+                    <p className="text-xs text-zinc-600 dark:text-zinc-400 line-clamp-3 leading-relaxed">
+                      {law.overview}
                     </p>
+
+                    <div className="p-3 rounded-xl bg-zinc-50 dark:bg-zinc-950 border border-zinc-100 dark:border-zinc-800/80">
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400 block mb-1">
+                        Plain Language Summary
+                      </span>
+                      <p className="text-zinc-600 dark:text-zinc-300 text-xs line-clamp-2 leading-relaxed">
+                        {law.simpleSummary}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="pt-4 border-t border-zinc-100 dark:border-zinc-800 flex items-center justify-between text-xs">
+                    <span className="text-zinc-500">{law.sections.length} Core Sections</span>
+                    <Link
+                      href={`/law/${law.id}`}
+                      id={`featured-law-read-${law.id}`}
+                      className="font-bold text-amber-600 dark:text-amber-400 hover:underline inline-flex items-center space-x-1"
+                    >
+                      <span>Read Full Statute</span>
+                      <ArrowRight className="w-3.5 h-3.5" />
+                    </Link>
                   </div>
                 </div>
+              ))}
+            </motion.div>
+          )}
 
-                <div className="pt-4 border-t border-zinc-100 dark:border-zinc-800 flex items-center justify-between text-xs">
-                  <span className="text-zinc-500">{law.sections.length} Core Sections</span>
-                  <Link
-                    href={`/law/${law.id}`}
-                    id={`featured-law-read-${law.id}`}
-                    className="font-bold text-amber-600 dark:text-amber-400 hover:underline inline-flex items-center space-x-1"
-                  >
-                    <span>Read Full Statute</span>
-                    <ArrowRight className="w-3.5 h-3.5" />
-                  </Link>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-
-        {/* Tab 2: Recently Updated Laws */}
-        {activeLawTab === 'recently_updated' && (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {recentlyUpdatedLaws.map((law) => (
-              <div
-                key={law.id}
-                className="p-6 rounded-2xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-sm space-y-4"
-              >
-                <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
-                    Amended / Updated {law.updateYear}
-                  </span>
-                  <span className="text-xs text-zinc-400">{law.jurisdiction}</span>
-                </div>
-                <div>
-                  <h3 className="text-base font-bold text-zinc-900 dark:text-white">{law.title}</h3>
-                  <p className="text-xs text-zinc-500 dark:text-zinc-400">{law.titleBn}</p>
-                </div>
-                <div className="p-3 rounded-xl bg-zinc-50 dark:bg-zinc-950 border border-zinc-100 dark:border-zinc-800 text-xs space-y-1">
-                  <span className="font-semibold text-zinc-800 dark:text-zinc-200 block">Amendment Overview:</span>
-                  <p className="text-zinc-600 dark:text-zinc-400 leading-relaxed">{law.updateNote}</p>
-                </div>
-                <div className="pt-2 flex justify-end">
-                  <Link
-                    href={law.url}
-                    className="text-xs font-bold text-amber-600 dark:text-amber-400 hover:underline flex items-center space-x-1"
-                  >
-                    <span>View Amendment History & Full Text</span>
-                    <ArrowRight className="w-3.5 h-3.5" />
-                  </Link>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-
-        {/* Tab 3: Recently Added Laws */}
-        {activeLawTab === 'recently_added' && (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {recentlyAddedLaws.map((law) => (
-              <div
-                key={law.id}
-                className="p-6 rounded-2xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-sm space-y-4 flex flex-col justify-between"
-              >
-                <div className="space-y-2">
+          {/* Tab 2: Recently Updated Laws */}
+          {activeLawTab === 'recently_updated' && (
+            <motion.div
+              key="tab-updated"
+              variants={tabContentVariants}
+              initial="hidden"
+              animate="visible"
+              exit="exit"
+              className="grid grid-cols-1 md:grid-cols-2 gap-6"
+            >
+              {recentlyUpdatedLaws.map((law) => (
+                <div
+                  key={law.id}
+                  className="p-6 rounded-2xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-sm space-y-4"
+                >
                   <div className="flex items-center justify-between">
-                    <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
-                      Recently Indexed
+                    <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
+                      Amended / Updated {law.updateYear}
                     </span>
                     <span className="text-xs text-zinc-400">{law.jurisdiction}</span>
                   </div>
-                  <h3 className="text-base font-bold text-zinc-900 dark:text-white">{law.title}</h3>
-                  <p className="text-xs text-zinc-500 dark:text-zinc-400">{law.titleBn}</p>
-                  <p className="text-xs text-zinc-600 dark:text-zinc-400">
-                    Category: <strong className="text-zinc-800 dark:text-zinc-200">{law.category}</strong>
-                  </p>
+                  <div>
+                    <h3 className="text-base font-bold text-zinc-900 dark:text-white">{law.title}</h3>
+                    <p className="text-xs text-zinc-500 dark:text-zinc-400">{law.titleBn}</p>
+                  </div>
+                  <div className="p-3 rounded-xl bg-zinc-50 dark:bg-zinc-950 border border-zinc-100 dark:border-zinc-800 text-xs space-y-1">
+                    <span className="font-semibold text-zinc-800 dark:text-zinc-200 block">Amendment Overview:</span>
+                    <p className="text-zinc-600 dark:text-zinc-400 leading-relaxed">{law.updateNote}</p>
+                  </div>
+                  <div className="pt-2 flex justify-end">
+                    <Link
+                      href={law.url}
+                      className="text-xs font-bold text-amber-600 dark:text-amber-400 hover:underline flex items-center space-x-1"
+                    >
+                      <span>View Amendment History & Full Text</span>
+                      <ArrowRight className="w-3.5 h-3.5" />
+                    </Link>
+                  </div>
                 </div>
-                <div className="pt-3 border-t border-zinc-100 dark:border-zinc-800 flex justify-end">
-                  <Link
-                    href={law.url}
-                    className="text-xs font-bold text-amber-600 dark:text-amber-400 hover:underline flex items-center space-x-1"
-                  >
-                    <span>Open Statute</span>
-                    <ArrowRight className="w-3.5 h-3.5" />
-                  </Link>
+              ))}
+            </motion.div>
+          )}
+
+          {/* Tab 3: Recently Added Laws */}
+          {activeLawTab === 'recently_added' && (
+            <motion.div
+              key="tab-added"
+              variants={tabContentVariants}
+              initial="hidden"
+              animate="visible"
+              exit="exit"
+              className="grid grid-cols-1 md:grid-cols-2 gap-6"
+            >
+              {recentlyAddedLaws.map((law) => (
+                <div
+                  key={law.id}
+                  className="p-6 rounded-2xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-sm space-y-4 flex flex-col justify-between"
+                >
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                        Recently Indexed
+                      </span>
+                      <span className="text-xs text-zinc-400">{law.jurisdiction}</span>
+                    </div>
+                    <h3 className="text-base font-bold text-zinc-900 dark:text-white">{law.title}</h3>
+                    <p className="text-xs text-zinc-500 dark:text-zinc-400">{law.titleBn}</p>
+                    <p className="text-xs text-zinc-600 dark:text-zinc-400">
+                      Category: <strong className="text-zinc-800 dark:text-zinc-200">{law.category}</strong>
+                    </p>
+                  </div>
+                  <div className="pt-3 border-t border-zinc-100 dark:border-zinc-800 flex justify-end">
+                    <Link
+                      href={law.url}
+                      className="text-xs font-bold text-amber-600 dark:text-amber-400 hover:underline flex items-center space-x-1"
+                    >
+                      <span>Open Statute</span>
+                      <ArrowRight className="w-3.5 h-3.5" />
+                    </Link>
+                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
-        )}
+              ))}
+            </motion.div>
+          )}
+        </AnimatePresence>
       </section>
 
       {/* ========================================================================= */}
@@ -840,37 +878,46 @@ export default function HomePage() {
                   </span>
                 </div>
 
-                <div className="space-y-3">
-                  <div className="p-2.5 rounded-lg bg-zinc-900 border border-zinc-800/80">
-                    <span className="text-[10px] uppercase font-bold text-zinc-500 block">Question</span>
-                    <p className="text-xs font-semibold text-zinc-200 mt-0.5">{selectedAIQuestion.question}</p>
-                    <p className="text-[11px] text-zinc-400">{selectedAIQuestion.questionBn}</p>
-                  </div>
-
-                  <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/20 space-y-2">
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs font-bold text-amber-300">Plain Meaning Breakdown:</span>
-                      <span className="text-[10px] text-zinc-400 font-mono">{selectedAIQuestion.lawRef}</span>
+                <AnimatePresence mode="wait">
+                  <motion.div
+                    key={selectedAIQuestion.id}
+                    variants={tabContentVariants}
+                    initial="hidden"
+                    animate="visible"
+                    exit="exit"
+                    className="space-y-3"
+                  >
+                    <div className="p-2.5 rounded-lg bg-zinc-900 border border-zinc-800/80">
+                      <span className="text-[10px] uppercase font-bold text-zinc-500 block">Question</span>
+                      <p className="text-xs font-semibold text-zinc-200 mt-0.5">{selectedAIQuestion.question}</p>
+                      <p className="text-[11px] text-zinc-400">{selectedAIQuestion.questionBn}</p>
                     </div>
-                    <p className="text-xs text-zinc-300 leading-relaxed">
-                      {selectedAIQuestion.shortAnswer}
-                    </p>
-                  </div>
 
-                  <div className="pt-2 flex items-center justify-between text-[11px] text-zinc-500">
-                    <span className="flex items-center space-x-1">
-                      <AlertCircle className="w-3.5 h-3.5 text-zinc-400" />
-                      <span>Educational research • Not legal representation</span>
-                    </span>
-                    <Link
-                      href={selectedAIQuestion.targetUrl}
-                      className="font-bold text-amber-400 hover:underline flex items-center space-x-1"
-                    >
-                      <span>Explore Reference</span>
-                      <ArrowRight className="w-3 h-3" />
-                    </Link>
-                  </div>
-                </div>
+                    <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/20 space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-bold text-amber-300">Plain Meaning Breakdown:</span>
+                        <span className="text-[10px] text-zinc-400 font-mono">{selectedAIQuestion.lawRef}</span>
+                      </div>
+                      <p className="text-xs text-zinc-300 leading-relaxed">
+                        {selectedAIQuestion.shortAnswer}
+                      </p>
+                    </div>
+
+                    <div className="pt-2 flex items-center justify-between text-[11px] text-zinc-500">
+                      <span className="flex items-center space-x-1">
+                        <AlertCircle className="w-3.5 h-3.5 text-zinc-400" />
+                        <span>Educational research • Not legal representation</span>
+                      </span>
+                      <Link
+                        href={selectedAIQuestion.targetUrl}
+                        className="font-bold text-amber-400 hover:underline flex items-center space-x-1"
+                      >
+                        <span>Explore Reference</span>
+                        <ArrowRight className="w-3 h-3" />
+                      </Link>
+                    </div>
+                  </motion.div>
+                </AnimatePresence>
               </div>
             </div>
           </div>

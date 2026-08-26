@@ -43,7 +43,15 @@ import {
   GitFork,
   Link2,
   Network,
-  Compass
+  Compass,
+  NotebookPen,
+  StickyNote,
+  Trash2,
+  Edit3,
+  Plus,
+  Lock,
+  X,
+  Tag
 } from 'lucide-react';
 import {
   LAWS_DATABASE,
@@ -53,6 +61,8 @@ import {
   GLOSSARY_TERMS,
   GlossaryTerm
 } from '@/lib/legal-data';
+import { motion, AnimatePresence } from 'motion/react';
+import { tabContentVariants, TRANSITION_FAST, TRANSITION_NORMAL } from '@/lib/motion';
 
 interface RelatedProvisionResult {
   section: LawSection;
@@ -195,7 +205,16 @@ function analyzeRelatedSections(
   return scored.slice(0, targetCount);
 }
 import { isLawBookmarked, toggleLocalBookmark } from '@/lib/bookmarks';
-import { addCitationToCollection, isCitationCollected } from '@/lib/research';
+import {
+  ResearchNote,
+  getResearchNotes,
+  saveResearchNote,
+  deleteResearchNote,
+  getNotesForSection,
+  getSectionNotesCountMap,
+  addCitationToCollection,
+  isCitationCollected
+} from '@/lib/research';
 import { SourceVerificationModal } from '@/components/SourceVerificationModal';
 import { CitationModal } from '@/components/CitationModal';
 import { GlossaryModal } from '@/components/GlossaryModal';
@@ -225,6 +244,19 @@ function LawDetailViewer({
   const [addedToResearch, setAddedToResearch] = useState(false);
   const [activeTab, setActiveTab] = useState<'content' | 'timeline' | 'citations' | 'metadata'>('content');
 
+  // Local-storage Research Notes state
+  const [notesVersion, setNotesVersion] = useState(0);
+  const [isAddingSectionNote, setIsAddingSectionNote] = useState(false);
+  const [noteTitleInput, setNoteTitleInput] = useState('');
+  const [noteContentInput, setNoteContentInput] = useState('');
+  const [noteTagsInput, setNoteTagsInput] = useState('Case Prep, Trial Strategy');
+  const [editingNoteId, setEditingNoteId] = useState<string | null>(null);
+  const [copiedNoteId, setCopiedNoteId] = useState<string | null>(null);
+  const [noteSavedFeedback, setNoteSavedFeedback] = useState(false);
+
+  // Reader Mode quick notes state
+  const [readerNoteSectionNumber, setReaderNoteSectionNumber] = useState<string | null>(null);
+
   const handleAddCitationToWorkspace = () => {
     addCitationToCollection({
       lawId: law.id,
@@ -244,16 +276,24 @@ function LawDetailViewer({
   const [citationModalOpen, setCitationModalOpen] = useState(false);
   const [glossaryModalTerm, setGlossaryModalTerm] = useState<GlossaryTerm | null>(null);
 
-  // Sync bookmark state on external events
+  // Sync bookmark and research notes state on external events
   useEffect(() => {
     const handleBookmarkChange = () => {
       setBookmarked(isLawBookmarked(law.id));
     };
+    const handleResearchChange = () => {
+      setNotesVersion((v) => v + 1);
+    };
+
     window.addEventListener('nyayota-bookmarks-updated', handleBookmarkChange);
+    window.addEventListener('nyayota-research-updated', handleResearchChange);
     window.addEventListener('storage', handleBookmarkChange);
+    window.addEventListener('storage', handleResearchChange);
     return () => {
       window.removeEventListener('nyayota-bookmarks-updated', handleBookmarkChange);
+      window.removeEventListener('nyayota-research-updated', handleResearchChange);
       window.removeEventListener('storage', handleBookmarkChange);
+      window.removeEventListener('storage', handleResearchChange);
     };
   }, [law.id]);
 
@@ -319,6 +359,70 @@ function LawDetailViewer({
           l.jurisdiction === law.jurisdiction)
     ).slice(0, 3);
   }, [law]);
+
+  // Section Notes derived data
+  const sectionNotesCountMap = useMemo(() => {
+    if (notesVersion < 0) return {};
+    return getSectionNotesCountMap(law.id);
+  }, [law.id, notesVersion]);
+
+  const activeSectionNotes = useMemo(() => {
+    if (!activeSection || notesVersion < 0) return [];
+    return getNotesForSection(law.id, activeSection.number);
+  }, [law.id, activeSection, notesVersion]);
+
+  const readerSectionNotes = useMemo(() => {
+    if (!readerNoteSectionNumber || notesVersion < 0) return [];
+    return getNotesForSection(law.id, readerNoteSectionNumber);
+  }, [law.id, readerNoteSectionNumber, notesVersion]);
+
+  const handleOpenAddNote = (targetSectionNumber?: string, targetSectionTitle?: string) => {
+    const secNum = targetSectionNumber || activeSection?.number;
+    const secTitle = targetSectionTitle || activeSection?.title;
+    setEditingNoteId(null);
+    setNoteTitleInput(`Study Notes: ${secNum ? `${secNum} - ` : ''}${secTitle || ''}`);
+    setNoteContentInput('');
+    setNoteTagsInput('Statutory Analysis, Case Prep');
+    setIsAddingSectionNote(true);
+  };
+
+  const handleEditNote = (note: ResearchNote) => {
+    setEditingNoteId(note.id);
+    setNoteTitleInput(note.title);
+    setNoteContentInput(note.content);
+    setNoteTagsInput(note.tags?.join(', ') || '');
+    setIsAddingSectionNote(true);
+  };
+
+  const handleSaveSectionNote = (targetSecNum?: string) => {
+    if (!noteContentInput.trim() && !noteTitleInput.trim()) return;
+    const effectiveSecNum = targetSecNum || activeSection?.number;
+    const tags = noteTagsInput
+      .split(',')
+      .map((t) => t.trim())
+      .filter(Boolean);
+
+    saveResearchNote({
+      id: editingNoteId || undefined,
+      title: noteTitleInput.trim() || `Study Notes on ${effectiveSecNum}`,
+      content: noteContentInput.trim(),
+      lawId: law.id,
+      lawTitle: law.title,
+      sectionNumber: effectiveSecNum,
+      tags: tags.length > 0 ? tags : ['Study Note']
+    });
+
+    setIsAddingSectionNote(false);
+    setEditingNoteId(null);
+    setNoteTitleInput('');
+    setNoteContentInput('');
+    setNoteSavedFeedback(true);
+    setTimeout(() => setNoteSavedFeedback(false), 2500);
+  };
+
+  const handleDeleteSectionNote = (id: string) => {
+    deleteResearchNote(id);
+  };
 
   // Status Badge formatting
   const getStatusBadgeStyle = (status: string) => {
@@ -546,13 +650,114 @@ function LawDetailViewer({
                 className="space-y-4 pt-6 border-t border-zinc-100 dark:border-zinc-800/80"
               >
                 <div className="flex items-center justify-between">
-                  <span className="px-3 py-1 rounded-lg bg-amber-500/10 text-amber-700 dark:text-amber-400 font-bold text-xs">
-                    {section.number}
-                  </span>
-                  <span className="text-xs text-zinc-400">
-                    Section {idx + 1} of {law.sections.length}
-                  </span>
+                  <div className="flex items-center space-x-2">
+                    <span className="px-3 py-1 rounded-lg bg-amber-500/10 text-amber-700 dark:text-amber-400 font-bold text-xs">
+                      {section.number}
+                    </span>
+                    {Boolean(sectionNotesCountMap[section.number]) && (
+                      <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/20 text-amber-700 dark:text-amber-300 inline-flex items-center space-x-1">
+                        <NotebookPen className="w-2.5 h-2.5" />
+                        <span>{sectionNotesCountMap[section.number]} Note{sectionNotesCountMap[section.number] > 1 ? 's' : ''}</span>
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex items-center space-x-3">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (readerNoteSectionNumber === section.number) {
+                          setReaderNoteSectionNumber(null);
+                        } else {
+                          setReaderNoteSectionNumber(section.number);
+                          handleOpenAddNote(section.number, section.title);
+                        }
+                      }}
+                      className="text-xs text-amber-600 dark:text-amber-400 font-semibold hover:underline inline-flex items-center space-x-1"
+                    >
+                      <NotebookPen className="w-3.5 h-3.5" />
+                      <span>{sectionNotesCountMap[section.number] > 0 ? `Notes (${sectionNotesCountMap[section.number]})` : '+ Study Note'}</span>
+                    </button>
+                    <span className="text-xs text-zinc-400">
+                      Section {idx + 1} of {law.sections.length}
+                    </span>
+                  </div>
                 </div>
+
+                {/* Inline Reader Study Notes Drawer */}
+                {readerNoteSectionNumber === section.number && (
+                  <div className="p-4 rounded-2xl bg-amber-500/5 dark:bg-zinc-900 border border-amber-500/30 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-bold uppercase tracking-wider text-amber-700 dark:text-amber-400 flex items-center space-x-1.5">
+                        <NotebookPen className="w-3.5 h-3.5" />
+                        <span>Personal Study Notes on {section.number}</span>
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => setReaderNoteSectionNumber(null)}
+                        className="text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
+
+                    {/* Reader Note Form */}
+                    <div className="space-y-2">
+                      <input
+                        type="text"
+                        value={noteTitleInput}
+                        onChange={(e) => setNoteTitleInput(e.target.value)}
+                        placeholder="Note heading..."
+                        className="w-full px-3 py-1.5 rounded-xl bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 text-xs text-zinc-900 dark:text-white"
+                      />
+                      <textarea
+                        value={noteContentInput}
+                        onChange={(e) => setNoteContentInput(e.target.value)}
+                        rows={3}
+                        placeholder="Write study annotation or courtroom pointer..."
+                        className="w-full px-3 py-1.5 rounded-xl bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 text-xs text-zinc-900 dark:text-white resize-y font-mono"
+                      />
+                      <div className="flex items-center justify-between">
+                        <input
+                          type="text"
+                          value={noteTagsInput}
+                          onChange={(e) => setNoteTagsInput(e.target.value)}
+                          placeholder="Tags (e.g. Exam, Precedent)"
+                          className="w-1/2 px-3 py-1 rounded-lg bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 text-[11px] text-zinc-900 dark:text-white"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => handleSaveSectionNote(section.number)}
+                          disabled={!noteContentInput.trim() && !noteTitleInput.trim()}
+                          className="px-3.5 py-1 rounded-xl bg-amber-500 hover:bg-amber-400 disabled:opacity-50 text-zinc-950 font-bold text-xs inline-flex items-center space-x-1"
+                        >
+                          <Check className="w-3.5 h-3.5" />
+                          <span>Save Note</span>
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Existing notes for this section */}
+                    {readerSectionNotes.length > 0 && (
+                      <div className="pt-2 border-t border-zinc-200 dark:border-zinc-800 space-y-2">
+                        {readerSectionNotes.map((note) => (
+                          <div key={note.id} className="p-3 rounded-xl bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 space-y-1 text-xs">
+                            <div className="flex items-center justify-between">
+                              <span className="font-bold text-zinc-900 dark:text-white">{note.title}</span>
+                              <button
+                                type="button"
+                                onClick={() => handleDeleteSectionNote(note.id)}
+                                className="text-zinc-400 hover:text-rose-500"
+                              >
+                                <Trash2 className="w-3 h-3" />
+                              </button>
+                            </div>
+                            <p className="text-zinc-700 dark:text-zinc-300 whitespace-pre-wrap font-sans">{note.content}</p>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
 
                 <h3 className="text-xl font-bold text-zinc-900 dark:text-white">
                   {section.title}
@@ -1108,9 +1313,18 @@ function LawDetailViewer({
           </div>
         </div>
 
-        {/* TAB 1: STATUTORY PROVISIONS / MAIN CONTENT */}
-        {activeTab === 'content' && (
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        {/* TABS CONTAINER WITH ANIMATION */}
+        <AnimatePresence mode="wait">
+          {/* TAB 1: STATUTORY PROVISIONS / MAIN CONTENT */}
+          {activeTab === 'content' && (
+            <motion.div
+              key="tab-content"
+              variants={tabContentVariants}
+              initial="hidden"
+              animate="visible"
+              exit="exit"
+              className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start"
+            >
             {/* Left Sidebar: Section Jump Navigator */}
             <aside className="lg:col-span-4 space-y-4">
               <div className="sticky top-20 p-5 rounded-3xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-sm space-y-4">
@@ -1140,6 +1354,7 @@ function LawDetailViewer({
                 <div className="max-h-[60vh] overflow-y-auto space-y-1.5 pr-1">
                   {filteredSections.map((sec) => {
                     const isSelected = selectedSectionNumber === sec.number;
+                    const noteCount = sectionNotesCountMap[sec.number] || 0;
                     return (
                       <button
                         key={sec.number}
@@ -1153,9 +1368,20 @@ function LawDetailViewer({
                         }`}
                       >
                         <div className="space-y-0.5 truncate">
-                          <span className="text-[10px] font-bold text-amber-600 dark:text-amber-400 block uppercase">
-                            {sec.number}
-                          </span>
+                          <div className="flex items-center space-x-1.5">
+                            <span className="text-[10px] font-bold text-amber-600 dark:text-amber-400 block uppercase">
+                              {sec.number}
+                            </span>
+                            {noteCount > 0 && (
+                              <span
+                                className="px-1.5 py-0.5 rounded-md text-[9px] font-bold bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-500/30 inline-flex items-center space-x-0.5"
+                                title={`${noteCount} private study note(s)`}
+                              >
+                                <NotebookPen className="w-2.5 h-2.5" />
+                                <span>{noteCount}</span>
+                              </span>
+                            )}
+                          </div>
                           <span className="block truncate font-medium">
                             {sec.title}
                           </span>
@@ -1186,12 +1412,18 @@ function LawDetailViewer({
 
             {/* Right Main Content: Active Section Viewer */}
             <main className="lg:col-span-8 space-y-6">
-              {activeSection ? (
-                <div
-                  id="active-section-display-card"
-                  className="p-6 sm:p-8 rounded-3xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-sm space-y-6"
-                >
-                  {/* Section Title Header */}
+              <AnimatePresence mode="wait">
+                {activeSection ? (
+                  <motion.div
+                    key={activeSection.number}
+                    variants={tabContentVariants}
+                    initial="hidden"
+                    animate="visible"
+                    exit="exit"
+                    id="active-section-display-card"
+                    className="p-6 sm:p-8 rounded-3xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-sm space-y-6"
+                  >
+                    {/* Section Title Header */}
                   <div className="flex flex-wrap items-start justify-between gap-3 border-b border-zinc-100 dark:border-zinc-800 pb-4">
                     <div className="space-y-1">
                       <span className="px-3 py-1 rounded-lg bg-amber-500/10 text-amber-700 dark:text-amber-400 font-bold text-xs">
@@ -1208,6 +1440,21 @@ function LawDetailViewer({
                     </div>
 
                     <div className="flex items-center space-x-2">
+                      <button
+                        type="button"
+                        id="add-section-note-btn"
+                        onClick={() => {
+                          handleOpenAddNote();
+                          const el = document.getElementById('section-notes-panel');
+                          if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        }}
+                        className="px-3 py-1.5 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-700 dark:text-amber-300 text-xs font-bold inline-flex items-center space-x-1.5 border border-amber-500/30 transition-colors"
+                        title="Add private research notes to this section"
+                      >
+                        <NotebookPen className="w-3.5 h-3.5" />
+                        <span>Private Notes {activeSectionNotes.length > 0 ? `(${activeSectionNotes.length})` : ''}</span>
+                      </button>
+
                       <Link
                         href={`/ai-assistant?lawId=${law.id}&lawTitle=${encodeURIComponent(law.title)}&section=${encodeURIComponent(activeSection.number)}&query=${encodeURIComponent(`Explain ${activeSection.number} (${activeSection.title}) of ${law.title} with practical examples and judicial interpretations.`)}`}
                         className="px-3 py-1.5 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-700 dark:text-amber-300 text-xs font-bold inline-flex items-center space-x-1.5 border border-amber-500/30 transition-colors"
@@ -1306,6 +1553,269 @@ function LawDetailViewer({
                       </div>
                     </div>
                   )}
+
+                  {/* SECTION RESEARCH NOTES (LOCAL-STORAGE PERSISTENT) */}
+                  <div id="section-notes-panel" className="space-y-4 pt-6 border-t border-zinc-100 dark:border-zinc-800">
+                    <div className="flex flex-wrap items-center justify-between gap-3 bg-zinc-50 dark:bg-zinc-950 p-4 rounded-2xl border border-zinc-200/80 dark:border-zinc-800">
+                      <div className="flex items-center space-x-3">
+                        <div className="p-2.5 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
+                          <NotebookPen className="w-4 h-4" />
+                        </div>
+                        <div>
+                          <h4 className="text-sm font-bold text-zinc-900 dark:text-white flex items-center gap-2">
+                            <span>Private Section Notes</span>
+                            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/25">
+                              {activeSectionNotes.length} {activeSectionNotes.length === 1 ? 'Note' : 'Notes'}
+                            </span>
+                          </h4>
+                          <p className="text-xs text-zinc-500 dark:text-zinc-400 flex items-center gap-1.5 mt-0.5">
+                            <Lock className="w-3 h-3 text-emerald-500" />
+                            <span>Saved directly in your browser&apos;s private offline storage.</span>
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-2">
+                        <button
+                          type="button"
+                          id="btn-toggle-add-section-note"
+                          onClick={() => {
+                            if (isAddingSectionNote) {
+                              setIsAddingSectionNote(false);
+                              setEditingNoteId(null);
+                            } else {
+                              handleOpenAddNote();
+                            }
+                          }}
+                          className="px-3.5 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-zinc-950 font-bold text-xs inline-flex items-center space-x-1.5 shadow-sm transition-all"
+                        >
+                          {isAddingSectionNote ? (
+                            <>
+                              <X className="w-3.5 h-3.5" />
+                              <span>Cancel</span>
+                            </>
+                          ) : (
+                            <>
+                              <Plus className="w-3.5 h-3.5" />
+                              <span>{editingNoteId ? 'Edit Note' : 'Add Note to this Section'}</span>
+                            </>
+                          )}
+                        </button>
+
+                        <Link
+                          href="/research"
+                          className="px-3 py-1.5 rounded-xl bg-zinc-200/80 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 hover:text-zinc-900 dark:hover:text-white text-xs font-semibold inline-flex items-center space-x-1 transition-colors"
+                          title="Open Full Research Workspace"
+                        >
+                          <span>Research Workspace</span>
+                          <ArrowRight className="w-3 h-3" />
+                        </Link>
+                      </div>
+                    </div>
+
+                    {/* Feedback Toast Banner */}
+                    {noteSavedFeedback && (
+                      <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-700 dark:text-emerald-300 text-xs font-medium flex items-center justify-between animate-fadeIn">
+                        <div className="flex items-center space-x-2">
+                          <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+                          <span>Section study note saved to your private local storage.</span>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Note Creation / Editing Form */}
+                    {isAddingSectionNote && (
+                      <div className="p-5 rounded-2xl bg-amber-500/5 dark:bg-zinc-950 border border-amber-500/30 space-y-4">
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs font-bold uppercase tracking-wider text-amber-700 dark:text-amber-400">
+                            {editingNoteId ? 'Edit Section Note' : `New Study Note for ${activeSection.number}`}
+                          </span>
+                          <span className="text-[10px] text-zinc-400 font-mono">
+                            Ref: {activeSection.title}
+                          </span>
+                        </div>
+
+                        <div className="space-y-3">
+                          <div>
+                            <label className="block text-[11px] font-bold uppercase tracking-wider text-zinc-500 mb-1">
+                              Note Heading
+                            </label>
+                            <input
+                              type="text"
+                              id="section-note-title-input"
+                              value={noteTitleInput}
+                              onChange={(e) => setNoteTitleInput(e.target.value)}
+                              placeholder="e.g. Mens Rea requirements, defense cross-examination points, trial brief notes..."
+                              className="w-full px-3.5 py-2 rounded-xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-xs text-zinc-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-500 font-semibold"
+                            />
+                          </div>
+
+                          <div>
+                            <label className="block text-[11px] font-bold uppercase tracking-wider text-zinc-500 mb-1">
+                              Study Notes & Annotations (Markdown / Text)
+                            </label>
+                            <textarea
+                              id="section-note-content-input"
+                              value={noteContentInput}
+                              onChange={(e) => setNoteContentInput(e.target.value)}
+                              rows={5}
+                              placeholder="Write down personalized study notes, legal theories, judicial interpretations, precedents, exam pointers, or practical compliance tips..."
+                              className="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-xs text-zinc-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-500 leading-relaxed resize-y font-mono"
+                            />
+                          </div>
+
+                          <div>
+                            <label className="block text-[11px] font-bold uppercase tracking-wider text-zinc-500 mb-1">
+                              Tags (comma separated)
+                            </label>
+                            <input
+                              type="text"
+                              id="section-note-tags-input"
+                              value={noteTagsInput}
+                              onChange={(e) => setNoteTagsInput(e.target.value)}
+                              placeholder="e.g. Criminal Trial, Exam Prep, Defense Theory, Precedent"
+                              className="w-full px-3.5 py-2 rounded-xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-xs text-zinc-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-500"
+                            />
+
+                            {/* Quick Tag Suggestion Chips */}
+                            <div className="flex flex-wrap gap-1.5 pt-2">
+                              {['Exam Prep', 'Case Brief', 'Trial Strategy', 'Statutory Ambiguity', 'Supreme Court Precedent', 'Defense Argument'].map((tag) => (
+                                <button
+                                  key={tag}
+                                  type="button"
+                                  onClick={() => {
+                                    const currentTags = noteTagsInput.split(',').map((t) => t.trim()).filter(Boolean);
+                                    if (!currentTags.includes(tag)) {
+                                      setNoteTagsInput(currentTags.length > 0 ? `${noteTagsInput}, ${tag}` : tag);
+                                    }
+                                  }}
+                                  className="px-2 py-0.5 rounded-md text-[10px] font-medium bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 hover:text-amber-600 dark:hover:text-amber-400 hover:bg-amber-500/10 transition-colors"
+                                >
+                                  + {tag}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center justify-end space-x-2 pt-2 border-t border-zinc-200/80 dark:border-zinc-800">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setIsAddingSectionNote(false);
+                              setEditingNoteId(null);
+                            }}
+                            className="px-4 py-2 rounded-xl bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 text-zinc-700 dark:text-zinc-300 font-semibold text-xs transition-colors"
+                          >
+                            Cancel
+                          </button>
+                          <button
+                            type="button"
+                            id="btn-save-section-note"
+                            onClick={() => handleSaveSectionNote()}
+                            disabled={!noteContentInput.trim() && !noteTitleInput.trim()}
+                            className="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 disabled:opacity-50 text-zinc-950 font-bold text-xs inline-flex items-center space-x-1.5 shadow-sm transition-all"
+                          >
+                            <Check className="w-3.5 h-3.5" />
+                            <span>{editingNoteId ? 'Update Note' : 'Save Section Note'}</span>
+                          </button>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Existing Notes for Active Section */}
+                    {activeSectionNotes.length > 0 ? (
+                      <div className="space-y-3">
+                        {activeSectionNotes.map((note) => (
+                          <div
+                            key={note.id}
+                            id={`section-note-item-${note.id}`}
+                            className="p-4 rounded-2xl bg-white dark:bg-zinc-900 border border-zinc-200/80 dark:border-zinc-800 hover:border-amber-500/30 transition-all space-y-3 shadow-xs"
+                          >
+                            <div className="flex items-start justify-between gap-3">
+                              <div className="space-y-1">
+                                <h5 className="text-sm font-bold text-zinc-900 dark:text-white">
+                                  {note.title}
+                                </h5>
+                                <div className="flex flex-wrap items-center gap-2 text-[11px] text-zinc-400">
+                                  <span>Updated: {new Date(note.updatedAt).toLocaleDateString()}</span>
+                                  {note.tags && note.tags.length > 0 && (
+                                    <div className="flex flex-wrap gap-1">
+                                      {note.tags.map((t, i) => (
+                                        <span
+                                          key={i}
+                                          className="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-amber-500/10 text-amber-700 dark:text-amber-400"
+                                        >
+                                          {t}
+                                        </span>
+                                      ))}
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+
+                              <div className="flex items-center space-x-1">
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    navigator.clipboard.writeText(`${note.title}\n\n${note.content}`);
+                                    setCopiedNoteId(note.id);
+                                    setTimeout(() => setCopiedNoteId(null), 2000);
+                                  }}
+                                  className="p-1.5 rounded-lg text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+                                  title="Copy Note Text"
+                                >
+                                  {copiedNoteId === note.id ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5" />}
+                                </button>
+
+                                <button
+                                  type="button"
+                                  onClick={() => handleEditNote(note)}
+                                  className="p-1.5 rounded-lg text-zinc-400 hover:text-amber-600 dark:hover:text-amber-400 hover:bg-amber-500/10 transition-colors"
+                                  title="Edit Note"
+                                >
+                                  <Edit3 className="w-3.5 h-3.5" />
+                                </button>
+
+                                <button
+                                  type="button"
+                                  onClick={() => handleDeleteSectionNote(note.id)}
+                                  className="p-1.5 rounded-lg text-zinc-400 hover:text-rose-500 hover:bg-rose-500/10 transition-colors"
+                                  title="Delete Note"
+                                >
+                                  <Trash2 className="w-3.5 h-3.5" />
+                                </button>
+                              </div>
+                            </div>
+
+                            <div className="p-3.5 rounded-xl bg-zinc-50 dark:bg-zinc-950 border border-zinc-100 dark:border-zinc-800/80 text-xs text-zinc-800 dark:text-zinc-200 whitespace-pre-wrap leading-relaxed font-sans">
+                              {note.content}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      !isAddingSectionNote && (
+                        <div className="p-5 rounded-2xl bg-zinc-50 dark:bg-zinc-950 border border-dashed border-zinc-200 dark:border-zinc-800 text-center space-y-2">
+                          <StickyNote className="w-6 h-6 text-zinc-400 mx-auto" />
+                          <div className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
+                            No private notes saved for {activeSection.number} yet.
+                          </div>
+                          <p className="text-[11px] text-zinc-500 max-w-sm mx-auto">
+                            Add your legal thoughts, exam preparation tips, case citations, or courtroom notes directly to this statutory provision.
+                          </p>
+                          <button
+                            type="button"
+                            onClick={() => handleOpenAddNote()}
+                            className="mt-1 px-3 py-1.5 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-700 dark:text-amber-300 text-xs font-bold inline-flex items-center space-x-1.5 border border-amber-500/30 transition-colors"
+                          >
+                            <Plus className="w-3.5 h-3.5" />
+                            <span>Create First Note on {activeSection.number}</span>
+                          </button>
+                        </div>
+                      )
+                    )}
+                  </div>
 
                   {/* Related Provisions in Same Statute */}
                   <div id="related-provisions-panel" className="space-y-4 pt-6 border-t border-zinc-100 dark:border-zinc-800">
@@ -1406,119 +1916,142 @@ function LawDetailViewer({
                       </div>
                     )}
                   </div>
-                </div>
+                </motion.div>
               ) : (
-                <div className="p-12 text-center text-zinc-500 rounded-3xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800">
+                <motion.div
+                  key="no-section-found"
+                  variants={tabContentVariants}
+                  initial="hidden"
+                  animate="visible"
+                  exit="exit"
+                  className="p-12 text-center text-zinc-500 rounded-3xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800"
+                >
                   No section found matching your search. Try adjusting the filter.
-                </div>
+                </motion.div>
               )}
-            </main>
-          </div>
-        )}
+            </AnimatePresence>
+          </main>
+        </motion.div>
+      )}
 
-        {/* TAB 2: VERSION HISTORY & TIMELINE */}
-        {activeTab === 'timeline' && (
-          <div className="p-6 sm:p-8 rounded-3xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-sm space-y-6">
-            <div>
-              <h3 className="text-lg font-bold text-zinc-900 dark:text-white">
-                Legislative Timeline & Amendment History
-              </h3>
-              <p className="text-xs text-zinc-500 dark:text-zinc-400">
-                Track how this legislation evolved from original enactment through parliamentary amendments.
-              </p>
-            </div>
-
-            <div className="relative pl-6 space-y-8 before:absolute before:left-2 before:top-2 before:bottom-2 before:w-0.5 before:bg-amber-500/30">
-              {(law.timeline || []).map((event, idx) => (
-                <div key={idx} className="relative group">
-                  {/* Timeline Node */}
-                  <div className="absolute -left-[27px] top-1.5 w-3.5 h-3.5 rounded-full bg-amber-500 ring-4 ring-white dark:ring-zinc-900" />
-
-                  <div className="p-5 rounded-2xl bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 space-y-2 hover:border-amber-500/40 transition-colors">
-                    <div className="flex flex-wrap items-center justify-between gap-2">
-                      <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-500/20">
-                        {event.year}
-                      </span>
-                      <span className="text-[11px] font-bold uppercase tracking-wider text-zinc-400">
-                        Status: {event.status}
-                      </span>
-                    </div>
-
-                    <h4 className="text-sm font-bold text-zinc-900 dark:text-white">
-                      {event.title}
-                    </h4>
-
-                    <p className="text-xs text-zinc-600 dark:text-zinc-300 leading-relaxed">
-                      {event.description}
-                    </p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* TAB 3: CITATIONS */}
-        {activeTab === 'citations' && (
-          <div className="p-6 sm:p-8 rounded-3xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-sm space-y-6">
-            <div className="flex items-center justify-between">
+          {/* TAB 2: VERSION HISTORY & TIMELINE */}
+          {activeTab === 'timeline' && (
+            <motion.div
+              key="tab-timeline"
+              variants={tabContentVariants}
+              initial="hidden"
+              animate="visible"
+              exit="exit"
+              className="p-6 sm:p-8 rounded-3xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-sm space-y-6"
+            >
               <div>
                 <h3 className="text-lg font-bold text-zinc-900 dark:text-white">
-                  Academic & Legal Citations
+                  Legislative Timeline & Amendment History
                 </h3>
                 <p className="text-xs text-zinc-500 dark:text-zinc-400">
-                  Ready-to-use citations formatted for academic papers, legal journals, and court filings.
+                  Track how this legislation evolved from original enactment through parliamentary amendments.
                 </p>
               </div>
 
-              <button
-                type="button"
-                onClick={() => setCitationModalOpen(true)}
-                className="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-zinc-950 font-bold text-xs shadow-md shadow-amber-500/20 transition-all"
-              >
-                Open Citation Generator
-              </button>
-            </div>
+              <div className="relative pl-6 space-y-8 before:absolute before:left-2 before:top-2 before:bottom-2 before:w-0.5 before:bg-amber-500/30">
+                {(law.timeline || []).map((event, idx) => (
+                  <div key={idx} className="relative group">
+                    {/* Timeline Node */}
+                    <div className="absolute -left-[27px] top-1.5 w-3.5 h-3.5 rounded-full bg-amber-500 ring-4 ring-white dark:ring-zinc-900" />
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="p-5 rounded-2xl bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 space-y-2">
-                <span className="text-xs font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400">
-                  Standard Public Citation
-                </span>
-                <p className="font-serif text-sm text-zinc-800 dark:text-zinc-200">
-                  {law.citations?.standard}
-                </p>
+                    <div className="p-5 rounded-2xl bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 space-y-2 hover:border-amber-500/40 transition-colors">
+                      <div className="flex flex-wrap items-center justify-between gap-2">
+                        <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-500/20">
+                          {event.year}
+                        </span>
+                        <span className="text-[11px] font-bold uppercase tracking-wider text-zinc-400">
+                          Status: {event.status}
+                        </span>
+                      </div>
+
+                      <h4 className="text-sm font-bold text-zinc-900 dark:text-white">
+                        {event.title}
+                      </h4>
+
+                      <p className="text-xs text-zinc-600 dark:text-zinc-300 leading-relaxed">
+                        {event.description}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </motion.div>
+          )}
+
+          {/* TAB 3: CITATIONS */}
+          {activeTab === 'citations' && (
+            <motion.div
+              key="tab-citations"
+              variants={tabContentVariants}
+              initial="hidden"
+              animate="visible"
+              exit="exit"
+              className="p-6 sm:p-8 rounded-3xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-sm space-y-6"
+            >
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-lg font-bold text-zinc-900 dark:text-white">
+                    Academic & Legal Citations
+                  </h3>
+                  <p className="text-xs text-zinc-500 dark:text-zinc-400">
+                    Ready-to-use citations formatted for academic papers, legal journals, and court filings.
+                  </p>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => setCitationModalOpen(true)}
+                  className="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-zinc-950 font-bold text-xs shadow-md shadow-amber-500/20 transition-all"
+                >
+                  Open Citation Generator
+                </button>
               </div>
 
-              <div className="p-5 rounded-2xl bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 space-y-2">
-                <span className="text-xs font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400">
-                  Bluebook (21st Edition)
-                </span>
-                <p className="font-serif text-sm text-zinc-800 dark:text-zinc-200">
-                  {law.citations?.bluebook}
-                </p>
-              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="p-5 rounded-2xl bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 space-y-2">
+                  <span className="text-xs font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400">
+                    Standard Public Citation
+                  </span>
+                  <p className="font-serif text-sm text-zinc-800 dark:text-zinc-200">
+                    {law.citations?.standard}
+                  </p>
+                </div>
 
-              <div className="p-5 rounded-2xl bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 space-y-2">
-                <span className="text-xs font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400">
-                  APA (7th Edition)
-                </span>
-                <p className="font-serif text-sm text-zinc-800 dark:text-zinc-200">
-                  {law.citations?.apa}
-                </p>
-              </div>
+                <div className="p-5 rounded-2xl bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 space-y-2">
+                  <span className="text-xs font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400">
+                    Bluebook (21st Edition)
+                  </span>
+                  <p className="font-serif text-sm text-zinc-800 dark:text-zinc-200">
+                    {law.citations?.bluebook}
+                  </p>
+                </div>
 
-              <div className="p-5 rounded-2xl bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 space-y-2">
-                <span className="text-xs font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400">
-                  MLA (9th Edition)
-                </span>
-                <p className="font-serif text-sm text-zinc-800 dark:text-zinc-200">
-                  {law.citations?.mla}
-                </p>
+                <div className="p-5 rounded-2xl bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 space-y-2">
+                  <span className="text-xs font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400">
+                    APA (7th Edition)
+                  </span>
+                  <p className="font-serif text-sm text-zinc-800 dark:text-zinc-200">
+                    {law.citations?.apa}
+                  </p>
+                </div>
+
+                <div className="p-5 rounded-2xl bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 space-y-2">
+                  <span className="text-xs font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400">
+                    MLA (9th Edition)
+                  </span>
+                  <p className="font-serif text-sm text-zinc-800 dark:text-zinc-200">
+                    {law.citations?.mla}
+                  </p>
+                </div>
               </div>
-            </div>
-          </div>
-        )}
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
 
       {/* SECTION 5: RELATED LAWS DISCOVERY */}

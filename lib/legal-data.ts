@@ -3156,4 +3156,151 @@ export const LEGAL_OUTCOME_SCENARIOS_DATA: LegalOutcomeScenario[] = [
   }
 ];
 
+// ============================================================================
+// ARCHITECTURE RE-EXPORTS & SCALABLE REPOSITORY ENGINE
+// ============================================================================
+
+export * from './architecture';
+import {
+  LegalQueryOptions,
+  ScalableQueryResult,
+  STATUTORY_AMENDMENT_RECORDS,
+  StatutoryAmendmentRecord,
+  CONCEPT_RELATIONAL_GRAPH,
+  ConceptRelationalNode,
+} from './architecture';
+
+/**
+ * Scalable multi-field weighted search and faceted filter engine
+ */
+export function queryLawsScalable(options: LegalQueryOptions = {}): ScalableQueryResult<LawItem> {
+  const {
+    query = '',
+    jurisdictionCode = 'All',
+    categorySlug = 'All',
+    status = 'All',
+    sortBy = 'relevance',
+    limit = 50,
+    offset = 0,
+  } = options;
+
+  const normalizedQuery = query.trim().toLowerCase();
+  const tokens = normalizedQuery.split(/\s+/).filter(Boolean);
+
+  // 1. Facet trackers
+  const byJurisdiction: Record<string, number> = {};
+  const byCategory: Record<string, number> = {};
+  const byStatus: Record<string, number> = {};
+
+  // 2. Filter & Score
+  const scoredItems: { item: LawItem; score: number }[] = [];
+
+  for (const law of LAWS_DATABASE) {
+    // Tally facets across whole collection
+    byJurisdiction[law.jurisdictionCode] = (byJurisdiction[law.jurisdictionCode] || 0) + 1;
+    byCategory[law.category] = (byCategory[law.category] || 0) + 1;
+    byStatus[law.status] = (byStatus[law.status] || 0) + 1;
+
+    // Apply Jurisdiction filter
+    if (jurisdictionCode !== 'All' && law.jurisdictionCode !== jurisdictionCode) {
+      continue;
+    }
+
+    // Apply Category filter
+    if (categorySlug !== 'All') {
+      const matchCat = law.category.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+      const targetCat = categorySlug.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+      if (!matchCat.includes(targetCat) && !targetCat.includes(matchCat)) {
+        continue;
+      }
+    }
+
+    // Apply Status filter
+    if (status !== 'All' && law.status.toLowerCase() !== status.toLowerCase()) {
+      continue;
+    }
+
+    // Compute Relevance Score
+    let score = 0;
+    if (tokens.length === 0) {
+      score = 1;
+    } else {
+      const titleLower = (law.title + ' ' + law.shortTitle + ' ' + (law.titleBn || '')).toLowerCase();
+      const overviewLower = (law.overview + ' ' + (law.overviewBn || '')).toLowerCase();
+      const keywordsLower = (law.keywords || []).join(' ').toLowerCase();
+
+      // Title exact or token match
+      if (titleLower.includes(normalizedQuery)) score += 50;
+      for (const token of tokens) {
+        if (titleLower.includes(token)) score += 15;
+        if (keywordsLower.includes(token)) score += 10;
+        if (overviewLower.includes(token)) score += 5;
+      }
+
+      // Check sections
+      for (const sec of law.sections) {
+        const secHeader = (sec.number + ' ' + sec.title + ' ' + (sec.titleBn || '')).toLowerCase();
+        const secBody = (sec.content + ' ' + sec.simpleExplanation).toLowerCase();
+        if (secHeader.includes(normalizedQuery)) score += 30;
+        for (const token of tokens) {
+          if (secHeader.includes(token)) score += 8;
+          if (secBody.includes(token)) score += 3;
+        }
+      }
+    }
+
+    if (score > 0 || tokens.length === 0) {
+      scoredItems.push({ item: law, score });
+    }
+  }
+
+  // 3. Sort Results
+  if (sortBy === 'relevance' && tokens.length > 0) {
+    scoredItems.sort((a, b) => b.score - a.score);
+  } else if (sortBy === 'year-desc') {
+    scoredItems.sort((a, b) => b.item.enactmentYear - a.item.enactmentYear);
+  } else if (sortBy === 'year-asc') {
+    scoredItems.sort((a, b) => a.item.enactmentYear - b.item.enactmentYear);
+  } else if (sortBy === 'title-asc') {
+    scoredItems.sort((a, b) => a.item.title.localeCompare(b.item.title));
+  }
+
+  // 4. Paginate
+  const total = scoredItems.length;
+  const paginated = scoredItems.slice(offset, offset + limit).map((s) => s.item);
+
+  return {
+    items: paginated,
+    total,
+    limit,
+    offset,
+    hasMore: offset + limit < total,
+    facets: {
+      byJurisdiction,
+      byCategory,
+      byStatus,
+    },
+  };
+}
+
+/**
+ * Retrieve statutory amendments for a law ID
+ */
+export function getLawAmendments(lawId: string): StatutoryAmendmentRecord[] {
+  return STATUTORY_AMENDMENT_RECORDS.filter((rec) => rec.lawId === lawId);
+}
+
+/**
+ * Retrieve relational legal concept nodes
+ */
+export function getAllConceptRelationalNodes(): ConceptRelationalNode[] {
+  return CONCEPT_RELATIONAL_GRAPH;
+}
+
+export function getConceptRelationalNode(slugOrId: string): ConceptRelationalNode | undefined {
+  return CONCEPT_RELATIONAL_GRAPH.find(
+    (c) => c.id === slugOrId || c.slug === slugOrId
+  );
+}
+
 
