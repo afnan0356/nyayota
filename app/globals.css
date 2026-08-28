@@ -86,13 +86,102 @@
   background: rgba(150, 150, 150, 0.42);
 }
 
+/* ========================================================================= */
+/* DEDICATED PRINT & PDF DOCUMENT FORMATTING STYLESHEET                     */
+/* ========================================================================= */
 @media print {
-  header, footer, nav, button, #mobile-search-toggle-btn {
+  /* Hide all interactive, navigational, floating, and screen-only elements */
+  header,
+  footer,
+  nav,
+  button,
+  input,
+  textarea,
+  select,
+  aside,
+  [role="dialog"],
+  [role="alertdialog"],
+  .screen-only,
+  .screen-view,
+  #mobile-search-toggle-btn,
+  #section-notes-panel,
+  #statute-section-search-input,
+  #explain-like-15-panel,
+  .reading-progress-bar,
+  .fixed,
+  .sticky,
+  .toast-notification,
+  .cursor-help {
     display: none !important;
   }
+
+  /* Page Setup & Margin Configuration */
+  @page {
+    size: A4 portrait;
+    margin: 16mm 14mm 18mm 14mm;
+  }
+
+  /* Global Document Reset for Crisp Print Typography */
+  html,
   body {
-    background: white !important;
-    color: black !important;
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+    color: #09090b !important;
+    font-size: 10pt !important;
+    line-height: 1.55 !important;
+    font-family: var(--font-sans), "Times New Roman", Times, Georgia, serif !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100% !important;
+    min-height: auto !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* Unhide Dedicated Print Document Container */
+  .statutory-print-document {
+    display: block !important;
+    width: 100% !important;
+    background: #ffffff !important;
+    color: #09090b !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  /* Page Break Controls */
+  .print-page-break-inside-avoid {
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+  }
+
+  .print-page-break-before {
+    break-before: page !important;
+    page-break-before: always !important;
+  }
+
+  .print-page-break-after {
+    break-after: page !important;
+    page-break-after: always !important;
+  }
+
+  /* Remove all browser hyperlinks URL expansion */
+  a[href]:after {
+    content: none !important;
+  }
+
+  /* Clean up borders and backgrounds in print document */
+  .statutory-print-document * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* High legibility typography for statutory clauses */
+  .statutory-print-document article {
+    margin-bottom: 1.25rem !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
   }
 }
 

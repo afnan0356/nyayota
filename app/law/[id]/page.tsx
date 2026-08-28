@@ -218,6 +218,11 @@ import {
 import { SourceVerificationModal } from '@/components/SourceVerificationModal';
 import { CitationModal } from '@/components/CitationModal';
 import { GlossaryModal } from '@/components/GlossaryModal';
+import { SourceTransparencyPanel } from '@/components/SourceTransparencyPanel';
+import { StatutoryHierarchyNav } from '@/components/StatutoryHierarchyNav';
+import { LegalDefinitionPopover } from '@/components/LegalDefinitionPopover';
+import { StatutoryPrintDocument, PrintOptions } from '@/components/StatutoryPrintDocument';
+import { PrintExportModal } from '@/components/PrintExportModal';
 
 function LawDetailViewer({
   law,
@@ -235,6 +240,7 @@ function LawDetailViewer({
     initialSectionParam || law.sections[0]?.number || ''
   );
   const [searchSectionQuery, setSearchSectionQuery] = useState('');
+  const [sidebarNavMode, setSidebarNavMode] = useState<'hierarchy' | 'flat'>('hierarchy');
   const [explainLike15Open, setExplainLike15Open] = useState(false);
   const [bookmarked, setBookmarked] = useState<boolean>(() => {
     if (typeof window === 'undefined') return false;
@@ -243,6 +249,17 @@ function LawDetailViewer({
   const [copiedLink, setCopiedLink] = useState(false);
   const [addedToResearch, setAddedToResearch] = useState(false);
   const [activeTab, setActiveTab] = useState<'content' | 'timeline' | 'citations' | 'metadata'>('content');
+
+  // Print & PDF Export State
+  const [printExportModalOpen, setPrintExportModalOpen] = useState(false);
+  const [printOptions, setPrintOptions] = useState<PrintOptions>({
+    scope: 'all',
+    includeBangla: true,
+    includeExplanation: true,
+    includeCrossReferences: true,
+    includeNotes: true,
+    includeMetadata: true
+  });
 
   // Local-storage Research Notes state
   const [notesVersion, setNotesVersion] = useState(0);
@@ -316,16 +333,23 @@ function LawDetailViewer({
     }
   };
 
-  const handlePrint = () => {
+  const executePrint = () => {
     if (typeof window !== 'undefined') {
+      const originalTitle = document.title;
+      document.title = `${law.title} - Official Statutory Text (Nyayota Legal Archive)`;
       window.print();
+      setTimeout(() => {
+        document.title = originalTitle;
+      }, 1000);
     }
   };
 
+  const handlePrint = () => {
+    executePrint();
+  };
+
   const handleExportPDF = () => {
-    if (typeof window !== 'undefined') {
-      window.print();
-    }
+    setPrintExportModalOpen(true);
   };
 
   // Filter sections
@@ -487,15 +511,15 @@ function LawDetailViewer({
       const match = keyTerms.find((k) => k.toLowerCase() === part.toLowerCase());
       if (match) {
         return (
-          <button
+          <LegalDefinitionPopover
             key={idx}
-            type="button"
-            onClick={() => openGlossaryByName(match)}
-            className="underline decoration-amber-500/60 decoration-2 underline-offset-2 font-semibold text-amber-700 dark:text-amber-400 hover:bg-amber-500/15 rounded px-0.5 transition-colors cursor-help inline-block"
-            title={`Click to view definition for ${match}`}
+            termName={match}
+            onOpenFullGlossary={(t) => {
+              setGlossaryModalTerm(t);
+            }}
           >
             {part}
-          </button>
+          </LegalDefinitionPopover>
         );
       }
       return <span key={idx}>{part}</span>;
@@ -597,6 +621,17 @@ function LawDetailViewer({
                 Dual
               </button>
             </div>
+
+            {/* Print / PDF in Reader Mode */}
+            <button
+              type="button"
+              id="reader-download-pdf-btn"
+              onClick={handleExportPDF}
+              className="p-2 rounded-xl bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-xs font-bold text-zinc-700 dark:text-zinc-300 hover:text-amber-500"
+              title="Download as PDF / Print Document"
+            >
+              <Download className="w-4 h-4" />
+            </button>
 
             {/* Exit Reading Mode */}
             <button
@@ -882,18 +917,11 @@ function LawDetailViewer({
         </div>
       </nav>
 
-      {/* Transparency / Curated Subset Notice */}
-      <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/25 flex items-start space-x-3 text-xs">
-        <Info className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
-        <div className="space-y-0.5">
-          <p className="font-semibold text-zinc-900 dark:text-white">
-            Curated Statutory View & Key Provisions Notice
-          </p>
-          <p className="text-zinc-600 dark:text-zinc-400 leading-relaxed">
-            This page currently displays selected key provisions ({law.sections.length} core sections of {law.totalStatutorySectionsCount} total statutory provisions). Never imply the displayed content is the full unabridged statute. For complete certified texts and historical amendment gazettes, consult the official legislative publication.
-          </p>
-        </div>
-      </div>
+      {/* STATUTORY SOURCE & REPOSITORY TRANSPARENCY PANEL */}
+      <SourceTransparencyPanel
+        law={law}
+        onOpenFullAuditModal={() => setSourceVerifyModalOpen(true)}
+      />
 
       {/* SECTION 1: TOP INFORMATION AREA */}
       <section
@@ -938,28 +966,61 @@ function LawDetailViewer({
           {/* Dates & Governance Grid */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-4 border-t border-zinc-800/80 text-xs">
             <div>
-              <span className="text-zinc-400 block">Enactment Year</span>
-              <span className="font-bold text-white text-sm">{law.enactmentYear}</span>
+              <span className="text-zinc-400 block">{law.jurisdiction === 'International' ? 'Adoption / Enactment' : 'Enactment Year'}</span>
+              <span className="font-bold text-white text-sm">{law.adoptionDate || law.enactmentYear}</span>
             </div>
             <div>
-              <span className="text-zinc-400 block">Effective Date</span>
+              <span className="text-zinc-400 block">Entry into Force / Effective</span>
               <span className="font-bold text-white text-sm">
-                {law.effectiveDate || `${law.enactmentYear}`}
+                {law.entryIntoForceDate || law.effectiveDate || `${law.enactmentYear}`}
               </span>
             </div>
             <div>
-              <span className="text-zinc-400 block">Last Updated / Amended</span>
-              <span className="font-bold text-white text-sm">
-                {law.lastUpdatedDate || (law.lastAmendedYear ? `${law.lastAmendedYear}` : `${law.enactmentYear}`)}
+              <span className="text-zinc-400 block">{law.jurisdiction === 'International' ? 'Depositary / Authority' : 'Last Updated / Amended'}</span>
+              <span className="font-bold text-white text-sm truncate block" title={law.depositary || law.publishingAuthority || ''}>
+                {law.depositary || law.publishingAuthority || law.lastUpdatedDate || (law.lastAmendedYear ? `${law.lastAmendedYear}` : `${law.enactmentYear}`)}
               </span>
             </div>
             <div>
-              <span className="text-zinc-400 block">Provisions Count</span>
+              <span className="text-zinc-400 block">{law.jurisdiction === 'International' ? 'State Parties / Ratifications' : 'Provisions Count'}</span>
               <span className="font-bold text-white text-sm">
-                {law.sections.length} Core Sections
+                {law.ratificationsCount || law.signatoriesCount
+                  ? `${law.ratificationsCount || law.signatoriesCount} State Parties`
+                  : `${law.sections.length} Core Sections`}
               </span>
             </div>
           </div>
+
+          {/* Extended International Metadata Strip */}
+          {law.jurisdiction === 'International' && (
+            <div className="p-3.5 rounded-2xl bg-blue-950/40 border border-blue-500/20 text-xs space-y-2 text-blue-200">
+              <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
+                {law.unCitationRef && (
+                  <div>
+                    <span className="text-zinc-400">UN / Citation: </span>
+                    <span className="font-mono font-bold text-blue-300">{law.unCitationRef}</span>
+                  </div>
+                )}
+                {law.officialLanguages && law.officialLanguages.length > 0 && (
+                  <div>
+                    <span className="text-zinc-400">Official Languages: </span>
+                    <span className="font-medium text-white">{law.officialLanguages.join(', ')}</span>
+                  </div>
+                )}
+                {law.verificationStatus && (
+                  <div className="inline-flex items-center space-x-1 text-emerald-400">
+                    <ShieldCheck className="w-3.5 h-3.5" />
+                    <span>{law.verificationStatus}</span>
+                  </div>
+                )}
+              </div>
+              {law.sourceReproductionNotice && (
+                <p className="text-[11px] text-zinc-400 italic">
+                  {law.sourceReproductionNotice}
+                </p>
+              )}
+            </div>
+          )}
 
           {/* Action Toolbar */}
           <div className="flex flex-wrap items-center gap-2.5 pt-2">
@@ -1035,15 +1096,15 @@ function LawDetailViewer({
               <span>Source Verification</span>
             </button>
 
-            {/* Download PDF / Print Version */}
+            {/* Download as PDF / Print Version */}
             <button
               type="button"
               id="download-pdf-btn"
               onClick={handleExportPDF}
               className="px-4 py-2.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-white border border-zinc-700 text-xs font-semibold inline-flex items-center space-x-2 transition-colors"
             >
-              <Download className="w-4 h-4 text-zinc-300" />
-              <span>Download PDF</span>
+              <Download className="w-4 h-4 text-amber-400" />
+              <span>Download as PDF</span>
             </button>
 
             <button
@@ -1110,60 +1171,18 @@ function LawDetailViewer({
         </section>
       )}
 
-      {/* SECTION 2: SOURCE VERIFICATION BAR */}
+      {/* SECTION 2: STATUTORY SYNTHESIS & KEY PRINCIPLES */}
       <section
-        aria-label="Source Verification Section"
-        className="p-5 rounded-2xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-4"
-      >
-        <div className="flex items-start space-x-3.5">
-          <div className="w-10 h-10 rounded-2xl bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 flex items-center justify-center shrink-0">
-            <ShieldCheck className="w-5 h-5" />
-          </div>
-          <div className="space-y-0.5">
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="font-bold text-sm text-zinc-900 dark:text-white">
-                Official Source:
-              </span>
-              <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full">
-                Authenticated Mirror
-              </span>
-              {law.officialGazetteRef && (
-                <span className="text-[11px] font-mono text-zinc-500 bg-zinc-100 dark:bg-zinc-800 px-2 py-0.5 rounded">
-                  {law.officialGazetteRef}
-                </span>
-              )}
-            </div>
-            <p className="text-xs text-zinc-600 dark:text-zinc-400">
-              {law.officialSource} • Published by <strong>{law.sourceOrganization}</strong>
-            </p>
-          </div>
-        </div>
-
-        <div className="flex items-center space-x-2 shrink-0">
-          <button
-            type="button"
-            id="verify-source-action-btn"
-            onClick={() => setSourceVerifyModalOpen(true)}
-            className="px-4 py-2 rounded-xl bg-zinc-100 dark:bg-zinc-800 hover:bg-amber-500/10 text-zinc-700 dark:text-zinc-200 hover:text-amber-600 dark:hover:text-amber-400 border border-zinc-200 dark:border-zinc-700 text-xs font-bold inline-flex items-center space-x-1.5 transition-colors shrink-0"
-          >
-            <span>View Source Metadata &amp; Citations</span>
-            <ExternalLink className="w-3.5 h-3.5" />
-          </button>
-        </div>
-      </section>
-
-      {/* SECTION 3: AI SUMMARY & SIMPLIFIED OVERVIEW */}
-      <section
-        aria-label="AI Summary Section"
+        aria-label="Statutory Synthesis Section"
         className="p-6 sm:p-7 rounded-3xl bg-amber-500/5 dark:bg-amber-500/10 border border-amber-500/25 space-y-4"
       >
         <div className="flex flex-wrap items-center justify-between gap-2">
           <div className="flex items-center space-x-2">
             <div className="w-7 h-7 rounded-lg bg-amber-500 text-zinc-950 flex items-center justify-center font-bold">
-              <Sparkles className="w-4 h-4" />
+              <Scale className="w-4 h-4" />
             </div>
             <h2 className="text-base font-bold text-zinc-900 dark:text-white">
-              AI Summary & Key Concepts
+              Statutory Synthesis &amp; Key Principles
             </h2>
           </div>
           <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-500/30">
@@ -1332,70 +1351,102 @@ function LawDetailViewer({
                   <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-900 dark:text-white">
                     Section Navigator
                   </h3>
-                  <span className="text-[10px] text-zinc-400">
-                    {filteredSections.length} of {law.sections.length}
-                  </span>
+                  {/* View Mode Toggle (Hierarchy vs Flat) */}
+                  <div className="flex items-center p-0.5 rounded-lg bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-[10px] font-bold">
+                    <button
+                      type="button"
+                      onClick={() => setSidebarNavMode('hierarchy')}
+                      className={`px-2 py-1 rounded-md transition-all ${
+                        sidebarNavMode === 'hierarchy'
+                          ? 'bg-white dark:bg-zinc-700 text-amber-600 dark:text-amber-400 shadow-xs'
+                          : 'text-zinc-500 hover:text-zinc-900 dark:hover:text-white'
+                      }`}
+                    >
+                      Hierarchy
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setSidebarNavMode('flat')}
+                      className={`px-2 py-1 rounded-md transition-all ${
+                        sidebarNavMode === 'flat'
+                          ? 'bg-white dark:bg-zinc-700 text-amber-600 dark:text-amber-400 shadow-xs'
+                          : 'text-zinc-500 hover:text-zinc-900 dark:hover:text-white'
+                      }`}
+                    >
+                      Flat List
+                    </button>
+                  </div>
                 </div>
 
-                {/* In-Statute Search Filter */}
-                <div className="relative">
-                  <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" />
-                  <input
-                    type="text"
-                    id="statute-section-search-input"
-                    value={searchSectionQuery}
-                    onChange={(e) => setSearchSectionQuery(e.target.value)}
-                    placeholder="Search sections or topics..."
-                    className="w-full pl-8 pr-3 py-2 rounded-xl bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 text-xs focus:outline-none focus:ring-2 focus:ring-amber-500 text-zinc-900 dark:text-white placeholder:text-zinc-400"
+                {sidebarNavMode === 'hierarchy' ? (
+                  <StatutoryHierarchyNav
+                    law={law}
+                    activeSectionNumber={selectedSectionNumber}
+                    onSelectSection={(secNum) => setSelectedSectionNumber(secNum)}
                   />
-                </div>
+                ) : (
+                  <>
+                    {/* In-Statute Search Filter */}
+                    <div className="relative">
+                      <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" />
+                      <input
+                        type="text"
+                        id="statute-section-search-input"
+                        value={searchSectionQuery}
+                        onChange={(e) => setSearchSectionQuery(e.target.value)}
+                        placeholder="Search sections or topics..."
+                        className="w-full pl-8 pr-3 py-2 rounded-xl bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 text-xs focus:outline-none focus:ring-2 focus:ring-amber-500 text-zinc-900 dark:text-white placeholder:text-zinc-400"
+                      />
+                    </div>
 
-                {/* Section Button List */}
-                <div className="max-h-[60vh] overflow-y-auto space-y-1.5 pr-1">
-                  {filteredSections.map((sec) => {
-                    const isSelected = selectedSectionNumber === sec.number;
-                    const noteCount = sectionNotesCountMap[sec.number] || 0;
-                    return (
-                      <button
-                        key={sec.number}
-                        type="button"
-                        id={`sec-nav-${sec.number.replace(/\s+/g, '-').toLowerCase()}`}
-                        onClick={() => setSelectedSectionNumber(sec.number)}
-                        className={`w-full text-left p-3 rounded-2xl text-xs transition-all flex items-start justify-between gap-2 ${
-                          isSelected
-                            ? 'bg-amber-500/10 text-amber-900 dark:text-amber-300 border border-amber-500/30 font-bold shadow-sm'
-                            : 'text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 border border-transparent'
-                        }`}
-                      >
-                        <div className="space-y-0.5 truncate">
-                          <div className="flex items-center space-x-1.5">
-                            <span className="text-[10px] font-bold text-amber-600 dark:text-amber-400 block uppercase">
-                              {sec.number}
-                            </span>
-                            {noteCount > 0 && (
-                              <span
-                                className="px-1.5 py-0.5 rounded-md text-[9px] font-bold bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-500/30 inline-flex items-center space-x-0.5"
-                                title={`${noteCount} private study note(s)`}
-                              >
-                                <NotebookPen className="w-2.5 h-2.5" />
-                                <span>{noteCount}</span>
+                    {/* Section Button List */}
+                    <div className="max-h-[60vh] overflow-y-auto space-y-1.5 pr-1">
+                      {filteredSections.map((sec) => {
+                        const isSelected = selectedSectionNumber === sec.number;
+                        const noteCount = sectionNotesCountMap[sec.number] || 0;
+                        return (
+                          <button
+                            key={sec.number}
+                            type="button"
+                            id={`sec-nav-${sec.number.replace(/\s+/g, '-').toLowerCase()}`}
+                            onClick={() => setSelectedSectionNumber(sec.number)}
+                            className={`w-full text-left p-3 rounded-2xl text-xs transition-all flex items-start justify-between gap-2 ${
+                              isSelected
+                                ? 'bg-amber-500/10 text-amber-900 dark:text-amber-300 border border-amber-500/30 font-bold shadow-sm'
+                                : 'text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 border border-transparent'
+                            }`}
+                          >
+                            <div className="space-y-0.5 truncate">
+                              <div className="flex items-center space-x-1.5">
+                                <span className="text-[10px] font-bold text-amber-600 dark:text-amber-400 block uppercase">
+                                  {sec.number}
+                                </span>
+                                {noteCount > 0 && (
+                                  <span
+                                    className="px-1.5 py-0.5 rounded-md text-[9px] font-bold bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-500/30 inline-flex items-center space-x-0.5"
+                                    title={`${noteCount} private study note(s)`}
+                                  >
+                                    <NotebookPen className="w-2.5 h-2.5" />
+                                    <span>{noteCount}</span>
+                                  </span>
+                                )}
+                              </div>
+                              <span className="block truncate font-medium">
+                                {sec.title}
                               </span>
-                            )}
-                          </div>
-                          <span className="block truncate font-medium">
-                            {sec.title}
-                          </span>
-                          {sec.titleBn && (
-                            <span className="block truncate text-[11px] font-bangla text-zinc-500 dark:text-zinc-400">
-                              {sec.titleBn}
-                            </span>
-                          )}
-                        </div>
-                        <ChevronRight className={`w-3.5 h-3.5 shrink-0 mt-1 ${isSelected ? 'text-amber-500' : 'text-zinc-400'}`} />
-                      </button>
-                    );
-                  })}
-                </div>
+                              {sec.titleBn && (
+                                <span className="block truncate text-[11px] font-bangla text-zinc-500 dark:text-zinc-400">
+                                  {sec.titleBn}
+                                </span>
+                              )}
+                            </div>
+                            <ChevronRight className={`w-3.5 h-3.5 shrink-0 mt-1 ${isSelected ? 'text-amber-500' : 'text-zinc-400'}`} />
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </>
+                )}
 
                 {/* Glossary Quick Tip */}
                 <div className="pt-3 border-t border-zinc-100 dark:border-zinc-800 text-[11px] text-zinc-500 space-y-1">
@@ -1404,7 +1455,7 @@ function LawDetailViewer({
                     <span>Interactive Legal Glossary</span>
                   </div>
                   <p>
-                    Highlighted terms in the text can be clicked to view simple plain-language explanations.
+                    Highlighted terms in the text can be clicked to view contextual legal definitions.
                   </p>
                 </div>
               </div>
@@ -1425,10 +1476,29 @@ function LawDetailViewer({
                   >
                     {/* Section Title Header */}
                   <div className="flex flex-wrap items-start justify-between gap-3 border-b border-zinc-100 dark:border-zinc-800 pb-4">
-                    <div className="space-y-1">
-                      <span className="px-3 py-1 rounded-lg bg-amber-500/10 text-amber-700 dark:text-amber-400 font-bold text-xs">
-                        {activeSection.number}
-                      </span>
+                    <div className="space-y-1.5">
+                      {/* Hierarchy breadcrumbs & provision type */}
+                      <div className="flex flex-wrap items-center gap-2 text-xs">
+                        <span className="px-2.5 py-0.5 rounded-md bg-amber-500/10 text-amber-700 dark:text-amber-400 font-bold text-xs">
+                          {activeSection.provisionType ? `${activeSection.provisionType} ${activeSection.number}` : activeSection.number}
+                        </span>
+                        {activeSection.partTitle && (
+                          <span className="px-2 py-0.5 rounded-md bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 text-[11px] font-medium">
+                            {activeSection.partTitle}
+                          </span>
+                        )}
+                        {activeSection.chapterTitle && (
+                          <span className="px-2 py-0.5 rounded-md bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 text-[11px] font-medium">
+                            {activeSection.chapterTitle}
+                          </span>
+                        )}
+                        {activeSection.amendmentHistory && (
+                          <span className="px-2 py-0.5 rounded-md bg-blue-500/10 text-blue-600 dark:text-blue-400 text-[10px] font-mono">
+                            {activeSection.amendmentHistory}
+                          </span>
+                        )}
+                      </div>
+
                       <h3 className="text-xl sm:text-2xl font-bold text-zinc-900 dark:text-white">
                         {activeSection.title}
                       </h3>
@@ -1522,6 +1592,62 @@ function LawDetailViewer({
                       {activeSection.simpleExplanation}
                     </p>
                   </div>
+
+                  {/* Statutory Cross-References */}
+                  {activeSection.crossReferences && activeSection.crossReferences.length > 0 && (
+                    <div className="p-4 rounded-2xl bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 space-y-3">
+                      <div className="flex items-center space-x-2 text-zinc-900 dark:text-white font-bold text-xs uppercase tracking-wider">
+                        <Scale className="w-3.5 h-3.5 text-amber-500" />
+                        <span>Statutory Cross-References & Connected Provisions</span>
+                      </div>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                        {activeSection.crossReferences.map((ref, idx) => (
+                          <div key={idx} className="p-3 rounded-xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-xs space-y-1">
+                            <div className="flex items-center justify-between">
+                              <span className="font-bold text-amber-700 dark:text-amber-400">
+                                {ref.targetLawTitle} — {ref.targetSectionNumber}
+                              </span>
+                              <span className="px-1.5 py-0.5 rounded text-[9px] uppercase font-mono bg-amber-500/10 text-amber-600 dark:text-amber-400">
+                                {ref.relationshipType}
+                              </span>
+                            </div>
+                            <p className="text-zinc-600 dark:text-zinc-400 text-[11px]">
+                              {ref.description}
+                            </p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Statutory Notes & Legislative Guidance */}
+                  {activeSection.statutoryNotes && activeSection.statutoryNotes.length > 0 && (
+                    <div className="space-y-2 pt-1">
+                      <span className="text-[11px] font-bold uppercase tracking-wider text-zinc-400">
+                        Statutory Notes & Legislative Clarifications
+                      </span>
+                      <div className="space-y-2">
+                        {activeSection.statutoryNotes.map((note, idx) => (
+                          <div
+                            key={idx}
+                            className={`p-3.5 rounded-xl border text-xs leading-relaxed ${
+                              note.type === 'procedural-warning'
+                                ? 'bg-amber-500/10 border-amber-500/30 text-amber-900 dark:text-amber-200'
+                                : note.type === 'judicial-interpretation'
+                                ? 'bg-blue-500/10 border-blue-500/30 text-blue-900 dark:text-blue-200'
+                                : 'bg-zinc-50 dark:bg-zinc-950 border-zinc-200 dark:border-zinc-800 text-zinc-700 dark:text-zinc-300'
+                            }`}
+                          >
+                            <div className="flex items-center space-x-1.5 font-bold uppercase text-[10px] mb-1">
+                              <Info className="w-3 h-3" />
+                              <span>{note.type.replace('-', ' ')} {note.citation ? `(${note.citation})` : ''}</span>
+                            </div>
+                            <p>{note.content}</p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
 
                   {/* Legal Remedy or Prescribed Punishment */}
                   {activeSection.punishmentOrRemedy && (
@@ -2109,6 +2235,16 @@ function LawDetailViewer({
       )}
 
       {/* MODALS */}
+      <PrintExportModal
+        law={law}
+        activeSection={activeSection}
+        isOpen={printExportModalOpen}
+        onClose={() => setPrintExportModalOpen(false)}
+        options={printOptions}
+        onOptionsChange={setPrintOptions}
+        onTriggerPrint={executePrint}
+      />
+
       <SourceVerificationModal
         law={law}
         isOpen={sourceVerifyModalOpen}
@@ -2125,6 +2261,13 @@ function LawDetailViewer({
         term={glossaryModalTerm}
         isOpen={!!glossaryModalTerm}
         onClose={() => setGlossaryModalTerm(null)}
+      />
+
+      {/* DEDICATED PRINT DOCUMENT (Hidden on screen, rendered exclusively during print/PDF generation) */}
+      <StatutoryPrintDocument
+        law={law}
+        activeSection={activeSection}
+        options={printOptions}
       />
     </div>
   );

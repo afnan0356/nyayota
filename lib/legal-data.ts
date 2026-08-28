@@ -1,13 +1,84 @@
+import { INTERNATIONAL_TREATIES_DATABASE } from './international-law-data';
+
+export type CoverageStatus = 'Complete' | 'Partial' | 'In Progress' | 'Under Review';
+
+export type ProvisionType = 'Section' | 'Article' | 'Rule' | 'Order' | 'Schedule' | 'Clause';
+
+export interface StatutoryCrossReference {
+  targetLawId: string;
+  targetLawTitle: string;
+  targetSectionNumber?: string;
+  relationshipType: 'cross-reference' | 'penalizes' | 'defines' | 'procedural-basis' | 'treaty-obligation' | 'constitutional-basis';
+  description: string;
+}
+
+export interface StatutoryNote {
+  id: string;
+  type: 'legislative-intent' | 'judicial-interpretation' | 'procedural-warning' | 'amendment-note';
+  content: string;
+  citation?: string;
+}
+
 export interface LawSection {
   number: string;
   title: string;
   titleBn?: string;
+  partNumber?: string;
+  partTitle?: string;
+  chapterNumber?: string;
+  chapterTitle?: string;
+  provisionType?: ProvisionType;
   content: string;
   contentBn?: string;
   simpleExplanation: string;
   explainLike15?: string;
   punishmentOrRemedy?: string;
   keyConcepts?: string[];
+  definitions?: string[];
+  crossReferences?: StatutoryCrossReference[];
+  statutoryNotes?: StatutoryNote[];
+  amendmentHistory?: string;
+}
+
+export interface LawChapter {
+  chapterNumber: string;
+  chapterTitle: string;
+  chapterTitleBn?: string;
+  partNumber?: string;
+  sectionRange: string;
+  sectionCount: number;
+  summary?: string;
+}
+
+export interface LawPart {
+  partNumber: string;
+  partTitle: string;
+  partTitleBn?: string;
+  chapters?: LawChapter[];
+  sectionRange: string;
+  sectionCount: number;
+  summary?: string;
+}
+
+export interface StatutorySourceMetadata {
+  officialTitle: string;
+  enactmentYear: number;
+  jurisdiction: string;
+  jurisdictionCode: string;
+  coverageStatus: CoverageStatus;
+  coveragePercentage: number;
+  totalStatutorySectionsCount: number;
+  indexedSectionsCount: number;
+  verificationDate: string;
+  sourceAuthority: string;
+  sourceOrganization: string;
+  sourceUrl: string;
+  officialGazetteRef: string;
+  authenticLanguage: string;
+  translatedLanguages: string[];
+  amendmentStatus: string;
+  lastAmendedYear?: number;
+  curationDisclaimer?: string;
 }
 
 export interface LawTimelineEvent {
@@ -40,15 +111,49 @@ export interface LawItem {
   titleBn: string;
   shortTitle: string;
   actNumber?: string;
-  jurisdiction: 'Bangladesh' | 'International';
-  jurisdictionCode: 'BD' | 'INT';
-  category: 'Criminal Law' | 'Constitutional Law' | 'Human Rights' | 'Cyber & Digital' | 'Commercial & Contract' | 'Civil Procedure' | 'Family Law' | 'Environmental Law' | 'International Humanitarian' | 'Labor & Employment';
-  status: 'Active' | 'Amended' | 'Repealed' | 'Draft' | 'In Force' | 'Active Treaty' | 'Customary Law';
+  jurisdiction: 'Bangladesh' | 'International' | 'Regional' | 'Supranational';
+  jurisdictionCode: 'BD' | 'INT' | 'REG';
+  category:
+    | 'Criminal Law'
+    | 'Constitutional Law'
+    | 'Human Rights'
+    | 'Cyber & Digital'
+    | 'Commercial & Contract'
+    | 'Civil Procedure'
+    | 'Family Law'
+    | 'Environmental Law'
+    | 'International Humanitarian'
+    | 'Labor & Employment'
+    | 'Humanitarian Law'
+    | 'International Criminal Law'
+    | 'Law of the Sea'
+    | 'Trade & Commerce'
+    | 'Labour Law'
+    | 'Intellectual Property'
+    | 'Environment & Climate'
+    | 'Investment Law'
+    | 'Public International Law'
+    | 'International Courts & Tribunals'
+    | 'Regional Law Systems';
+  status: 'Active' | 'Amended' | 'Repealed' | 'Draft' | 'In Force' | 'Active Treaty' | 'Customary Law' | 'Declaratory Instrument' | 'Model Law' | 'Statute / Constitutional Charter';
+  alternativeTitles?: string[];
+  depositary?: string;
+  officialLanguages?: string[];
+  adoptionDate?: string;
+  entryIntoForceDate?: string;
+  sourceReproductionNotice?: string;
+  verificationStatus?: string;
+  unCitationRef?: string;
+  ratificationsCount?: number;
+  coverageStatus?: CoverageStatus;
   sourceReliabilityStatus?: SourceReliabilityStatus;
   contentQualityStatus?: ContentQualityStatus;
   publishingAuthority?: string;
   totalStatutorySectionsCount?: number;
   isCuratedSubset?: boolean;
+  parts?: LawPart[];
+  chapters?: LawChapter[];
+  sourceMetadata?: StatutorySourceMetadata;
   topics?: string[];
   enactmentYear: number;
   effectiveDate?: string;
@@ -79,6 +184,7 @@ export interface LawItem {
     standard?: string;
     academic?: string;
     bluebook?: string;
+    oscola?: string;
     apa?: string;
     mla?: string;
     chicago?: string;
@@ -1340,7 +1446,8 @@ export const LAWS_DATABASE: LawItem[] = [
       bluebook: 'United Nations Convention on Contracts for the International Sale of Goods, Apr. 11, 1980, S. Treaty Doc. No. 98-9 (1983), 1489 U.N.T.S. 3.'
     },
     keywords: ['cisg', 'commercial law', 'international sale of goods', 'contracts', 'uncitral', 'export', 'import', 'breach of contract']
-  }
+  },
+  ...INTERNATIONAL_TREATIES_DATABASE
 ];
 
 export const GLOSSARY_TERMS: GlossaryTerm[] = [

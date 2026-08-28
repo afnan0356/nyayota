@@ -8,46 +8,60 @@ interface CitationModalProps {
   law: LawItem;
   isOpen: boolean;
   onClose: () => void;
+  sectionNumber?: string;
 }
 
-export function CitationModal({ law, isOpen, onClose }: CitationModalProps) {
-  const [activeFormat, setActiveFormat] = useState<'apa' | 'mla' | 'chicago' | 'bluebook' | 'academic' | 'standard'>('apa');
+export function CitationModal({ law, isOpen, onClose, sectionNumber }: CitationModalProps) {
+  const [activeFormat, setActiveFormat] = useState<'bluebook' | 'oscola' | 'apa' | 'mla' | 'chicago' | 'standard'>('bluebook');
   const [copied, setCopied] = useState(false);
 
   if (!isOpen) return null;
 
   const currentYear = new Date().getFullYear();
+  const secSuffix = sectionNumber ? `, ${sectionNumber}` : '';
 
   const citationFormats = {
+    bluebook: {
+      label: 'Bluebook (21st Edition)',
+      description: 'Standard judicial citation for court submissions, law reviews, and legal briefs',
+      text: law.citations?.bluebook
+        ? `${law.citations.bluebook}${secSuffix}`
+        : `${law.title}${secSuffix}, ${law.actNumber || `Act of ${law.enactmentYear}`} (${law.jurisdictionCode === 'BD' ? 'Bangl.' : 'Intl.'}).`
+    },
+    oscola: {
+      label: 'OSCOLA (Oxford Standard)',
+      description: 'Oxford University Standard for Citation of Legal Authorities',
+      text: law.citations?.oscola
+        ? `${law.citations.oscola}${secSuffix}`
+        : `${law.title} ${law.enactmentYear}${sectionNumber ? `, s ${sectionNumber.replace(/[^0-9]/g, '')}` : ''}`
+    },
     apa: {
       label: 'APA (7th Edition)',
       description: 'American Psychological Association style for social science & policy papers',
-      text: law.citations?.apa || `${law.title}. (${law.enactmentYear}). ${law.officialSource}. Retrieved from Nyayota Legal Platform.`
+      text: law.citations?.apa
+        ? `${law.citations.apa}${secSuffix}`
+        : `${law.title}${secSuffix}. (${law.enactmentYear}). ${law.officialSource || 'Government of Bangladesh'}. Retrieved from Nyayota Legal Platform.`
     },
     mla: {
       label: 'MLA (9th Edition)',
-      description: 'Modern Language Association standard for humanities and law essays',
-      text: law.citations?.mla || `"${law.title}." ${law.jurisdiction} Legal Statutes, ${law.enactmentYear}. Nyayota Platform, accessed ${currentYear}.`
+      description: 'Modern Language Association standard for academic essays and humanities',
+      text: law.citations?.mla
+        ? `${law.citations.mla}${secSuffix}`
+        : `"${law.title}${secSuffix}." ${law.jurisdiction} Legal Statutes, ${law.enactmentYear}. Nyayota Platform, accessed ${currentYear}.`
     },
     chicago: {
       label: 'Chicago (17th Edition)',
       description: 'Notes and bibliography format for legal history and academic publishing',
-      text: law.citations?.chicago || `${law.title} (${law.enactmentYear}). ${law.officialSource}. Nyayota Legal Research System.`
-    },
-    bluebook: {
-      label: 'Bluebook (21st Edition)',
-      description: 'Standard legal citation system used in courts, law journals, and legal briefs',
-      text: law.citations?.bluebook || `${law.title}, Act No. ${law.actNumber || 'N/A'} of ${law.enactmentYear} (${law.jurisdictionCode === 'BD' ? 'Bangl.' : 'Intl.'}).`
-    },
-    academic: {
-      label: 'Academic / Law Review',
-      description: 'Comprehensive citation style for dissertations and peer-reviewed journals',
-      text: law.citations?.academic || `${law.title} (${law.enactmentYear}), ${law.officialSource}, Nyayota Digital Legal Repository.`
+      text: law.citations?.chicago
+        ? `${law.citations.chicago}${secSuffix}`
+        : `${law.title}${secSuffix} (${law.enactmentYear}). ${law.officialSource || 'Official Gazette'}. Nyayota Legal Research System.`
     },
     standard: {
-      label: 'Standard Public Citation',
-      description: 'Short universal statutory reference for general reports and citations',
-      text: law.citations?.standard || `${law.title} (${law.enactmentYear})`
+      label: 'Standard Statutory Reference',
+      description: 'Universal public citation format for official reports and correspondence',
+      text: law.citations?.standard
+        ? `${law.citations.standard}${secSuffix}`
+        : `${law.title}${secSuffix} (${law.enactmentYear})`
     }
   };
 

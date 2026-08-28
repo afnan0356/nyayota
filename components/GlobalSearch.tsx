@@ -39,7 +39,7 @@ export interface SearchResultItem {
   titleBn?: string;
   subtitle?: string;
   tag: string;
-  jurisdiction?: 'Bangladesh' | 'International';
+  jurisdiction?: 'Bangladesh' | 'International' | 'Regional' | 'Supranational' | string;
   jurisdictionCode?: string;
   sourceStatus?: string;
   url: string;

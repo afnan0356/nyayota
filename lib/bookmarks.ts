@@ -5,7 +5,7 @@ export interface LocalBookmark {
   lawId: string;
   lawTitle: string;
   lawTitleBn?: string;
-  jurisdiction: 'Bangladesh' | 'International';
+  jurisdiction: 'Bangladesh' | 'International' | 'Regional' | 'Supranational' | string;
   category: string;
   sectionNumber?: string;
   sectionTitle?: string;
@@ -37,7 +37,7 @@ export function toggleLocalBookmark(item: {
   lawId: string;
   lawTitle: string;
   lawTitleBn?: string;
-  jurisdiction: 'Bangladesh' | 'International';
+  jurisdiction: 'Bangladesh' | 'International' | 'Regional' | 'Supranational' | string;
   category: string;
   sectionNumber?: string;
   sectionTitle?: string;
