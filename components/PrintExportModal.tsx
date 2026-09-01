@@ -174,7 +174,7 @@ export function PrintExportModal({
                   <Sparkles className="w-4 h-4 text-amber-500" />
                   <div>
                     <span className="font-semibold text-zinc-900 dark:text-white block">
-                      Include Plain-Language Synthesis
+                      Include Plain-Language Explanation
                     </span>
                     <span className="text-[11px] text-zinc-500">
                       Layperson explanations and clear practical takeaways.

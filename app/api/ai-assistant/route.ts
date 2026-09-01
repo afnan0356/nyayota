@@ -241,7 +241,7 @@ Legal concepts are categorized by:
   }
 
   // Default response
-  return `### Nyayota Legal Knowledge Synthesis
+  return `### Nyayota Legal Analysis & Provisions
 
 **Inquiry:** "${query}"
 

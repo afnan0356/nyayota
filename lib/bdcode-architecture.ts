@@ -65,6 +65,8 @@ export type BangladeshActType =
   | 'Act of Parliament'         // Act passed by Jatiya Sangsad or colonial legislature
   | 'Ordinance'                 // Promulgated by the President when parliament is dissolved
   | "President's Order (P.O.)"  // Promulgated during 1972-1973 transition
+  | "President's Order"
+  | "President’s Order"
   | 'Constitutional Amendment'  // Constitutional provisions under Art. 142
   | 'Statutory Rules & Orders'; // S.R.O. delegated legislation
 

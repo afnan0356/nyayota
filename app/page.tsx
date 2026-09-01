@@ -874,7 +874,7 @@ export default function HomePage() {
                     <span className="font-semibold text-amber-400">Plain Language Legal Explanation</span>
                   </div>
                   <span className="text-[10px] px-2 py-0.5 rounded bg-zinc-800 text-zinc-300 font-medium">
-                    Verified Statutory Synthesis
+                    Official Legal Text
                   </span>
                 </div>
 

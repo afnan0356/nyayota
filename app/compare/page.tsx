@@ -287,7 +287,7 @@ function CompareToolContent() {
         <section className="p-6 sm:p-8 rounded-3xl bg-amber-500/5 dark:bg-amber-500/10 border border-amber-500/20 space-y-6">
           <div>
             <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-500/30">
-              Curated Legal Synthesis
+              Comparative Legal Analysis
             </span>
             <h2 className="text-xl font-bold text-zinc-900 dark:text-white mt-2">
               {activePreset.title}

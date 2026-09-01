@@ -1,4 +1,5 @@
 import { INTERNATIONAL_TREATIES_DATABASE } from './international-law-data';
+import { BANGLADESH_CODE_CATALOG, convertBdRecordToLawItem } from './bdcode-catalog';
 
 export type CoverageStatus = 'Complete' | 'Partial' | 'In Progress' | 'Under Review';
 
@@ -785,7 +786,7 @@ export const LAWS_DATABASE: LawItem[] = [
     status: 'In Force',
     enactmentYear: 2006,
     lastAmendedYear: 2018,
-    totalStatutorySectionsCount: 353,
+    totalStatutorySectionsCount: 354,
     isCuratedSubset: true,
     officialGazetteRef: 'Bangladesh Gazette Extraordinary, Oct 11, 2006',
     overview: 'Comprehensive codification consolidating 25 disparate labor laws covering working conditions, maximum working hours, overtime compensation, maternity benefits, workplace safety, trade unions, and labor courts.',
@@ -793,20 +794,80 @@ export const LAWS_DATABASE: LawItem[] = [
     simpleSummary: 'Protects workers and employees across industries in Bangladesh by setting limits on working hours, guaranteeing overtime pay, maternity leaves, and establishing safety standards.',
     fullOfficialTextExcerpt: 'An Act to consolidate and amend the laws relating to employment of workers, relations between workers and employers, determination of minimum rates of wages, payment of wages, compensation for injuries to workers in the course of their employment, formation of trade unions, raise and settlement of industrial disputes...',
     keyHighlights: [
-      'Guarantees 16 weeks of paid maternity benefit for female workers.',
-      'Caps standard working hours at 8 hours per day / 48 hours per week with double rate overtime pay.',
-      'Mandates establishment of Safety Committees and workplace compensation for accidental injuries.'
+      'Guarantees 16 weeks of paid maternity benefit for female workers (Section 45 & 46).',
+      'Caps standard working hours at 8 hours per day / 48 hours per week with double rate overtime pay (Section 100 & 108).',
+      'Regulates classification of workers, notice period for termination, and establishment of specialized Labour Courts (Section 4, 26 & 214).'
     ],
     sections: [
       {
+        number: 'Section 4',
+        title: 'Classification of Workers and Period of Probation',
+        titleBn: 'শ্রমিকদের শ্রেণীবিভাগ ও শিক্ষানবিশী কাল',
+        content: 'Workers employed in any establishment shall be classified into apprentice, badli, casual, temporary, probationer, and permanent. The period of probation for a worker whose function is of a clerical nature shall be six months and for other workers three months.',
+        contentBn: 'প্রতিষ্ঠানে নিযুক্ত শ্রমিকগণ শিক্ষানবীশ, বদলী, সাময়িক, অস্থায়ী, শিক্ষানবিশী ও স্থায়ী শ্রেণীতে বিভক্ত হবেন। করণিক কাজের জন্য শিক্ষানবিশী কাল ৬ মাস এবং অন্যান্যদের জন্য ৩ মাস।',
+        simpleExplanation: 'Classifies workers into official legal tiers (permanent, probationer, temporary) and sets 3 to 6 months statutory probation limits.',
+        punishmentOrRemedy: 'Confirmation of permanent status and legal service benefits.',
+        keyConcepts: ['Worker classification', 'Probationary period', 'Permanent employment']
+      },
+      {
+        number: 'Section 26',
+        title: 'Termination of Employment by Notice by Employer',
+        titleBn: 'মালিক কর্তৃক নোটিশ প্রদানের মাধ্যমে চাকুরির অবসান',
+        content: 'The employment of a permanent worker may be terminated by the employer by giving 120 days\' notice in writing in the case of monthly rated workers, and 60 days\' notice in the case of other workers, or by paying wages in lieu of notice alongside compensation of 30 days\' wages for every completed year of service.',
+        contentBn: 'মাসিক মজুরির স্থায়ী শ্রমিকের ক্ষেত্রে ১২০ দিনের এবং অন্যান্য শ্রমিকের ক্ষেত্রে ৬০ দিনের লিখিত নোটিশ বা নোটিশের পরিবর্তে মজুরি এবং প্রতি পূর্ণ বছরের চাকুরির জন্য ৩০ দিনের মজুরি ক্ষতিপূরণ প্রদানপূর্বক চাকুরির অবসান করা যায়।',
+        simpleExplanation: 'Employers terminating permanent workers without misconduct charges must provide 120 days advance notice (or wages in lieu) plus 30 days severance pay per year of service.',
+        punishmentOrRemedy: 'Mandatory statutory severance pay and gratuity.',
+        keyConcepts: ['Termination notice', 'Severance pay', 'Gratuity']
+      },
+      {
         number: 'Section 46',
-        title: 'Payment of maternity benefit',
-        titleBn: 'মাতৃত্বকালীন সুবিধার অর্থ প্রদান',
+        title: 'Payment of Maternity Benefit and Procedure',
+        titleBn: 'মাতৃত্বকালীন সুবিধার অর্থ প্রদান ও পদ্ধতি',
         content: 'Every woman employed in an establishment shall be entitled to, and her employer shall be liable for, the payment of maternity benefit at the rate of her average daily wages for a period of eight weeks preceding and eight weeks immediately following the date of her delivery.',
-        contentBn: 'প্রত্যেক নারী শ্রমিক প্রসবের পূর্বে ৮ সপ্তাহ এবং প্রসবের পর ৮ সপ্তাহ মোট ১৬ সপ্তাহের জন্য গড় মজুরিতে বেতনসহ মাতৃত্বকালীন ছুটি পাবেন।',
-        simpleExplanation: 'Guarantees 16 weeks of full paid leave for expecting mothers in formal workplaces.',
+        contentBn: 'প্রত্যেক নারী শ্রমিক প্রসবের পূর্বে ৮ সপ্তাহ এবং প্রসবের পর ৮ সপ্তাহ মোট ১৬ সপ্তাহের জন্য গড় মজুরিতে বেতনসহ মাতৃত্বকালীন ছুটি ও আর্থিক সুবিধা পাবেন।',
+        simpleExplanation: 'Guarantees 16 weeks of full paid leave for expecting mothers in formal workplaces (8 weeks before and 8 weeks after delivery).',
         punishmentOrRemedy: 'Labor Court order and employer fines for refusal.',
         keyConcepts: ['Maternity rights', 'Worker welfare', 'Equal opportunity']
+      },
+      {
+        number: 'Section 100',
+        title: 'Daily Working Hours',
+        titleBn: 'দৈনিক কর্মঘণ্টা',
+        content: 'No adult worker shall ordinarily be required or allowed to work in an establishment for more than eight hours in any day: Provided that, subject to the provisions of section 108, any such worker may work in an establishment not exceeding ten hours in any day.',
+        contentBn: 'কোনো প্রাপ্তবয়স্ক শ্রমিককে কোনো প্রতিষ্ঠানে দৈনিক ৮ ঘণ্টার অধিক কাজ করানো যাবে না; তবে ওভারটাইম ভাতা প্রদান সাপেক্ষে দৈনিক সর্বোচ্চ ১০ ঘণ্টা পর্যন্ত কাজ করানো যেতে পারে।',
+        simpleExplanation: 'Limits daily working time to 8 hours, capping daily work at 10 hours including overtime.',
+        punishmentOrRemedy: 'Statutory restriction enforced by Department of Inspection for Factories and Establishments (DIFE).',
+        keyConcepts: ['8-hour workday', 'Maximum daily cap', 'Occupational health']
+      },
+      {
+        number: 'Section 108',
+        title: 'Extra Allowance for Overtime',
+        titleBn: 'অতিরিক্ত কাজের জন্য অতিরিক্ত ভাতা (ওভারটাইম)',
+        content: 'Where a worker works in an establishment on any day for more than the time specified in section 100 or on any week for more than the time specified in section 102, he shall, in respect of overtime work, be entitled to allowance at the rate of twice his ordinary rate of basic wage and dearness allowance and ad-hoc or interim pay, if any.',
+        contentBn: 'কোনো শ্রমিক দৈনিক ৮ ঘণ্টা বা সপ্তাহে ৪৮ ঘণ্টার অতিরিক্ত কাজ করলে, অতিরিক্ত কাজের জন্য তার সাধারণ মূল মজুরির দ্বিগুণ হারে ওভারটাইম ভাতা প্রাপ্ত হবেন।',
+        simpleExplanation: 'Mandates double (2x) the regular hourly wage rate for all overtime hours worked beyond 8 hours/day or 48 hours/week.',
+        punishmentOrRemedy: 'Double-rate wage compensation payable with monthly payroll.',
+        keyConcepts: ['Double rate overtime', 'Wage protection', 'Premium pay']
+      },
+      {
+        number: 'Section 176',
+        title: 'Trade Unions of Workers and Employers',
+        titleBn: 'শ্রমিক ও মালিকদের ট্রেড ইউনিয়ন গঠনের অধিকার',
+        content: 'Workers, without distinction whatsoever, shall have the right to form and, subject only to the rules of the organization concerned, to join trade union of their own choosing for collective bargaining and representation.',
+        contentBn: 'শ্রমিকগণ বৈষম্যহীনভাবে নিজেদের পছন্দের ট্রেড ইউনিয়ন গঠন ও তাতে যোগদান করার অধিকার সংরক্ষণ করেন।',
+        simpleExplanation: 'Protects the statutory freedom of workers to organize trade unions and elect collective bargaining agents (CBA).',
+        punishmentOrRemedy: 'Protection against unfair labor practices under Section 195.',
+        keyConcepts: ['Freedom of association', 'Trade union', 'Collective bargaining']
+      },
+      {
+        number: 'Section 214',
+        title: 'Establishment of Labour Courts',
+        titleBn: 'শ্রম আদালত প্রতিষ্ঠা ও বিচারিক এখতিয়ার',
+        content: 'For the purpose of adjudicating and determining any industrial dispute or any matter relating to the implementation or violation of this Act, the Government may, by notification in the official Gazette, establish one or more Labour Courts.',
+        contentBn: 'শ্রম বিরোধ নিষ্পত্তি ও আইন লঙ্ঘনের বিচারের জন্য সরকার সরকারি গেজেটে প্রজ্ঞাপন দ্বারা এক বা একাধিক শ্রম আদালত প্রতিষ্ঠা করবে।',
+        simpleExplanation: 'Specialized judicial tribunals dedicated to hearing employment disputes, wrongful dismissal claims, and labor safety violations.',
+        punishmentOrRemedy: 'Binding judicial award and decree enforceable under civil and criminal powers.',
+        keyConcepts: ['Labour Court', 'Industrial disputes', 'Specialized tribunal']
       }
     ],
     timeline: [
@@ -2094,13 +2155,25 @@ export interface EnrichedLawItem extends LawItem {
 export function getEnrichedLaw(id: string): EnrichedLawItem | null {
   if (!id) return null;
   const cleanId = id.trim().toLowerCase();
-  const baseLaw = LAWS_DATABASE.find(
+  let baseLaw = LAWS_DATABASE.find(
     (l) =>
       l.id.toLowerCase() === cleanId ||
       l.slug.toLowerCase() === cleanId ||
       l.id.replace(/^(bd-|int-|uk-|us-)/, '').toLowerCase() === cleanId ||
       l.slug.replace(/^(bd-|int-)/, '').toLowerCase() === cleanId
   );
+
+  if (!baseLaw) {
+    const bdRecord = BANGLADESH_CODE_CATALOG.find(
+      (l) =>
+        l.id.toLowerCase() === cleanId ||
+        l.id.replace(/^bd-/, '').toLowerCase() === cleanId ||
+        l.actNumber.toLowerCase() === cleanId
+    );
+    if (bdRecord) {
+      baseLaw = convertBdRecordToLawItem(bdRecord);
+    }
+  }
   
   if (!baseLaw) return null;
   
