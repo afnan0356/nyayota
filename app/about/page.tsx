@@ -9,39 +9,38 @@ import {
   Globe,
   GraduationCap,
   Users,
-  Building2,
   AlertTriangle,
-  ArrowRight,
-  CheckCircle2,
   FileCheck2,
-  Mail
+  Mail,
+  Info,
+  Clock
 } from 'lucide-react';
 
 export default function AboutPage() {
   const audiences = [
     {
-      title: 'Citizens & the General Public',
-      description: 'Individuals seeking clear explanations of their statutory rights when navigating police interactions, landlord-tenant disputes, labor rights, and cyber threats.',
+      title: 'Citizens & Everyday Users',
+      description: 'People looking for clear explanations of their rights during tenancy disputes, employment questions, cyber safety issues, or routine interactions with authorities.',
       icon: Users
     },
     {
-      title: 'Law Students & Candidates',
-      description: 'Undergraduate law students, Bar Council aspirants, and Judicial Service Examination candidates studying codified statutes, comparative doctrines, and legal maxims.',
+      title: 'Law Students & Exam Candidates',
+      description: 'Students preparing for coursework, Bar Council examinations, or Judicial Service tests who need structured access to acts, sections, and legal doctrines.',
       icon: GraduationCap
     },
     {
-      title: 'Legal Scholars & Researchers',
-      description: 'Academics comparing domestic statutory frameworks against international human rights covenants, environmental treaties, and international humanitarian law.',
+      title: 'Researchers & Academics',
+      description: 'Scholars examining statutory frameworks, comparative international treaties, human rights conventions, and historical amendments.',
       icon: BookOpen
     },
     {
       title: 'Journalists & Fact-Checkers',
-      description: 'Newsrooms and court reporters verifying statutory section numbers, bailable vs non-bailable offense schedules, and constitutional provisions under publication deadlines.',
+      description: 'Writers and reporters verifying statutory names, section numbers, penal penalties, and constitutional clauses under tight deadlines.',
       icon: Globe
     },
     {
-      title: 'Junior Advocates & Paralegals',
-      description: 'Legal professionals conducting fast keyword indexing, cross-statute references, and procedural order verifications.',
+      title: 'Legal Professionals & Paralegals',
+      description: 'Practitioners and junior advocates needing quick reference, bilingual terminology lookup, and cross-statute cross-referencing.',
       icon: Scale
     }
   ];
@@ -52,58 +51,84 @@ export default function AboutPage() {
       <div className="space-y-4 text-center max-w-3xl mx-auto">
         <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-md bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 text-xs font-medium">
           <Scale className="w-3.5 h-3.5" />
-          <span>About the Nyayota Initiative</span>
+          <span>About Nyayota</span>
         </div>
         <h1 className="text-3xl sm:text-4xl font-bold text-zinc-900 dark:text-zinc-100 font-serif tracking-tight">
           Making the Law Accessible, Transparent, and Searchable
         </h1>
         <p className="text-sm sm:text-base text-zinc-600 dark:text-zinc-400 leading-relaxed max-w-2xl mx-auto">
-          Nyayota is an open public legal knowledge repository. We index primary statutes, international conventions, and procedural guides to provide transparent legal information to everyone.
+          Nyayota is an independent, open legal information project. We organize primary laws, international treaties, and procedural guides to make legal knowledge clear and accessible to everyone.
         </p>
       </div>
 
-      {/* The Problem & The Mission */}
+      {/* NEW SECTION: Who Built Nyayota */}
+      <div className="p-8 rounded-2xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-xs space-y-5">
+        <div className="flex items-center space-x-2.5">
+          <div className="w-8 h-8 rounded-lg bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center border border-blue-500/20">
+            <Info className="w-4 h-4" />
+          </div>
+          <h2 className="text-xl sm:text-2xl font-bold text-zinc-900 dark:text-zinc-100 font-serif">
+            Who Built Nyayota
+          </h2>
+        </div>
+        <div className="space-y-4 text-xs sm:text-sm text-zinc-600 dark:text-zinc-300 leading-relaxed">
+          <p>
+            Nyayota is an independent project started by developers and researchers who were frustrated by how difficult it is to look up and understand everyday laws.
+          </p>
+          <p>
+            In many countries, finding the text of a law means digging through old scanned PDFs, navigating broken government websites, or paying for expensive proprietary databases. Even when you find the text, it is often written in dense, archaic legal jargon that ordinary people cannot decipher without help.
+          </p>
+          <p>
+            We built Nyayota to solve that problem. There is no large corporation, foundation, or institutional lobby behind this project. It is an independent effort to collect official public statutes, clean up the text, make it instantly searchable, and provide plain-language bilingual summaries so that anyone can read what the law says.
+          </p>
+          <p>
+            We believe that the rules governing society should be open, legible, and freely accessible to everyone who lives under them.
+          </p>
+        </div>
+      </div>
+
+      {/* The Mission & Purpose */}
       <div className="p-8 rounded-2xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-xs space-y-6">
         <h2 className="text-xl sm:text-2xl font-bold text-zinc-900 dark:text-zinc-100 font-serif">
-          Why Nyayota Exists
+          Why Legal Information Matters
         </h2>
         <div className="space-y-4 text-xs sm:text-sm text-zinc-600 dark:text-zinc-300 leading-relaxed">
           <p>
-            Law governs fundamental aspects of daily life — from civil rights and employment protections to tenancy agreements and digital privacy. However, in many jurisdictions, statutory laws remain practically inaccessible to the general public. Official texts are often distributed across fragmented gazette scans, archaic 19th-century colonial terminology, or closed commercial research databases.
+            The law touches almost every part of everyday life: work contracts, rental agreements, personal privacy, consumer rights, and civil liberties. Yet most people only encounter the legal system during a moment of crisis, when they have the least time and fewest resources to figure out what their rights are.
           </p>
           <p>
-            When citizens face urgent situations — such as police questioning, unlawful eviction, or online harassment — discovering their basic statutory rights should not be prevented by prohibitive costs or obscure formatting.
+            When someone faces an unlawful eviction, a workplace dispute, or harassment, they should be able to look up the relevant statute immediately without encountering paywalls or impossible formatting.
           </p>
           <p>
-            <strong>Nyayota</strong> (derived from the root concept of <em>Nyay</em> — justice, fairness, and jurisprudence) was established as an open legal information repository. Our approach is straightforward: preserve the verbatim, authoritative text of official statutes while providing adjacent plain-language syntheses, bilingual legal definitions, and clear procedural steps.
+            The name <strong>Nyayota</strong> comes from the root concept of <em>Nyay</em> — justice, fairness, and law. Our focus is straightforward: keep the full, authoritative statutory text intact, and pair it with clear summaries, clear section breakdowns, and structured procedural guidance.
           </p>
         </div>
       </div>
 
-      {/* Institutional Disclaimer & Scope */}
+      {/* Legal Disclaimer & Scope */}
       <div className="p-6 rounded-xl bg-amber-50/70 dark:bg-amber-950/20 border border-amber-200/80 dark:border-amber-900/50 text-zinc-900 dark:text-zinc-100 space-y-3">
         <div className="flex items-center space-x-2 text-zinc-900 dark:text-zinc-100 font-bold text-sm">
           <AlertTriangle className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0" />
-          <span>Institutional Charter &amp; Non-Representation Notice</span>
+          <span>Important Legal Disclaimer</span>
         </div>
         <div className="text-xs sm:text-sm text-zinc-700 dark:text-zinc-300 leading-relaxed space-y-2">
           <p>
-            <strong>Nyayota is a legal information and research platform, not a legal practice or law firm.</strong> We do not provide individual legal counsel, advocate services, or court representation. Accessing materials on this site does not constitute an advocate-client relationship.
+            <strong>Nyayota is an educational and informational tool, not a law firm.</strong> We do not provide legal advice, professional counsel, or representation in any court. Using this website or interacting with its AI assistant does not create a lawyer-client relationship.
           </p>
           <p>
-            Our statutory overviews and computational syntheses are educational materials designed to assist research and legal literacy. If you are involved in pending criminal proceedings, civil suits, or transactional disputes, you should retain qualified legal counsel or reach out to the National Legal Aid Services Organization (NLASO Helpline: <strong>16430</strong>).
+            The summaries and explanations provided here are meant to assist study, research, and legal literacy. If you are dealing with an active legal case, dispute, or police investigation, you should always consult a qualified lawyer or contact the National Legal Aid Services Organization (NLASO Helpline: <strong>16430</strong>).
           </p>
         </div>
       </div>
 
-      {/* Sourcing & Verification Methodology */}
+      {/* Sourcing & Verification */}
       <div className="space-y-6">
         <div className="space-y-1">
           <h2 className="text-xl sm:text-2xl font-bold text-zinc-900 dark:text-zinc-100 font-serif">
-            Statutory Sourcing &amp; Verification
+            How We Source and Verify Legal Texts
           </h2>
           <p className="text-xs sm:text-sm text-zinc-500 dark:text-zinc-400">
-            Legal reliability depends on rigorous adherence to official gazettes and primary records.
+            Legal accuracy requires building directly on official primary records.
           </p>
         </div>
 
@@ -113,10 +138,10 @@ export default function AboutPage() {
               <FileCheck2 className="w-4 h-4" />
             </div>
             <h3 className="text-sm font-bold text-zinc-900 dark:text-zinc-100">
-              Official Government Gazette
+              Official Government Gazettes
             </h3>
             <p className="text-xs text-zinc-600 dark:text-zinc-400 leading-relaxed">
-              Domestic enactments are sourced and verified against the <em>Laws of Bangladesh</em> digital gazette maintained by the Ministry of Law, Justice and Parliamentary Affairs.
+              Bangladesh acts, ordinances, and codes are sourced directly from the official digital gazette maintained by the Ministry of Law, Justice and Parliamentary Affairs.
             </p>
           </div>
 
@@ -125,10 +150,10 @@ export default function AboutPage() {
               <Globe className="w-4 h-4" />
             </div>
             <h3 className="text-sm font-bold text-zinc-900 dark:text-zinc-100">
-              UN Treaty Series &amp; Registries
+              UN &amp; International Repositories
             </h3>
             <p className="text-xs text-zinc-600 dark:text-zinc-400 leading-relaxed">
-              Multilateral conventions (UDHR, ICCPR, Geneva Conventions, UNCLOS) are indexed from the United Nations Treaty Collection and International Committee of the Red Cross (ICRC).
+              International treaties and conventions are indexed from certified archives including the UN Treaty Series, OHCHR, and the International Committee of the Red Cross.
             </p>
           </div>
 
@@ -137,10 +162,10 @@ export default function AboutPage() {
               <ShieldCheck className="w-4 h-4" />
             </div>
             <h3 className="text-sm font-bold text-zinc-900 dark:text-zinc-100">
-              Editorial Review &amp; Errata Policy
+              Continuous Editorial Review
             </h3>
             <p className="text-xs text-zinc-600 dark:text-zinc-400 leading-relaxed">
-              Plain-language summaries and educational glossaries undergo structured editorial review to eliminate misleading simplifications and maintain legal precision.
+              Summaries and bilingual terms are reviewed against primary statutory provisions to prevent misleading generalizations or loss of legal meaning.
             </p>
           </div>
         </div>
@@ -150,10 +175,10 @@ export default function AboutPage() {
       <div className="space-y-6">
         <div className="space-y-1">
           <h2 className="text-xl sm:text-2xl font-bold text-zinc-900 dark:text-zinc-100 font-serif">
-            Who Nyayota Serves
+            Who Uses Nyayota
           </h2>
           <p className="text-xs sm:text-sm text-zinc-500 dark:text-zinc-400">
-            Structured for researchers, students, and citizens requiring verifiable statutory clarity.
+            Built for anyone who needs fast, readable, and verifiable legal information.
           </p>
         </div>
 
@@ -176,14 +201,30 @@ export default function AboutPage() {
         </div>
       </div>
 
-      {/* Errata and Editorial Notice */}
+      {/* PART 3: Current Status & Transparency Note */}
+      <div className="p-6 rounded-2xl bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 space-y-3">
+        <div className="flex items-center space-x-2 text-zinc-900 dark:text-zinc-100 font-bold text-sm">
+          <Clock className="w-4 h-4 text-blue-600 dark:text-blue-400 shrink-0" />
+          <span>Current Status</span>
+        </div>
+        <div className="text-xs sm:text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed space-y-2">
+          <p>
+            Nyayota is actively being developed. Our database of statutes, case precedents, and treaties is expanding over time, and some platform features remain in progress.
+          </p>
+          <p>
+            While we strive for precision and keep texts closely aligned with official publications, laws are amended periodically and court interpretations evolve. For binding legal proceedings, formal compliance, or critical life decisions, you should always verify the current official gazette text and consult qualified legal counsel.
+          </p>
+        </div>
+      </div>
+
+      {/* Corrections & Errata Reporting */}
       <div className="p-6 rounded-2xl bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
         <div className="space-y-1.5 max-w-xl">
           <h2 className="text-base font-bold text-zinc-900 dark:text-zinc-100">
-            Statutory Corrections &amp; Errata Reporting
+            Corrections &amp; Feedback
           </h2>
           <p className="text-xs text-zinc-600 dark:text-zinc-400 leading-relaxed">
-            Statutes and subordinate rules change over time. If you identify a missing amendment, typographical error in a section numbering, or translation discrepancy, please submit a correction notice.
+            If you spot a typo in a section number, an outdated amendment, or a translation discrepancy, please let us know so we can fix it quickly.
           </p>
         </div>
         <Link
@@ -191,7 +232,7 @@ export default function AboutPage() {
           className="px-4 py-2.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 dark:bg-zinc-100 dark:hover:bg-white text-white dark:text-zinc-900 font-semibold text-xs inline-flex items-center space-x-2 transition-colors shrink-0"
         >
           <Mail className="w-3.5 h-3.5" />
-          <span>Submit Correction Notice</span>
+          <span>Report a Correction</span>
         </Link>
       </div>
     </div>

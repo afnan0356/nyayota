@@ -12,10 +12,10 @@ export function Footer() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
           <div className="flex items-center space-x-2 text-zinc-800 dark:text-zinc-300 font-medium">
             <span className="font-bold text-amber-800 dark:text-amber-400 uppercase tracking-wide text-[10px] px-1.5 py-0.5 rounded bg-amber-200/60 dark:bg-amber-900/40 border border-amber-300 dark:border-amber-800">
-              Legal Notice
+              Notice
             </span>
             <span>
-              Nyayota is an open educational and research initiative. It provides statutory texts and structured syntheses, not legal representation or personalized counsel.
+              Nyayota is an educational project providing law texts and plain-language summaries. It does not provide legal advice or representation.
             </span>
           </div>
           <Link
@@ -23,7 +23,7 @@ export function Footer() {
             id="footer-read-disclaimer-btn"
             className="text-amber-800 dark:text-amber-400 hover:underline shrink-0 font-semibold text-xs"
           >
-            Review Institutional Disclaimer →
+            Read Disclaimer →
           </Link>
         </div>
       </div>
@@ -39,20 +39,20 @@ export function Footer() {
               <span className="text-lg font-bold text-zinc-900 dark:text-zinc-100 font-serif">Nyayota</span>
             </Link>
             <p className="text-xs leading-relaxed text-zinc-600 dark:text-zinc-400 max-w-sm">
-              An open digital repository and legal research framework dedicated to making national codifications, judicial procedures, and international treaties universally transparent, searchable, and comprehensible.
+              An open legal information project making statutes, court procedures, and international treaties easier to search, read, and understand.
             </p>
             <div className="pt-1 flex items-center space-x-2 text-xs text-zinc-500">
               <span className="inline-flex items-center space-x-1.5 px-2.5 py-1 rounded bg-zinc-200/60 dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300 font-medium text-[11px] border border-zinc-300/60 dark:border-zinc-800">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 dark:bg-emerald-400" />
-                <span>Public Repository • Open Access</span>
+                <span>Open Access Legal Project</span>
               </span>
             </div>
           </div>
 
-          {/* Col 2: Legal Repositories */}
+          {/* Col 2: Legal Resources */}
           <div className="space-y-3">
             <p className="text-[11px] font-bold uppercase tracking-wider text-zinc-900 dark:text-zinc-200 font-mono">
-              Legal Repositories
+              Legal Resources
             </p>
             <ul className="space-y-2 text-xs">
               <li>
@@ -61,7 +61,7 @@ export function Footer() {
                   id="footer-nav-bangladesh-laws"
                   className="hover:text-zinc-950 dark:hover:text-white transition-colors"
                 >
-                  Bangladesh Code & Acts
+                  Bangladesh Laws
                 </Link>
               </li>
               <li>
@@ -79,7 +79,7 @@ export function Footer() {
                   id="footer-nav-outcome-guide"
                   className="hover:text-zinc-950 dark:hover:text-white transition-colors"
                 >
-                  Procedural Outcome Guide
+                  Procedural Guides
                 </Link>
               </li>
               <li>
@@ -88,7 +88,7 @@ export function Footer() {
                   id="footer-nav-ai-assistant"
                   className="hover:text-zinc-950 dark:hover:text-white transition-colors"
                 >
-                  Plain-Language Explainer
+                  AI Legal Assistant
                 </Link>
               </li>
               <li>
@@ -97,16 +97,16 @@ export function Footer() {
                   id="footer-nav-concepts"
                   className="hover:text-zinc-950 dark:hover:text-white transition-colors"
                 >
-                  Legal Doctrines & Latin Maxims
+                  Legal Concepts & Maxims
                 </Link>
               </li>
             </ul>
           </div>
 
-          {/* Col 3: Organization & Mission */}
+          {/* Col 3: About & Project */}
           <div className="space-y-3">
             <p className="text-[11px] font-bold uppercase tracking-wider text-zinc-900 dark:text-zinc-200 font-mono">
-              The Initiative
+              About
             </p>
             <ul className="space-y-2 text-xs">
               <li>
@@ -115,7 +115,7 @@ export function Footer() {
                   id="footer-nav-about-us"
                   className="hover:text-zinc-950 dark:hover:text-white transition-colors"
                 >
-                  Mission & Editorial Charter
+                  About
                 </Link>
               </li>
               <li>
@@ -124,7 +124,7 @@ export function Footer() {
                   id="footer-nav-research"
                   className="hover:text-zinc-950 dark:hover:text-white transition-colors"
                 >
-                  Research Framework
+                  Methodology
                 </Link>
               </li>
               <li>
@@ -133,7 +133,7 @@ export function Footer() {
                   id="footer-nav-roadmap"
                   className="hover:text-zinc-950 dark:hover:text-white transition-colors"
                 >
-                  Jurisdiction Expansion Roadmap
+                  Roadmap
                 </Link>
               </li>
               <li>
@@ -142,7 +142,7 @@ export function Footer() {
                   id="footer-nav-contact-us"
                   className="hover:text-zinc-950 dark:hover:text-white transition-colors"
                 >
-                  Academic & Public Inquiries
+                  Contact
                 </Link>
               </li>
               <li>
@@ -151,16 +151,16 @@ export function Footer() {
                   id="footer-nav-accessibility"
                   className="hover:text-zinc-950 dark:hover:text-white transition-colors"
                 >
-                  Digital Accessibility (WCAG 2.1)
+                  Accessibility
                 </Link>
               </li>
             </ul>
           </div>
 
-          {/* Col 4: Trust & Legal Documents */}
+          {/* Col 4: Legal & Policies */}
           <div className="space-y-3">
             <p className="text-[11px] font-bold uppercase tracking-wider text-zinc-900 dark:text-zinc-200 font-mono">
-              Governance
+              Legal
             </p>
             <ul className="space-y-2 text-xs">
               <li>
@@ -169,7 +169,7 @@ export function Footer() {
                   id="footer-nav-disclaimer"
                   className="hover:text-zinc-950 dark:hover:text-white transition-colors"
                 >
-                  Statutory Disclaimer
+                  Disclaimer
                 </Link>
               </li>
               <li>
@@ -178,7 +178,7 @@ export function Footer() {
                   id="footer-nav-terms"
                   className="hover:text-zinc-950 dark:hover:text-white transition-colors"
                 >
-                  Terms of Access
+                  Terms
                 </Link>
               </li>
               <li>
@@ -187,7 +187,7 @@ export function Footer() {
                   id="footer-nav-privacy"
                   className="hover:text-zinc-950 dark:hover:text-white transition-colors"
                 >
-                  Privacy & Data Stewardship
+                  Privacy
                 </Link>
               </li>
             </ul>
@@ -196,9 +196,9 @@ export function Footer() {
 
         {/* Bottom Subfooter */}
         <div className="mt-12 pt-6 border-t border-zinc-200 dark:border-zinc-800/80 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-zinc-500">
-          <p>© {new Date().getFullYear()} Nyayota Legal Information Project. Dedicated to open public legal knowledge.</p>
+          <p>© {new Date().getFullYear()} Nyayota. Open legal information project.</p>
           <div className="flex items-center space-x-4">
-            <span className="text-[11px]">Primary Source: Official Gazette of Bangladesh & UN Treaty Series</span>
+            <span className="text-[11px]">Primary sources: Official Gazette of Bangladesh and UN Treaty Series.</span>
           </div>
         </div>
       </div>
