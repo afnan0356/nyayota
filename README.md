@@ -19,6 +19,12 @@ An open educational legal knowledge, statutory research, and navigation engine d
 
 ---
 
+![Nyayota homepage](public/images/nyayota-homepage.png)
+
+*Screenshot of the Nyayota website homepage (https://nyayota.vercel.app).*
+
+---
+
 ## Table of Contents
 
 - [Overview](#overview)
@@ -119,7 +125,7 @@ The deployed web application can be accessed at **[https://nyayota.vercel.app](h
 | `/categories` | Categorical legal taxonomy covering 12 distinct branches of law. | [nyayota.vercel.app/categories](https://nyayota.vercel.app/categories) |
 | `/glossary` | Searchable legal terminology and Latin maxims glossary with Bengali translations. | [nyayota.vercel.app/glossary](https://nyayota.vercel.app/glossary) |
 
-> *Note on Screenshots:* Graphic assets captured from production runs will be stored under `/public/previews/` and linked here in future documentation releases.
+> *Repository Screenshot:* The authentic full-resolution desktop screenshot of the live homepage is stored in [`public/images/nyayota-homepage.png`](public/images/nyayota-homepage.png).
 
 ---
 
@@ -351,8 +357,13 @@ nyayota/
 │       ├── commercial-banking-tax.ts    # Companies Act, NI Act, Banking, Customs, Tax
 │       └── environment-admin-local-cyber.ts # Cyber Security, Environment, RTI, Labor Act
 │
-└── hooks/                           # Custom React Hooks
-    └── useSearchHistory.ts          # Hook for retrieving and clearing local search history
+├── hooks/                           # Custom React Hooks
+│   └── useSearchHistory.ts          # Hook for retrieving and clearing local search history
+│
+└── public/                          # Static assets and repository media
+    └── images/
+        ├── nyayota-homepage.png     # Authentic desktop screenshot of the Nyayota homepage
+        └── nyayota-homepage.jpg     # Source capture reference
 ```
 
 ---
