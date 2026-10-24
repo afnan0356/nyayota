@@ -786,7 +786,7 @@ export const LAWS_DATABASE: LawItem[] = [
     status: 'In Force',
     enactmentYear: 2006,
     lastAmendedYear: 2018,
-    totalStatutorySectionsCount: 354,
+    totalStatutorySectionsCount: 353,
     isCuratedSubset: true,
     officialGazetteRef: 'Bangladesh Gazette Extraordinary, Oct 11, 2006',
     overview: 'Comprehensive codification consolidating 25 disparate labor laws covering working conditions, maximum working hours, overtime compensation, maternity benefits, workplace safety, trade unions, and labor courts.',

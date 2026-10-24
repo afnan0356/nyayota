@@ -1019,7 +1019,9 @@ function LawDetailViewer({
               <span className="font-bold text-white text-sm">
                 {law.ratificationsCount || law.signatoriesCount
                   ? `${law.ratificationsCount || law.signatoriesCount} State Parties`
-                  : `${law.sections.length} Core Sections`}
+                  : law.totalStatutorySectionsCount && law.totalStatutorySectionsCount > 0
+                  ? `${law.totalStatutorySectionsCount} ${law.id.includes('constitution') ? 'Articles' : 'Sections'} (${law.sections.length} Indexed)`
+                  : `${law.sections.length} ${law.sections.length === 1 ? 'Section' : 'Sections'}`}
               </span>
             </div>
           </div>

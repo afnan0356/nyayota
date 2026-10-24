@@ -35,7 +35,7 @@ export const COMMERCIAL_BANKING_TAX_LAWS: BangladeshLawRecord[] = [
     importDate: '2026-08-20T00:00:00Z',
     lastVerifiedDate: '2026-08-26T00:00:00Z',
     integrityStatus: 'fully-verified',
-    totalSectionsCount: 354,
+    totalSectionsCount: 353,
     relatedLawIds: ['bd-epz-labour-2019', 'bd-contract-act-1872'],
     sections: [
       {

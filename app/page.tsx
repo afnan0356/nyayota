@@ -691,7 +691,11 @@ export default function HomePage() {
                   </div>
 
                   <div className="pt-4 border-t border-zinc-100 dark:border-zinc-800 flex items-center justify-between text-xs">
-                    <span className="text-zinc-500">{law.sections.length} Core Sections</span>
+                    <span className="text-zinc-500">
+                      {law.totalStatutorySectionsCount && law.totalStatutorySectionsCount > 0
+                        ? `${law.totalStatutorySectionsCount} Sections (${law.sections.length} Indexed)`
+                        : `${law.sections.length} ${law.sections.length === 1 ? 'Section' : 'Sections'}`}
+                    </span>
                     <Link
                       href={`/law/${law.id}`}
                       id={`featured-law-read-${law.id}`}

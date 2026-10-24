@@ -227,7 +227,11 @@ function DiscoverContent() {
                 </div>
 
                 <div className="pt-2 border-t border-zinc-100 dark:border-zinc-800 flex items-center justify-between text-xs">
-                  <span className="text-zinc-400 text-[11px]">{law.sections.length} Sections</span>
+                  <span className="text-zinc-400 text-[11px]">
+                    {law.totalStatutorySectionsCount && law.totalStatutorySectionsCount > 0
+                      ? `${law.totalStatutorySectionsCount} Sections`
+                      : `${law.sections.length} ${law.sections.length === 1 ? 'Section' : 'Sections'}`}
+                  </span>
                   <Link
                     href={`/law/${law.id}`}
                     className="text-amber-600 dark:text-amber-400 font-bold hover:underline inline-flex items-center space-x-1"

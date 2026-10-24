@@ -454,7 +454,11 @@ function SearchContent() {
 
                     <div className="pt-3 border-t border-zinc-100 dark:border-zinc-800/80 flex items-center justify-between text-xs">
                       <div className="flex items-center space-x-3 text-zinc-500">
-                        <span>{law.sections.length} Sections</span>
+                        <span>
+                          {law.totalStatutorySectionsCount && law.totalStatutorySectionsCount > 0
+                            ? `${law.totalStatutorySectionsCount} Sections`
+                            : `${law.sections.length} ${law.sections.length === 1 ? 'Section' : 'Sections'}`}
+                        </span>
                         <Link
                           href={`/ai-assistant?lawId=${law.id}`}
                           className="hover:text-amber-500 font-semibold flex items-center space-x-1"
