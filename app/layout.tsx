@@ -12,7 +12,8 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: 'Nyayota — Free Legal Information & Research Platform',
+  metadataBase: new URL('https://nyayota.vercel.app'),
+  title: 'Nyayota: Free Legal Information and Research Platform',
   description: 'An open legal research and knowledge platform making laws understandable, searchable, comparable, and accessible globally.',
   keywords: [
     'legal research',
@@ -28,8 +29,10 @@ export const metadata: Metadata = {
   ],
   authors: [{ name: 'Nyayota Legal Initiative' }],
   openGraph: {
-    title: 'Nyayota — Legal Information & Research Platform',
+    title: 'Nyayota: Legal Information and Research Platform',
     description: 'Understand laws easily with simple language summaries, multilingual translations, comparison tools, and educational outcome guides.',
+    url: 'https://nyayota.vercel.app',
+    siteName: 'Nyayota',
     type: 'website',
   },
 };
@@ -66,9 +69,16 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         />
       </head>
       <body className={`${inter.variable} font-sans min-h-screen flex flex-col bg-zinc-50 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 antialiased selection:bg-amber-500 selection:text-white transition-colors duration-150`}>
+        {/* Skip to Main Content Link for WCAG 2.2 AA accessibility */}
+        <a
+          href="#main-content"
+          className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-amber-500 focus:text-zinc-950 focus:font-semibold focus:rounded-md focus:shadow-lg focus:outline-none"
+        >
+          Skip to main content
+        </a>
         <ThemeProvider>
           <Header />
-          <main className="flex-1 w-full flex flex-col">{children}</main>
+          <main id="main-content" className="flex-1 w-full flex flex-col">{children}</main>
           <Footer />
         </ThemeProvider>
       </body>

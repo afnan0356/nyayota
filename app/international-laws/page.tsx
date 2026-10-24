@@ -156,7 +156,7 @@ export default function InternationalLawsPage() {
       {/* Header Banner */}
       <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6 pb-6 border-b border-zinc-200 dark:border-zinc-800">
         <div className="space-y-4 max-w-3xl">
-          <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20 text-xs font-semibold">
+          <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-md bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20 text-xs font-semibold">
             <Globe className="w-3.5 h-3.5" />
             <span>Multilateral Treaty & Statutory Repository</span>
           </div>

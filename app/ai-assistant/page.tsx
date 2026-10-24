@@ -230,7 +230,7 @@ I am an interactive, neutral educational legal research assistant. I can help yo
       {/* Top Banner & Header */}
       <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 border-b border-zinc-200 dark:border-zinc-800 pb-6">
         <div className="space-y-2 max-w-3xl">
-          <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 text-xs font-semibold">
+          <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-md bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 text-xs font-semibold">
             <Sparkles className="w-3.5 h-3.5" />
             <span>AI Legal Knowledge Assistant</span>
           </div>

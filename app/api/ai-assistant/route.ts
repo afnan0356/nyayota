@@ -6,12 +6,107 @@ export interface ChatMessage {
   content: string;
 }
 
+// In-memory sliding-window rate limiter (20 requests per 60 seconds per client IP)
+interface RateLimitRecord {
+  timestamps: number[];
+}
+const rateLimitMap = new Map<string, RateLimitRecord>();
+const RATE_LIMIT_WINDOW_MS = 60 * 1000; // 60 seconds
+const MAX_REQUESTS_PER_WINDOW = 20;
+
+function checkRateLimit(clientIp: string): { allowed: boolean; remaining: number } {
+  const now = Date.now();
+  const record = rateLimitMap.get(clientIp) || { timestamps: [] };
+
+  // Remove timestamps outside the sliding window
+  const activeTimestamps = record.timestamps.filter((ts) => now - ts < RATE_LIMIT_WINDOW_MS);
+
+  if (activeTimestamps.length >= MAX_REQUESTS_PER_WINDOW) {
+    rateLimitMap.set(clientIp, { timestamps: activeTimestamps });
+    return { allowed: false, remaining: 0 };
+  }
+
+  activeTimestamps.push(now);
+  rateLimitMap.set(clientIp, { timestamps: activeTimestamps });
+
+  // Periodically clean stale entries to prevent memory leaks
+  if (rateLimitMap.size > 2000) {
+    for (const [key, val] of rateLimitMap.entries()) {
+      if (val.timestamps.every((t) => now - t >= RATE_LIMIT_WINDOW_MS)) {
+        rateLimitMap.delete(key);
+      }
+    }
+  }
+
+  return { allowed: true, remaining: MAX_REQUESTS_PER_WINDOW - activeTimestamps.length };
+}
+
 export async function POST(req: NextRequest) {
   try {
-    const { query, mode = 'explain', language = 'both', lawContext, messages = [] } = await req.json();
+    // 1. IP extraction and sliding-window rate limiting
+    const forwardedHeader = req.headers.get('x-forwarded-for');
+    const clientIp = forwardedHeader ? forwardedHeader.split(',')[0].trim() : req.headers.get('x-real-ip') || '127.0.0.1';
+    
+    const rateLimit = checkRateLimit(clientIp);
+    if (!rateLimit.allowed) {
+      return NextResponse.json(
+        {
+          error: 'Rate limit exceeded. Please wait a moment before sending additional legal inquiries.',
+          retryAfterSeconds: 60,
+        },
+        {
+          status: 429,
+          headers: {
+            'Retry-After': '60',
+            'X-RateLimit-Limit': String(MAX_REQUESTS_PER_WINDOW),
+            'X-RateLimit-Remaining': '0',
+          },
+        }
+      );
+    }
 
-    if (!query || typeof query !== 'string') {
-      return NextResponse.json({ error: 'Query parameter is required' }, { status: 400 });
+    // 2. Body parsing and strict input validation
+    let body;
+    try {
+      body = await req.json();
+    } catch {
+      return NextResponse.json({ error: 'Malformed JSON payload.' }, { status: 400 });
+    }
+
+    const { query, mode = 'explain', language = 'both', lawContext, messages = [] } = body;
+
+    if (!query || typeof query !== 'string' || query.trim().length === 0) {
+      return NextResponse.json({ error: 'Query parameter is required and must be non-empty.' }, { status: 400 });
+    }
+
+    // Enforce 1,500 character upper limit to avoid token exhaustion and DoS
+    const trimmedQuery = query.trim();
+    if (trimmedQuery.length > 1500) {
+      return NextResponse.json(
+        { error: 'Query exceeds maximum allowed length of 1,500 characters.' },
+        { status: 400 }
+      );
+    }
+
+    // Validate mode and language
+    const safeMode = typeof mode === 'string' && ['explain', 'outcome', 'compare', 'analogy', 'statute'].includes(mode)
+      ? mode
+      : 'explain';
+    const safeLanguage = typeof language === 'string' && ['english', 'bengali', 'both'].includes(language)
+      ? language
+      : 'both';
+
+    // Limit conversation history to latest 10 messages with 2,000 character cap per message
+    const validatedMessages: ChatMessage[] = [];
+    if (Array.isArray(messages)) {
+      messages.slice(-10).forEach((msg) => {
+        if (msg && typeof msg === 'object' && typeof msg.content === 'string') {
+          validatedMessages.push({
+            role: msg.role === 'user' ? 'user' : 'assistant',
+            content: msg.content.slice(0, 2000),
+          });
+        }
+      });
     }
 
     const apiKey = process.env.GEMINI_API_KEY;
@@ -29,12 +124,22 @@ CRITICAL OPERATIONAL RULES:
 6. STRUCTURED RESPONSES: Use clear Markdown headings (###), bullet points, bold key terms, and statutory section citations (e.g., Section 300, Penal Code 1860; Article 102, Constitution).`;
 
     // Construct enriched prompt
-    let userPrompt = ``;
-    if (lawContext) {
-      userPrompt += `[ACTIVE STATUTE CONTEXT]\nTitle: ${lawContext.title || 'N/A'}\nJurisdiction: ${lawContext.jurisdiction || 'N/A'}\nCategory: ${lawContext.category || 'N/A'}\n${lawContext.sectionNumber ? `Selected Section: ${lawContext.sectionNumber} - ${lawContext.sectionTitle || ''}\nContent Excerpt: ${lawContext.sectionContent || ''}\n` : ''}\n\n`;
+    let userPrompt = '';
+    if (lawContext && typeof lawContext === 'object') {
+      const safeTitle = typeof lawContext.title === 'string' ? lawContext.title.slice(0, 150) : 'N/A';
+      const safeJurisdiction = typeof lawContext.jurisdiction === 'string' ? lawContext.jurisdiction.slice(0, 60) : 'N/A';
+      const safeCategory = typeof lawContext.category === 'string' ? lawContext.category.slice(0, 60) : 'N/A';
+      userPrompt += `[ACTIVE STATUTE CONTEXT]\nTitle: ${safeTitle}\nJurisdiction: ${safeJurisdiction}\nCategory: ${safeCategory}\n`;
+      if (lawContext.sectionNumber) {
+        const safeSecNum = String(lawContext.sectionNumber).slice(0, 30);
+        const safeSecTitle = typeof lawContext.sectionTitle === 'string' ? lawContext.sectionTitle.slice(0, 150) : '';
+        const safeSecContent = typeof lawContext.sectionContent === 'string' ? lawContext.sectionContent.slice(0, 600) : '';
+        userPrompt += `Selected Section: ${safeSecNum} - ${safeSecTitle}\nContent Excerpt: ${safeSecContent}\n`;
+      }
+      userPrompt += '\n';
     }
 
-    userPrompt += `User Inquiry: ${query}\nMode: ${mode}\nTarget Language: ${language}`;
+    userPrompt += `User Inquiry: ${trimmedQuery}\nMode: ${safeMode}\nTarget Language: ${safeLanguage}`;
 
     if (apiKey) {
       try {
@@ -47,10 +152,10 @@ CRITICAL OPERATIONAL RULES:
           },
         });
 
-        // Format conversation history if provided
+        // Format conversation history
         const contents: any[] = [];
-        if (Array.isArray(messages) && messages.length > 0) {
-          messages.slice(-6).forEach((msg: ChatMessage) => {
+        if (validatedMessages.length > 0) {
+          validatedMessages.slice(-6).forEach((msg) => {
             contents.push({
               role: msg.role === 'user' ? 'user' : 'model',
               parts: [{ text: msg.content }]
@@ -77,19 +182,22 @@ CRITICAL OPERATIONAL RULES:
           timestamp: new Date().toISOString(),
         });
       } catch (geminiError: unknown) {
-        console.error('Gemini API call failed, switching to local legal reasoning engine:', geminiError);
+        // Sanitized server-side error logging: never echo raw query payload
+        const errorMsg = geminiError instanceof Error ? geminiError.message : 'Unknown upstream error';
+        console.error('Upstream AI generation request encountered an issue:', errorMsg);
       }
     }
 
     // High precision fallback educational analysis if API key is missing or offline
-    const fallbackResponse = generateLocalLegalAnalysis(query, mode, language, lawContext);
+    const fallbackResponse = generateLocalLegalAnalysis(trimmedQuery, safeMode, safeLanguage, lawContext);
     return NextResponse.json({
       text: fallbackResponse,
       provider: 'nyayota-legal-engine-v1',
       timestamp: new Date().toISOString(),
     });
   } catch (error: unknown) {
-    console.error('AI assistant route error:', error);
+    const errorMsg = error instanceof Error ? error.message : 'Internal error';
+    console.error('AI assistant route encountered an error:', errorMsg);
     return NextResponse.json(
       { error: 'An error occurred while analyzing the legal query.' },
       { status: 500 }

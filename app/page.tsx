@@ -809,7 +809,7 @@ export default function HomePage() {
             {/* Left Column: Information & Triggers */}
             <div className="lg:col-span-6 space-y-6">
               <div className="space-y-2">
-                <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-amber-500/20 text-amber-400 border border-amber-500/30 text-xs font-semibold">
+                <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-md bg-amber-500/20 text-amber-400 border border-amber-500/30 text-xs font-semibold">
                   <Sparkles className="w-3.5 h-3.5" />
                   <span>Interactive AI Research Engine</span>
                 </div>

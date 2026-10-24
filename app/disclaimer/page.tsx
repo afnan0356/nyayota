@@ -2,13 +2,13 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { AlertTriangle, Scale, PhoneCall, ArrowRight, ShieldAlert } from 'lucide-react';
+import { AlertTriangle, Scale, PhoneCall, ShieldAlert, Mail } from 'lucide-react';
 
 export default function DisclaimerPage() {
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-10">
       <div className="space-y-3">
-        <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20 text-xs font-semibold">
+        <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-md bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20 text-xs font-semibold">
           <AlertTriangle className="w-3.5 h-3.5" />
           <span>Legal Disclaimer</span>
         </div>
@@ -18,10 +18,10 @@ export default function DisclaimerPage() {
         <p className="text-xs text-zinc-500">Comprehensive Statement Regarding Legal Information vs. Legal Advice</p>
       </div>
 
-      <div className="p-6 sm:p-7 rounded-3xl bg-rose-500/5 dark:bg-rose-500/10 border border-rose-500/20 text-zinc-800 dark:text-zinc-200 space-y-3">
+      <div className="p-6 sm:p-7 rounded-2xl bg-rose-500/5 dark:bg-rose-500/10 border border-rose-500/20 text-zinc-800 dark:text-zinc-200 space-y-3">
         <h2 className="text-base sm:text-lg font-bold text-rose-700 dark:text-rose-400 flex items-center space-x-2">
           <ShieldAlert className="w-5 h-5 text-rose-500 shrink-0" />
-          <span>No Attorney-Client Relationship</span>
+          <span>No Attorney-Client Relationship Formed</span>
         </h2>
         <p className="text-xs sm:text-sm leading-relaxed">
           Accessing Nyayota, using its search tools, reading statutory explanations, or interacting with our AI Legal Knowledge Explainer <strong>does NOT create an attorney-client relationship</strong> between you and Nyayota, its developers, or its contributors.
@@ -37,7 +37,7 @@ export default function DisclaimerPage() {
         </section>
 
         <section className="space-y-2">
-          <h2 className="text-base sm:text-lg font-bold text-zinc-900 dark:text-white">2. AI Explanations and Summaries</h2>
+          <h2 className="text-base sm:text-lg font-bold text-zinc-900 dark:text-white">2. AI Explanations and Plain-Language Summaries</h2>
           <p>
             AI-generated summaries and plain language explanations are provided to simplify complex legal concepts. While configured with high accuracy standards, AI outputs may contain simplifications or interpretive nuances and should always be verified against the official government gazette or statutory source text.
           </p>
@@ -57,6 +57,16 @@ export default function DisclaimerPage() {
               National Legal Aid Services Organization (NLASO) provides free legal assistance to eligible citizens: <strong>Toll-Free Helpline: 16430</strong>.
             </p>
           </div>
+        </section>
+
+        <section className="space-y-2">
+          <h2 className="text-base sm:text-lg font-bold text-zinc-900 dark:text-white">4. Reporting Discrepancies</h2>
+          <p>
+            If you identify any discrepancy with recent gazetted amendments, please notify our editorial desk at{' '}
+            <a href="mailto:nyayota.contact@gmail.com" className="text-amber-600 dark:text-amber-400 underline font-mono">
+              nyayota.contact@gmail.com
+            </a>.
+          </p>
         </section>
       </div>
     </div>

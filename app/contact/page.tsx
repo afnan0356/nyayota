@@ -1,17 +1,18 @@
 'use client';
 
 import React, { useState } from 'react';
+import Link from 'next/link';
 import {
   Mail,
-  MessageSquare,
-  Building2,
+  Send,
   CheckCircle2,
   AlertCircle,
-  Send,
-  HelpCircle,
-  FileCheck,
+  Copy,
+  ExternalLink,
+  ShieldCheck,
+  Building2,
   GraduationCap,
-  RefreshCw
+  FileCheck
 } from 'lucide-react';
 
 export default function ContactPage() {
@@ -21,10 +22,27 @@ export default function ContactPage() {
     category: 'General Inquiry',
     subject: '',
     message: '',
+    consent: false,
   });
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [copied, setCopied] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
+
+  const OFFICIAL_EMAIL = 'nyayota.contact@gmail.com';
+
+  const generateMailtoUrl = () => {
+    const subjectLine = formData.subject.trim() || `[${formData.category}] Inquiry from ${formData.name.trim()}`;
+    const emailBody = `Name: ${formData.name.trim()}
+Email: ${formData.email.trim()}
+Department: ${formData.category}
+
+Message:
+${formData.message.trim()}
+
+---
+Submitted via Nyayota Legal Platform`;
+    return `mailto:${OFFICIAL_EMAIL}?subject=${encodeURIComponent(subjectLine)}&body=${encodeURIComponent(emailBody)}`;
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -32,63 +50,102 @@ export default function ContactPage() {
       setErrorMsg('Please complete all required fields (Name, Email, and Message).');
       return;
     }
+    if (!formData.consent) {
+      setErrorMsg('Please confirm your consent to process this inquiry according to the Privacy Policy.');
+      return;
+    }
     setErrorMsg('');
-    setIsSubmitting(true);
+    setIsSubmitted(true);
 
-    // Simulate reliable dispatch
-    setTimeout(() => {
-      setIsSubmitting(false);
-      setIsSubmitted(true);
-    }, 800);
+    // Open mail client directly with pre-composed query
+    const mailtoUrl = generateMailtoUrl();
+    window.location.href = mailtoUrl;
+  };
+
+  const handleCopyText = async () => {
+    const fullText = `To: ${OFFICIAL_EMAIL}
+Subject: ${formData.subject.trim() || `[${formData.category}] Inquiry from ${formData.name.trim()}`}
+From: ${formData.name.trim()} (${formData.email.trim()})
+
+${formData.message.trim()}`;
+    try {
+      await navigator.clipboard.writeText(fullText);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 3000);
+    } catch {
+      // Fallback if clipboard API blocked
+    }
   };
 
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-12">
       {/* Header Banner */}
       <div className="space-y-4 max-w-3xl">
-        <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 text-xs font-semibold">
+        <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-md bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 text-xs font-semibold">
           <Mail className="w-3.5 h-3.5" />
-          <span>Contact & Inquiries</span>
+          <span>Contact and Inquiries</span>
         </div>
         <h1 className="text-3xl sm:text-4xl font-extrabold text-zinc-900 dark:text-white tracking-tight">
           Get in Touch with Nyayota
         </h1>
         <p className="text-sm sm:text-base text-zinc-600 dark:text-zinc-400 leading-relaxed">
-          Have feedback on our legal repository, identified a statutory amendment to be updated, or interested in academic collaboration? Send us a message below.
+          Have feedback on our legal repository, identified a statutory amendment to be updated, or interested in academic collaboration? Direct inquiries to our official editorial desk.
         </p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
         {/* Left Column: Contact Form */}
         <div className="lg:col-span-7">
-          <div className="p-7 sm:p-8 rounded-3xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-sm">
+          <div className="p-7 sm:p-8 rounded-2xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-sm">
             {isSubmitted ? (
-              <div className="py-12 text-center space-y-4 animate-in fade-in">
-                <div className="w-12 h-12 rounded-full bg-emerald-500/20 text-emerald-500 flex items-center justify-center mx-auto">
+              <div className="py-8 text-center space-y-5">
+                <div className="w-12 h-12 rounded-xl bg-emerald-500/10 text-emerald-500 flex items-center justify-center mx-auto border border-emerald-500/20">
                   <CheckCircle2 className="w-6 h-6" />
                 </div>
-                <h2 className="text-xl font-bold text-zinc-900 dark:text-white">Message Received</h2>
-                <p className="text-xs sm:text-sm text-zinc-600 dark:text-zinc-400 max-w-md mx-auto leading-relaxed">
-                  Thank you for reaching out to the Nyayota team. Our research coordinators will review your inquiry and follow up at <strong>{formData.email}</strong> if required.
-                </p>
-                <button
-                  type="button"
-                  id="contact-reset-btn"
-                  onClick={() => {
-                    setIsSubmitted(false);
-                    setFormData({ name: '', email: '', category: 'General Inquiry', subject: '', message: '' });
-                  }}
-                  className="mt-4 px-5 py-2.5 rounded-xl bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 text-xs font-bold transition-colors"
-                >
-                  Send Another Inquiry
-                </button>
+                <div className="space-y-2">
+                  <h2 className="text-xl font-bold text-zinc-900 dark:text-white">Inquiry Prepared for Dispatch</h2>
+                  <p className="text-xs sm:text-sm text-zinc-600 dark:text-zinc-400 max-w-md mx-auto leading-relaxed">
+                    Your inquiry has been formatted for the Nyayota editorial team at <span className="font-mono text-zinc-900 dark:text-zinc-200 font-semibold">{OFFICIAL_EMAIL}</span>. If your mail client did not open automatically, you can send it directly or copy the formatted text below.
+                  </p>
+                </div>
+
+                <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
+                  <a
+                    href={generateMailtoUrl()}
+                    className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-zinc-950 font-bold text-xs flex items-center justify-center space-x-2 transition-colors shadow-sm"
+                  >
+                    <ExternalLink className="w-3.5 h-3.5" />
+                    <span>Open in Email App</span>
+                  </a>
+                  <button
+                    type="button"
+                    onClick={handleCopyText}
+                    className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-zinc-900 dark:text-zinc-100 font-semibold text-xs flex items-center justify-center space-x-2 transition-colors border border-zinc-200 dark:border-zinc-700"
+                  >
+                    <Copy className="w-3.5 h-3.5" />
+                    <span>{copied ? 'Copied to Clipboard' : 'Copy Formatted Text'}</span>
+                  </button>
+                </div>
+
+                <div className="pt-4 border-t border-zinc-200 dark:border-zinc-800">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsSubmitted(false);
+                      setFormData({ name: '', email: '', category: 'General Inquiry', subject: '', message: '', consent: false });
+                    }}
+                    className="text-xs text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-300 underline"
+                  >
+                    Send another inquiry
+                  </button>
+                </div>
               </div>
             ) : (
-              <form onSubmit={handleSubmit} className="space-y-4">
+              <form onSubmit={handleSubmit} className="space-y-4" noValidate>
                 <h2 className="text-lg font-bold text-zinc-900 dark:text-white mb-2">Send an Inquiry</h2>
 
                 {errorMsg && (
-                  <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-600 dark:text-rose-400 text-xs flex items-center space-x-2">
+                  <div role="alert" className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-600 dark:text-rose-400 text-xs flex items-center space-x-2">
                     <AlertCircle className="w-4 h-4 shrink-0" />
                     <span>{errorMsg}</span>
                   </div>
@@ -139,7 +196,8 @@ export default function ContactPage() {
                     >
                       <option value="General Inquiry">General Inquiry</option>
                       <option value="Statute Data Correction">Statute / Gazette Amendment Correction</option>
-                      <option value="Accessibility Feedback">Accessibility & Platform Feedback</option>
+                      <option value="Accessibility Feedback">Accessibility &amp; Platform Feedback</option>
+                      <option value="Academic Collaboration">Academic &amp; Research Collaboration</option>
                     </select>
                   </div>
 
@@ -173,99 +231,100 @@ export default function ContactPage() {
                   />
                 </div>
 
+                {/* Privacy Consent Checkbox */}
+                <div className="flex items-start space-x-2 pt-1">
+                  <input
+                    id="contact-consent"
+                    type="checkbox"
+                    checked={formData.consent}
+                    onChange={(e) => setFormData({ ...formData, consent: e.target.checked })}
+                    className="mt-0.5 h-4 w-4 rounded border-zinc-300 dark:border-zinc-700 text-amber-500 focus:ring-amber-400"
+                  />
+                  <label htmlFor="contact-consent" className="text-xs text-zinc-600 dark:text-zinc-400">
+                    I agree that the details provided above will be transmitted to the Nyayota team to evaluate and respond to this inquiry in accordance with the{' '}
+                    <Link href="/privacy" className="text-amber-600 dark:text-amber-400 hover:underline font-medium">
+                      Privacy Policy
+                    </Link>.
+                  </label>
+                </div>
+
                 <button
                   type="submit"
                   id="contact-submit-btn"
-                  disabled={isSubmitting}
-                  className="w-full py-3 rounded-xl bg-amber-500 hover:bg-amber-400 disabled:opacity-50 text-zinc-950 font-bold text-xs sm:text-sm flex items-center justify-center space-x-2 transition-colors shadow-md shadow-amber-500/20"
+                  className="w-full py-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-zinc-950 font-bold text-xs sm:text-sm flex items-center justify-center space-x-2 transition-colors shadow-md shadow-amber-500/20"
                 >
-                  {isSubmitting ? (
-                    <>
-                      <RefreshCw className="w-4 h-4 animate-spin" />
-                      <span>Transmitting Inquiry...</span>
-                    </>
-                  ) : (
-                    <>
-                      <Send className="w-4 h-4" />
-                      <span>Submit Message</span>
-                    </>
-                  )}
+                  <Send className="w-4 h-4" />
+                  <span>Send Inquiry to Official Desk</span>
                 </button>
               </form>
             )}
           </div>
         </div>
 
-        {/* Right Column: Channels & Future Support Infrastructure */}
+        {/* Right Column: Channels & Educational Notice */}
         <div className="lg:col-span-5 space-y-4">
-          <div className="p-6 rounded-3xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-sm space-y-4">
-            <h3 className="text-sm font-bold text-zinc-900 dark:text-white">Communication & Departmental Channels</h3>
+          <div className="p-6 rounded-2xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-sm space-y-4">
+            <h3 className="text-sm font-bold text-zinc-900 dark:text-white">Communication and Departmental Channels</h3>
             
             <div className="space-y-3 text-xs">
               {/* General Inquiries */}
-              <div className="p-3.5 rounded-2xl bg-zinc-50 dark:bg-zinc-950/60 border border-zinc-200 dark:border-zinc-800/80 flex items-start space-x-3">
+              <div className="p-3.5 rounded-xl bg-zinc-50 dark:bg-zinc-950/60 border border-zinc-200 dark:border-zinc-800/80 flex items-start space-x-3">
                 <div className="w-8 h-8 rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0 border border-amber-500/20">
                   <Mail className="w-4 h-4" />
                 </div>
                 <div className="space-y-0.5">
                   <div className="flex items-center space-x-2">
-                    <strong className="text-zinc-900 dark:text-white block">General Inquiry</strong>
+                    <strong className="text-zinc-900 dark:text-white block">Official Contact Desk</strong>
                     <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800 font-semibold">
-                      Active
+                      Monitored
                     </span>
                   </div>
                   <a
-                    href="mailto:contact.nyayota@gmail.com"
+                    href={`mailto:${OFFICIAL_EMAIL}`}
                     className="font-mono text-zinc-600 dark:text-zinc-300 hover:text-amber-600 dark:hover:text-amber-400 hover:underline block text-xs"
                   >
-                    contact.nyayota@gmail.com
+                    {OFFICIAL_EMAIL}
                   </a>
-                  <p className="text-[11px] text-zinc-500">Public inquiries, editorial feedback, and general questions.</p>
+                  <p className="text-[11px] text-zinc-500">Public inquiries, statutory corrections, and research communications.</p>
                 </div>
               </div>
 
               {/* Academic Partnerships */}
-              <div className="p-3.5 rounded-2xl bg-zinc-50/70 dark:bg-zinc-950/40 border border-zinc-200 dark:border-zinc-800/80 flex items-start space-x-3 opacity-90">
+              <div className="p-3.5 rounded-xl bg-zinc-50 dark:bg-zinc-950/40 border border-zinc-200 dark:border-zinc-800/80 flex items-start space-x-3">
                 <div className="w-8 h-8 rounded-lg bg-zinc-200 dark:bg-zinc-800 text-zinc-500 flex items-center justify-center shrink-0">
                   <GraduationCap className="w-4 h-4" />
                 </div>
                 <div className="space-y-0.5">
                   <div className="flex items-center space-x-2">
                     <strong className="text-zinc-900 dark:text-white block">Academic Partnerships</strong>
-                    <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-zinc-200 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 font-medium">
-                      Under Maintenance
-                    </span>
                   </div>
                   <p className="text-[11px] text-zinc-500">
-                    Institutional curriculum integrations and faculty pilot programs are temporarily paused while our core repository indices are being upgraded.
+                    Law faculty, student researchers, and civic legal organizations may reach out directly via {OFFICIAL_EMAIL}.
                   </p>
                 </div>
               </div>
 
               {/* Verification & Archive Requests */}
-              <div className="p-3.5 rounded-2xl bg-zinc-50/70 dark:bg-zinc-950/40 border border-zinc-200 dark:border-zinc-800/80 flex items-start space-x-3 opacity-90">
+              <div className="p-3.5 rounded-xl bg-zinc-50 dark:bg-zinc-950/40 border border-zinc-200 dark:border-zinc-800/80 flex items-start space-x-3">
                 <div className="w-8 h-8 rounded-lg bg-zinc-200 dark:bg-zinc-800 text-zinc-500 flex items-center justify-center shrink-0">
                   <FileCheck className="w-4 h-4" />
                 </div>
                 <div className="space-y-0.5">
                   <div className="flex items-center space-x-2">
-                    <strong className="text-zinc-900 dark:text-white block">Verification &amp; Archive Requests</strong>
-                    <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-zinc-200 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 font-medium">
-                      Under Maintenance
-                    </span>
+                    <strong className="text-zinc-900 dark:text-white block">Statute Verification Reports</strong>
                   </div>
                   <p className="text-[11px] text-zinc-500">
-                    Direct custom gazette archival extraction requests are currently paused during scheduled repository maintenance.
+                    If you detect a gazette amendment or section typo, cite the gazette number and section in your message for immediate verification.
                   </p>
                 </div>
               </div>
             </div>
           </div>
 
-          <div className="p-6 rounded-3xl bg-zinc-900 text-white border border-zinc-800 space-y-2">
+          <div className="p-6 rounded-2xl bg-zinc-900 text-white border border-zinc-800 space-y-2">
             <h4 className="text-xs font-bold uppercase tracking-wider text-amber-400">Educational Notice</h4>
             <p className="text-xs text-zinc-400 leading-relaxed">
-              Nyayota team members cannot provide individualized legal counsel, draft court pleadings for private lawsuits, or assess the merits of ongoing criminal or civil cases. Please consult a licensed attorney.
+              Nyayota team members cannot provide individualized legal counsel, draft court pleadings for private lawsuits, or assess the merits of ongoing criminal or civil cases. Please consult a licensed advocate or call the national legal aid helpline (16430 in Bangladesh).
             </p>
           </div>
         </div>
