@@ -11,6 +11,7 @@ An open educational legal knowledge, statutory research, and navigation engine d
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178C6?style=flat&logo=typescript)](https://www.typescriptlang.org/)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-v4.1-38B2AC?style=flat&logo=tailwind-css)](https://tailwindcss.com/)
 [![Google Gen AI SDK](https://img.shields.io/badge/@google/genai-v2.4-4285F4?style=flat&logo=google)](https://www.npmjs.com/package/@google/genai)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Deployment](https://img.shields.io/badge/Deploy-Vercel-000000?style=flat&logo=vercel)](https://nyayota.vercel.app)
 
 [**Live Web Application**](https://nyayota.vercel.app) • [**Source Repository**](https://github.com/afnan0356/nyayota) • [**Bangladesh Laws**](https://nyayota.vercel.app/bangladesh-laws) • [**International Treaties**](https://nyayota.vercel.app/international-laws) • [**AI Assistant**](https://nyayota.vercel.app/ai-assistant)
@@ -510,7 +511,9 @@ Contributions to Nyayota are welcomed, particularly in verifying statutory accur
 
 ## License & Intellectual Property
 
-- **Platform Source Code:** The application architecture, user interface, custom software components, and original styling in this repository are maintained by the Nyayota project contributors. Because an explicit open-source license file (`LICENSE`) is not currently declared in the root repository, standard intellectual property protections apply to the original software code.
+Nyayota is released under the **[MIT License](LICENSE)**.
+
+- **Platform Source Code:** The application codebase, user interface, custom software components, and original styling in this repository are open source and licensed under the [MIT License](LICENSE). Copyright &copy; 2026 Md. Afnan. See the [`LICENSE`](LICENSE) file for the complete terms and conditions.
 - **Primary Statutory Texts:** Codified legislation, Acts of Parliament, President's Orders, government gazette notifications, and international multilateral treaties reproduced herein are public government works and official statutory instruments. They are reproduced for educational, research, and non-commercial public knowledge purposes in accordance with public-domain legal principles and fair dealing provisions under international copyright conventions and national copyright laws.
 
 ---
