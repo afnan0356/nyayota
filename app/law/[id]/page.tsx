@@ -228,6 +228,53 @@ import { LegalDefinitionPopover } from '@/components/LegalDefinitionPopover';
 import { StatutoryPrintDocument, PrintOptions } from '@/components/StatutoryPrintDocument';
 import { PrintExportModal } from '@/components/PrintExportModal';
 
+function findMatchingSection(sections: LawSection[], query: string | null): LawSection {
+  if (!sections || sections.length === 0) {
+    return {
+      number: '1',
+      title: 'General Provision',
+      content: 'Statutory provision under review.',
+      simpleExplanation: 'Statutory explanation.'
+    };
+  }
+  if (!query) return sections[0];
+  const qTrim = query.trim();
+  // 1. Exact match
+  const exact = sections.find((s) => s.number === qTrim);
+  if (exact) return exact;
+
+  // 2. Case-insensitive match
+  const caseMatch = sections.find((s) => s.number.toLowerCase() === qTrim.toLowerCase());
+  if (caseMatch) return caseMatch;
+
+  // 3. Alphanumeric normalized match (e.g. 'order-39-rule-1' or 'order 39 rule 1' -> 'order39rule1')
+  const cleanStr = (str: string) => str.toLowerCase().replace(/[^a-z0-9]/g, '');
+  const cleanQ = cleanStr(qTrim);
+  if (cleanQ) {
+    const normMatch = sections.find((s) => {
+      const cleanS = cleanStr(s.number);
+      return cleanS === cleanQ || cleanS.includes(cleanQ) || cleanQ.includes(cleanS);
+    });
+    if (normMatch) return normMatch;
+  }
+
+  // 4. Number only extraction match (e.g. '300' for 'Section 300' or 'Order 39' for 'Order 39, Rule 1')
+  const numOnly = qTrim.replace(/[^0-9]/g, '');
+  if (numOnly) {
+    const numMatch = sections.find((s) => cleanStr(s.number).includes(numOnly));
+    if (numMatch) return numMatch;
+  }
+
+  // 5. Title substring match
+  const titleMatch = sections.find((s) =>
+    s.title.toLowerCase().includes(qTrim.toLowerCase()) ||
+    (s.titleBn && s.titleBn.includes(qTrim))
+  );
+  if (titleMatch) return titleMatch;
+
+  return sections[0];
+}
+
 function LawDetailViewer({
   law,
   initialSectionParam
@@ -240,9 +287,16 @@ function LawDetailViewer({
   const [readingMode, setReadingMode] = useState(false);
   const [fontSize, setFontSize] = useState<'sm' | 'base' | 'lg' | 'xl'>('base');
   const [fontFamily, setFontFamily] = useState<'sans' | 'serif'>('sans');
-  const [selectedSectionNumber, setSelectedSectionNumber] = useState<string>(
-    initialSectionParam || law.sections[0]?.number || ''
-  );
+
+  const matchedInitialSection = useMemo(() => {
+    return findMatchingSection(law.sections, initialSectionParam);
+  }, [law.sections, initialSectionParam]);
+
+  const [userSelectedSectionNumber, setUserSelectedSectionNumber] = useState<string | null>(null);
+
+  const selectedSectionNumber =
+    userSelectedSectionNumber ?? (matchedInitialSection?.number || law.sections[0]?.number || '');
+  const setSelectedSectionNumber = (secNum: string) => setUserSelectedSectionNumber(secNum);
   const [searchSectionQuery, setSearchSectionQuery] = useState('');
   const [sidebarNavMode, setSidebarNavMode] = useState<'hierarchy' | 'flat'>('hierarchy');
   const [explainLike15Open, setExplainLike15Open] = useState(false);
@@ -251,6 +305,8 @@ function LawDetailViewer({
     return isLawBookmarked(law.id);
   });
   const [copiedLink, setCopiedLink] = useState(false);
+  const [copiedSectionToast, setCopiedSectionToast] = useState(false);
+  const [copiedCitationToast, setCopiedCitationToast] = useState(false);
   const [addedToResearch, setAddedToResearch] = useState(false);
   const [activeTab, setActiveTab] = useState<'content' | 'fulltext' | 'timeline' | 'citations' | 'metadata'>('content');
   const [expandedAll, setExpandedAll] = useState(true);
@@ -395,8 +451,7 @@ function LawDetailViewer({
     );
   }, [law.sections, searchSectionQuery]);
 
-  const activeSection =
-    law.sections.find((s) => s.number === selectedSectionNumber) || law.sections[0];
+  const activeSection = findMatchingSection(law.sections, selectedSectionNumber);
 
   const activeSectionIndex = law.sections.findIndex((s) => s.number === activeSection?.number);
   const prevSection = activeSectionIndex > 0 ? law.sections[activeSectionIndex - 1] : null;
@@ -956,6 +1011,68 @@ function LawDetailViewer({
         onOpenFullAuditModal={() => setSourceVerifyModalOpen(true)}
       />
 
+      {/* HISTORICAL REPEAL NOTICE BANNER */}
+      {law.status === 'Repealed' && (
+        <div
+          role="alert"
+          aria-label="Statute Repeal and Historical Archive Notice"
+          className="p-5 sm:p-6 rounded-3xl bg-rose-500/10 dark:bg-rose-950/30 border-2 border-rose-500/40 text-rose-950 dark:text-rose-200 space-y-3"
+        >
+          <div className="flex items-start justify-between gap-3">
+            <div className="flex items-center space-x-2.5">
+              <div className="p-2 rounded-xl bg-rose-500 text-white shrink-0 shadow-sm">
+                <AlertTriangle className="w-5 h-5" />
+              </div>
+              <div>
+                <h2 className="text-sm sm:text-base font-bold text-rose-900 dark:text-rose-100 uppercase tracking-wide">
+                  Historical Archive — Statute Repealed / Inoperative
+                </h2>
+                <p className="text-xs text-rose-800/90 dark:text-rose-300">
+                  This instrument is no longer operative law in the People&apos;s Republic of Bangladesh.
+                </p>
+              </div>
+            </div>
+            <span className="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-rose-500/20 text-rose-700 dark:text-rose-300 border border-rose-500/30 shrink-0">
+              Archival Record
+            </span>
+          </div>
+          <div className="p-4 rounded-2xl bg-white/80 dark:bg-zinc-900/90 border border-rose-500/20 text-xs sm:text-sm text-zinc-800 dark:text-zinc-200 space-y-2 leading-relaxed">
+            <p>
+              <strong>Official Status Summary:</strong> {law.repealNote || 'Following legislative review and subsequent executive ordinances, key non-bailable speech and expressive offenses under this enactment were repealed. The interim administration transitioned digital infrastructure and cybercrime standards toward the operative 2026 legal framework.'}
+            </p>
+            <p className="text-[11px] text-zinc-600 dark:text-zinc-400">
+              This codified text is preserved in the Nyayota Legal Archive strictly for judicial retrospection, academic research, and constitutional case analysis. Do not rely on repealed sections for contemporary regulatory compliance or criminal liability assessment without consulting an accredited legal practitioner.
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* AMENDED STATUTE NOTICE BANNER */}
+      {law.status === 'Amended' && (
+        <div
+          role="status"
+          aria-label="Amended Statute Notification"
+          className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-900 dark:text-amber-200 flex flex-wrap items-center justify-between gap-3 text-xs"
+        >
+          <div className="flex items-center space-x-2.5">
+            <Info className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0" />
+            <div>
+              <span className="font-bold">Amended Codification: </span>
+              <span>
+                This statute incorporates legislative amendments enacted by subsequent parliamentary acts. Verify specific section amendment notes below.
+              </span>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={() => setActiveTab('timeline')}
+            className="px-3 py-1 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-800 dark:text-amber-200 font-bold shrink-0 transition-colors"
+          >
+            View Revision Timeline
+          </button>
+        </div>
+      )}
+
       {/* SECTION 1: TOP INFORMATION AREA */}
       <section
         aria-label="Statute Header Information"
@@ -1166,6 +1283,36 @@ function LawDetailViewer({
               <Quote className="w-4 h-4 text-amber-400" />
               <span>Cite This Law</span>
             </button>
+
+            {/* Quick Copy Standard Citation */}
+            <button
+              type="button"
+              id="header-copy-citation-btn"
+              onClick={() => {
+                const cite = law.citations?.standard || `${law.title} (${law.enactmentYear}), ${law.actNumber || 'Laws of Bangladesh'}`;
+                navigator.clipboard.writeText(cite);
+                setCopiedCitationToast(true);
+                setTimeout(() => setCopiedCitationToast(false), 2000);
+              }}
+              className="px-4 py-2.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-white border border-zinc-700 text-xs font-semibold inline-flex items-center space-x-2 transition-colors"
+              title="Copy official standard citation"
+            >
+              {copiedCitationToast ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4 text-amber-400" />}
+              <span>{copiedCitationToast ? 'Citation Copied!' : 'Copy Citation'}</span>
+            </button>
+
+            {/* Official Government Source External Link */}
+            <a
+              href={law.sourceVerificationUrl || (law.jurisdictionCode === 'BD' ? 'http://bdlaws.minlaw.gov.bd' : 'https://treaties.un.org')}
+              target="_blank"
+              rel="noopener noreferrer"
+              id="header-official-source-link"
+              className="px-4 py-2.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-white border border-zinc-700 text-xs font-semibold inline-flex items-center space-x-2 transition-colors"
+              title="Open authoritative source on official government repository"
+            >
+              <ExternalLink className="w-4 h-4 text-blue-400" />
+              <span>Official Gazette</span>
+            </a>
 
             {/* Verify Source */}
             <button
@@ -1381,13 +1528,75 @@ function LawDetailViewer({
             </button>
           </div>
 
-          {/* Translation Switcher (English / Bangla / Dual / Multi-language selector) */}
-          <div className="flex items-center space-x-2">
-            <span className="text-xs font-bold text-zinc-500 hidden sm:inline-flex items-center space-x-1">
-              <Languages className="w-3.5 h-3.5 text-amber-500" />
-              <span>Translate Law:</span>
-            </span>
+          {/* Translation Switcher & Typography Customizer */}
+          <div className="flex flex-wrap items-center gap-2">
+            {/* Typography Controls */}
+            <div className="hidden sm:flex items-center space-x-1 p-1 rounded-xl bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-xs">
+              <button
+                type="button"
+                onClick={() => setFontSize('sm')}
+                className={`px-2 py-1 rounded-lg font-bold transition-all ${
+                  fontSize === 'sm'
+                    ? 'bg-white dark:bg-zinc-800 shadow-xs text-amber-600 dark:text-amber-400'
+                    : 'text-zinc-500 hover:text-zinc-900 dark:hover:text-white'
+                }`}
+                title="Small text"
+              >
+                A-
+              </button>
+              <button
+                type="button"
+                onClick={() => setFontSize('base')}
+                className={`px-2 py-1 rounded-lg font-bold transition-all ${
+                  fontSize === 'base'
+                    ? 'bg-white dark:bg-zinc-800 shadow-xs text-amber-600 dark:text-amber-400'
+                    : 'text-zinc-500 hover:text-zinc-900 dark:hover:text-white'
+                }`}
+                title="Default text"
+              >
+                A
+              </button>
+              <button
+                type="button"
+                onClick={() => setFontSize('lg')}
+                className={`px-2 py-1 rounded-lg font-bold transition-all ${
+                  fontSize === 'lg'
+                    ? 'bg-white dark:bg-zinc-800 shadow-xs text-amber-600 dark:text-amber-400'
+                    : 'text-zinc-500 hover:text-zinc-900 dark:hover:text-white'
+                }`}
+                title="Large text"
+              >
+                A+
+              </button>
+              <button
+                type="button"
+                onClick={() => setFontSize('xl')}
+                className={`px-2 py-1 rounded-lg font-bold transition-all ${
+                  fontSize === 'xl'
+                    ? 'bg-white dark:bg-zinc-800 shadow-xs text-amber-600 dark:text-amber-400'
+                    : 'text-zinc-500 hover:text-zinc-900 dark:hover:text-white'
+                }`}
+                title="Extra large text"
+              >
+                A++
+              </button>
+              <div className="w-px h-4 bg-zinc-200 dark:bg-zinc-700 mx-0.5" />
+              <button
+                type="button"
+                onClick={() => setFontFamily(fontFamily === 'serif' ? 'sans' : 'serif')}
+                className={`px-2 py-1 rounded-lg font-bold text-xs inline-flex items-center space-x-1 transition-all ${
+                  fontFamily === 'serif'
+                    ? 'bg-white dark:bg-zinc-800 shadow-xs text-amber-600 dark:text-amber-400'
+                    : 'text-zinc-500 hover:text-zinc-900 dark:hover:text-white'
+                }`}
+                title="Toggle font face (Serif / Sans-serif)"
+              >
+                <Type className="w-3.5 h-3.5" />
+                <span className="text-[10px] uppercase font-mono">{fontFamily === 'serif' ? 'Serif' : 'Sans'}</span>
+              </button>
+            </div>
 
+            {/* Translation Switcher */}
             <div className="flex items-center p-1 rounded-xl bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-xs">
               <button
                 type="button"
@@ -1560,6 +1769,67 @@ function LawDetailViewer({
 
             {/* Right Main Content: Active Section Viewer */}
             <main className="lg:col-span-8 space-y-6">
+              {/* Mobile Quick Section Selector (compact jumper for narrow screens) */}
+              <div className="lg:hidden p-4 rounded-3xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-xs space-y-2.5">
+                <div className="flex items-center justify-between text-xs font-semibold text-zinc-500">
+                  <span className="flex items-center space-x-1.5 text-zinc-800 dark:text-zinc-200 font-bold">
+                    <Compass className="w-4 h-4 text-amber-500" />
+                    <span>Quick Section Navigator</span>
+                  </span>
+                  <span className="font-mono text-[11px] bg-zinc-100 dark:bg-zinc-800 px-2 py-0.5 rounded-full">
+                    {activeSectionIndex >= 0 ? activeSectionIndex + 1 : 1} of {law.sections.length}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <select
+                    aria-label="Jump to statutory section"
+                    value={activeSection?.number || ''}
+                    onChange={(e) => {
+                      setSelectedSectionNumber(e.target.value);
+                      const el = document.getElementById('active-section-display-card');
+                      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }}
+                    className="flex-1 px-3 py-2 text-xs rounded-xl bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-white font-medium focus:ring-2 focus:ring-amber-500 focus:outline-none"
+                  >
+                    {law.sections.map((s) => (
+                      <option key={s.number} value={s.number}>
+                        {s.number}: {s.title}
+                      </option>
+                    ))}
+                  </select>
+                  {prevSection && (
+                    <button
+                      type="button"
+                      aria-label="Previous section"
+                      onClick={() => {
+                        setSelectedSectionNumber(prevSection.number);
+                        const el = document.getElementById('active-section-display-card');
+                        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                      }}
+                      className="p-2 rounded-xl bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700"
+                      title="Previous Section"
+                    >
+                      <ChevronLeft className="w-4 h-4" />
+                    </button>
+                  )}
+                  {nextSection && (
+                    <button
+                      type="button"
+                      aria-label="Next section"
+                      onClick={() => {
+                        setSelectedSectionNumber(nextSection.number);
+                        const el = document.getElementById('active-section-display-card');
+                        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                      }}
+                      className="p-2 rounded-xl bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700"
+                      title="Next Section"
+                    >
+                      <ChevronRight className="w-4 h-4" />
+                    </button>
+                  )}
+                </div>
+              </div>
+
               <AnimatePresence mode="wait">
                 {activeSection ? (
                   <motion.div
@@ -1633,46 +1903,47 @@ function LawDetailViewer({
 
                       <button
                         type="button"
+                        id="btn-copy-section-text"
                         onClick={() => {
-                          const citationText = `${law.title}, ${activeSection.number} (${law.enactmentYear})`;
+                          const citationText = `"${activeSection.title}" [${activeSection.number}], ${law.title} (${law.enactmentYear}).\nAuthentic Text:\n${activeSection.content}\n\nSource: Nyayota Legal Archive (https://nyayota.vercel.app/law/${law.id}?section=${encodeURIComponent(activeSection.number)})`;
                           navigator.clipboard.writeText(citationText);
-                          setCopiedLink(true);
-                          setTimeout(() => setCopiedLink(false), 2000);
+                          setCopiedSectionToast(true);
+                          setTimeout(() => setCopiedSectionToast(false), 2000);
                         }}
-                        className="px-3 py-1.5 rounded-xl bg-zinc-100 dark:bg-zinc-800 hover:bg-amber-500/10 text-zinc-700 dark:text-zinc-300 text-xs font-semibold inline-flex items-center space-x-1.5 transition-colors"
-                        title="Copy section citation"
+                        className="px-3 py-1.5 rounded-xl bg-zinc-100 dark:bg-zinc-800 hover:bg-amber-500/10 text-zinc-700 dark:text-zinc-300 text-xs font-semibold inline-flex items-center space-x-1.5 transition-colors cursor-pointer"
+                        title="Copy section citation & text"
                       >
-                        <Copy className="w-3.5 h-3.5" />
-                        <span>Copy Section</span>
+                        {copiedSectionToast ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5" />}
+                        <span>{copiedSectionToast ? 'Copied with Citation!' : 'Copy Section'}</span>
                       </button>
                     </div>
                   </div>
 
                   {/* Section Statutory Text (English & Bangla side-by-side or stacked) */}
-                  <div className="space-y-6">
+                  <div className={activeLanguageView === 'dual' && activeSection.contentBn ? "grid grid-cols-1 lg:grid-cols-2 gap-5" : "space-y-6"}>
                     {(activeLanguageView === 'en' || activeLanguageView === 'dual') && (
-                      <div className="space-y-2">
+                      <div className="space-y-2 flex flex-col">
                         <div className="flex items-center justify-between text-xs font-bold uppercase tracking-wider text-zinc-400">
                           <span>Official Statutory Text (English)</span>
                           <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold">
                             Primary Authentic Version
                           </span>
                         </div>
-                        <div className="p-5 rounded-2xl bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 text-sm sm:text-base leading-relaxed">
+                        <div className={`flex-1 p-5 rounded-2xl bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 ${fontClass} ${familyClass} leading-relaxed`}>
                           {renderAnnotatedText(activeSection.content)}
                         </div>
                       </div>
                     )}
 
                     {(activeLanguageView === 'bn' || activeLanguageView === 'dual') && activeSection.contentBn && (
-                      <div className="space-y-2">
+                      <div className="space-y-2 flex flex-col">
                         <div className="flex items-center justify-between text-xs font-bold uppercase tracking-wider text-zinc-400">
                           <span>বাংলা অনুবাদ (Bangla Translation)</span>
                           <span className="text-[10px] text-amber-600 dark:text-amber-400 font-semibold">
                             Accredited Translation
                           </span>
                         </div>
-                        <div className="p-5 rounded-2xl bg-amber-50/50 dark:bg-zinc-950 border border-amber-500/20 text-zinc-900 dark:text-zinc-100 text-sm sm:text-base font-bangla leading-relaxed">
+                        <div className={`flex-1 p-5 rounded-2xl bg-amber-50/50 dark:bg-zinc-950 border border-amber-500/20 text-zinc-900 dark:text-zinc-100 ${fontClass} font-bangla leading-relaxed`}>
                           {activeSection.contentBn}
                         </div>
                       </div>

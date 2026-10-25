@@ -13,6 +13,7 @@ import {
   Info,
   CheckCircle2,
   AlertTriangle,
+  AlertCircle,
   FileText,
   Clock,
   Sparkles,
@@ -119,17 +120,29 @@ export function SourceTransparencyPanel({
           </div>
         </div>
 
-        {onOpenFullAuditModal && (
-          <button
-            type="button"
-            id="view-full-audit-log-btn"
-            onClick={onOpenFullAuditModal}
-            className="px-3 py-1.5 rounded-xl text-xs font-semibold text-blue-600 dark:text-blue-400 bg-blue-500/5 hover:bg-blue-500/10 border border-blue-500/20 transition-all inline-flex items-center space-x-1.5 self-start sm:self-auto"
+        <div className="flex items-center gap-2 flex-wrap self-start sm:self-auto">
+          {onOpenFullAuditModal && (
+            <button
+              type="button"
+              id="view-full-audit-log-btn"
+              onClick={onOpenFullAuditModal}
+              className="px-3 py-1.5 rounded-xl text-xs font-semibold text-blue-600 dark:text-blue-400 bg-blue-500/5 hover:bg-blue-500/10 border border-blue-500/20 transition-all inline-flex items-center space-x-1.5"
+            >
+              <span>Full Audit Log</span>
+              <ExternalLink className="w-3 h-3" />
+            </button>
+          )}
+
+          <a
+            href={`mailto:nyayota.contact@gmail.com?subject=${encodeURIComponent(`[Discrepancy Report] ${law.title} (${law.id})`)}&body=${encodeURIComponent(`Statute ID: ${law.id}\nStatute Title: ${law.title}\nJurisdiction: ${law.jurisdiction}\n\nDescription of Discrepancy / Outdated Provision / Missing Section:\n`)}`}
+            id="report-law-discrepancy-btn"
+            className="px-3 py-1.5 rounded-xl text-xs font-semibold text-rose-600 dark:text-rose-400 bg-rose-500/5 hover:bg-rose-500/10 border border-rose-500/20 transition-all inline-flex items-center space-x-1.5"
+            title="Report Outdated Legal Text or Discrepancy to Nyayota Legal Editorial Team"
           >
-            <span>Full Audit Log</span>
-            <ExternalLink className="w-3 h-3" />
-          </button>
-        )}
+            <AlertCircle className="w-3 h-3" />
+            <span>Report Discrepancy</span>
+          </a>
+        </div>
       </div>
 
       {/* Coverage Status Banner */}

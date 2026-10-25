@@ -181,6 +181,7 @@ export interface LawItem {
   officialSource?: string;
   sourceOrganization?: string;
   sourceVerificationUrl?: string;
+  repealNote?: string;
   overview: string;
   overviewBn: string;
   simpleSummary?: string;
@@ -739,14 +740,15 @@ export const LAWS_DATABASE: LawItem[] = [
     jurisdiction: 'Bangladesh',
     jurisdictionCode: 'BD',
     category: 'Cyber & Digital',
-    status: 'In Force',
+    status: 'Repealed',
     enactmentYear: 2023,
     totalStatutorySectionsCount: 60,
     isCuratedSubset: true,
-    officialGazetteRef: 'Bangladesh Gazette Notification Sept 18, 2023',
-    overview: 'Governs national cyber infrastructure protection, hacking, digital identity theft, digital fraud, cyber terrorism, and online safety standards replacing the previous Digital Security Act 2018.',
-    overviewBn: 'সাইবার অবকাঠামো সুরক্ষা, হ্যাকিং, ডিজিটাল জালিয়াতি এবং অনলাইন অপরাধ প্রতিরোধের আইন।',
-    simpleSummary: 'The modern digital law in Bangladesh addressing internet crimes, computer hacking, identity theft, unauthorized data access, and online financial scams.',
+    officialGazetteRef: 'Bangladesh Gazette Notification Sept 18, 2023 (Repealed via 2025 Ordinance)',
+    repealNote: 'Repealed by the interim government via the Cyber Security Ordinance 2025 following the August 2024 mass movement, systematically withdrawing controversial non-bailable speech and journalistic offenses, and transitioning digital security governance to the 2026 operative framework.',
+    overview: '[REPEALED STATUTE — HISTORICAL ARCHIVE] Enacted in September 2023 (Act No. XXVII of 2023) to replace the controversial Digital Security Act 2018. Following widespread public criticism regarding misuse against free speech and the August 2024 mass uprising, the interim government formally repealed the Cyber Security Act 2023 through the Cyber Security Ordinance 2025 (annulling speech offenses) and transitioned to the Cyber Security Act 2026. This statutory text is preserved exclusively for historical reference, archived litigation, and academic research.',
+    overviewBn: '[রহিতকৃত আইন — ঐতিহাসিক সংরক্ষণ] ২০২৩ সালে ডিজিটাল নিরাপত্তা আইনের স্থলে প্রণীত হলেও মতপ্রকাশের স্বাধীনতা ক্ষুণ্ণ করার কারণে ২০২৪-এর গণঅভ্যুত্থান পরবর্তী সময়ে সাইবার নিরাপত্তা অধ্যাদেশ ২০২৫ দ্বারা এই আইনটি আনুষ্ঠানিকভাবে রহিত করা হয় এবং ২০২৬ সালের নতুন আইন কার্যকর করা হয়। আইনি গবেষণা ও পূর্ববর্তী মামলার নজির পর্যালোচনার জন্য এটি সংরক্ষিত।',
+    simpleSummary: 'A repealed 2023 statute that replaced the 2018 Digital Security Act but was subsequently dismantled by the 2025 Cyber Security Ordinance and replaced by the 2026 cybersecurity legislative framework. Preserved here as an educational historical record.',
     fullOfficialTextExcerpt: 'An Act to provide for the security of cyberspace, ensure integrity of critical information infrastructure, and suppress offenses committed through digital devices and computer systems...',
     keyHighlights: [
       'Provides penalties for unauthorized intrusion into Critical Information Infrastructure (CII).',
@@ -776,9 +778,12 @@ export const LAWS_DATABASE: LawItem[] = [
       }
     ],
     timeline: [
-      { year: '2006', title: 'ICT Act 2006', description: 'Initial digital legal framework in Bangladesh.', status: 'enacted' },
-      { year: '2018', title: 'Digital Security Act 2018', description: 'Enacted to combat cyber crime, later criticized for broad application.', status: 'repealed' },
-      { year: '2023', title: 'Cyber Security Act 2023 Enacted', description: 'Passed by Parliament revising fine structures and bailable provisions.', status: 'enacted' }
+      { year: '2006', title: 'ICT Act 2006', description: 'Initial digital legal framework in Bangladesh (Act XXXIX of 2006).', status: 'enacted' },
+      { year: '2018', title: 'Digital Security Act 2018', description: 'Enacted to combat cyber crime; later repealed after widespread controversy over speech restrictions.', status: 'repealed' },
+      { year: '2023', title: 'Cyber Security Act 2023 Enacted', description: 'Passed by Parliament (Act XXVII of 2023) revising fine structures and bailable provisions.', status: 'enacted' },
+      { year: '2024', title: 'Interim Cabinet Decision to Repeal', description: 'On November 7, 2024, the Advisory Council decided in principle to dismantle the CSA due to speech curbing concerns.', status: 'repealed' },
+      { year: '2025', title: 'Cyber Security Ordinance 2025 Promulgated', description: 'Formally repealed Act XXVII of 2023, annulling 9 controversial speech and defamation sections.', status: 'repealed' },
+      { year: '2026', title: 'Cyber Security Act 2026 Enacted', description: 'Parliamentary enactment establishing the revised operative cybersecurity and critical infrastructure regime.', status: 'enacted' }
     ],
     relatedLawIds: ['bd-penal-code-1860', 'bd-constitution-1972'],
     citations: {
@@ -933,6 +938,36 @@ export const LAWS_DATABASE: LawItem[] = [
         simpleExplanation: 'Civil courts have general authority to resolve any civil or property dispute unless another specific statute creates a specialized tribunal.',
         punishmentOrRemedy: 'Adjudication and decree issuance.',
         keyConcepts: ['Civil jurisdiction', 'Inherent power', 'Cognizance']
+      },
+      {
+        number: 'Section 11',
+        title: 'Res Judicata',
+        titleBn: 'রেস জুডিকাটা বা দোবারা দোষ',
+        content: 'No Court shall try any suit or issue in which the matter directly and substantially in issue has been directly and substantially in issue in a former suit between the same parties, or between parties under whom they or any of them claim, litigating under the same title, in a Court competent to try such subsequent suit or the suit in which such issue has been subsequently raised, and has been heard and finally decided by such Court.',
+        contentBn: 'একই পক্ষগণের মধ্যে ইতিপূর্বে কোনো উপযুক্ত আদালত কর্তৃক চূড়ান্তভাবে মীমাংসিত বিষয় পুনরায় নতুন মোকদ্দমায় বিচার করা যাবে না।',
+        simpleExplanation: 'Doctrine preventing double litigation: Once a court has finalized a dispute between parties, neither party can sue again on the same issue.',
+        punishmentOrRemedy: 'Bar to subsequent trial and dismissal of the plaint.',
+        keyConcepts: ['Res judicata', 'Finality of judgment', 'Double litigation bar']
+      },
+      {
+        number: 'Section 89A',
+        title: 'Mediation / Alternative Dispute Resolution (ADR)',
+        titleBn: 'মধ্যস্থতা বা বিকল্প বিরোধ নিষ্পত্তি (এডিআর)',
+        content: 'Except in a suit under the Artha Rin Adalat Ain, after filing of written statement, the Court shall, by adjourning the hearing of the suit, mediate in order to settle the dispute or disputes in the suit, or refer the dispute or disputes to the engaged pleaders or to an accredited mediator.',
+        contentBn: 'জবাব দাখিলের পর আদালত পক্ষগণের সম্মতিতে মামলাটি মধ্যস্থতাকারীর নিকট বা আইনজীবীদের মাধ্যমে আপস নিষ্পত্তির জন্য প্রেরণ করতে পারেন।',
+        simpleExplanation: 'Mandates institutional mediation in civil lawsuits to encourage out-of-court settlements and reduce court backlogs.',
+        punishmentOrRemedy: 'Compromise decree and refund of court fees upon successful mediation.',
+        keyConcepts: ['Mediation', 'ADR', 'Compromise settlement']
+      },
+      {
+        number: 'Order 39, Rule 1',
+        title: 'Cases in which Temporary Injunction may be granted',
+        titleBn: 'যেসব ক্ষেত্রে অস্থায়ী নিষেধাজ্ঞা মঞ্জুর করা যায়',
+        content: 'Where in any suit it is proved by affidavit or otherwise: (a) that any property in dispute in a suit is in danger of being wasted, damaged or alienated by any party to the suit, or wrongfully sold in execution of a decree, or (b) that the defendant threatens, or intends, to remove or dispose of his property with a view to defraud his creditors, the Court may by order grant a temporary injunction.',
+        contentBn: 'মোকদ্দমা চলাকালে নালিশি সম্পত্তি যাতে হস্তান্তর, ক্ষতিসাধন বা বেদখল না হয়, তার সুরক্ষায় আদালত অস্থায়ী নিষেধাজ্ঞা জারি করতে পারেন।',
+        simpleExplanation: 'Provides urgent court orders to freeze property and preserve the status quo during the pendency of a civil suit.',
+        punishmentOrRemedy: 'Temporary injunction restraining waste, damage, or alienation of property until trial conclusion.',
+        keyConcepts: ['Temporary injunction', 'Order 39 Rule 1', 'Preservation of property', 'Status quo', 'Irreparable loss']
       },
       {
         number: 'Section 115',
@@ -2534,7 +2569,7 @@ export const KNOWLEDGE_PATHS_DATA: KnowledgePath[] = [
         durationMinutes: 10,
         summary: 'Understanding legal definitions of critical information infrastructure, illegal intrusion, and denial-of-service attacks.',
         keyStatutes: [
-          { lawId: 'cyber-security-act-2023', title: 'Cyber Security Act 2023', section: 'Section 17-19' }
+          { lawId: 'bd-cyber-security-2023', title: 'Cyber Security Legislation (Historical 2023 Act / 2026 Framework)', section: 'Section 17-19' }
         ],
         takeaways: [
           'Accessing a password-protected server without authorization is a statutory crime even without data theft.',
@@ -2551,7 +2586,7 @@ export const KNOWLEDGE_PATHS_DATA: KnowledgePath[] = [
         durationMinutes: 12,
         summary: 'How codified statutes distinguish fair comment from malicious electronic character assassination and identity spoofing.',
         keyStatutes: [
-          { lawId: 'bd-cyber-security-2023', title: 'Cyber Security Act 2023', section: 'Section 24-25' },
+          { lawId: 'bd-cyber-security-2023', title: 'Cyber Security Legislation (Historical 2023 Act / 2026 Framework)', section: 'Section 24-25' },
           { lawId: 'bd-penal-code-1860', title: 'Penal Code 1860', section: 'Section 499-500' }
         ],
         takeaways: [
@@ -2586,7 +2621,7 @@ export const KNOWLEDGE_PATHS_DATA: KnowledgePath[] = [
         durationMinutes: 12,
         summary: 'Emergency reporting channels, cyber police complaints, search warrants, and High Court writ protections.',
         keyStatutes: [
-          { lawId: 'bd-cyber-security-2023', title: 'Cyber Security Act 2023', section: 'Section 28' },
+          { lawId: 'bd-cyber-security-2023', title: 'Cyber Security Legislation (Historical 2023 Act / 2026 Framework)', section: 'Section 28' },
           { lawId: 'bd-constitution-1972', title: 'Constitution of Bangladesh', section: 'Article 102' }
         ],
         takeaways: [
@@ -2797,9 +2832,9 @@ export const LEGAL_OUTCOME_SCENARIOS_DATA: LegalOutcomeScenario[] = [
     applicableStatutes: [
       {
         lawId: 'bd-cyber-security-2023',
-        title: 'Cyber Security Act 2023',
+        title: 'Cyber Security Legislation (Historical 2023 Act / 2026 Operative Regime)',
         section: 'Section 24 & 28',
-        explanation: 'Criminalizes electronic identity spoofing, hacking, and cyber extortion with strict non-bailable prison terms.'
+        explanation: 'Criminalizes electronic identity spoofing, hacking, and cyber extortion. Note: The 2023 Act was formally repealed via the 2025 Ordinance; operative cases proceed under the 2026 cybersecurity legislative framework alongside Penal Code provisions.'
       },
       {
         lawId: 'bd-penal-code-1860',

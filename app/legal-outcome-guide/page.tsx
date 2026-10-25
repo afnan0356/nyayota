@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, Suspense } from 'react';
+import React, { useState, useEffect, useMemo, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'motion/react';
@@ -36,15 +36,39 @@ import {
   TRANSITION_FAST
 } from '@/lib/motion';
 
+const TOPIC_TO_SCENARIO_MAP: Record<string, string> = {
+  'arrest-and-bail-rights': 'scenario-unlawful-arrest',
+  'fir-police-investigation': 'scenario-theft-fraud',
+  'unlawful-arrest': 'scenario-unlawful-arrest',
+  'cyber-extortion': 'scenario-cyber-extortion',
+  'cyber-blackmail': 'scenario-cyber-extortion',
+  'theft-fraud': 'scenario-theft-fraud',
+  'contract-breach': 'scenario-commercial-contract-breach',
+  'commercial-contract-breach': 'scenario-commercial-contract-breach'
+};
+
+function resolveScenarioId(param: string | null): string {
+  if (!param) return LEGAL_OUTCOME_SCENARIOS_DATA[0].id;
+  const directMatch = LEGAL_OUTCOME_SCENARIOS_DATA.find((s) => s.id === param);
+  if (directMatch) return directMatch.id;
+  const mapped = TOPIC_TO_SCENARIO_MAP[param.toLowerCase().trim()];
+  if (mapped && LEGAL_OUTCOME_SCENARIOS_DATA.some((s) => s.id === mapped)) {
+    return mapped;
+  }
+  return LEGAL_OUTCOME_SCENARIOS_DATA[0].id;
+}
+
 function LegalOutcomeGuideContent() {
   const searchParams = useSearchParams();
-  const scenarioParam = searchParams.get('scenario') || '';
+  const rawParam = searchParams.get('scenario') || searchParams.get('topic') || '';
+  const paramScenarioId = useMemo(() => resolveScenarioId(rawParam), [rawParam]);
 
-  const [selectedScenarioId, setSelectedScenarioId] = useState<string>(
-    scenarioParam || LEGAL_OUTCOME_SCENARIOS_DATA[0].id
-  );
+  const [userSelectedScenarioId, setUserSelectedScenarioId] = useState<string | null>(null);
   const [filterCategory, setFilterCategory] = useState<string>('All');
   const [searchQuery, setSearchQuery] = useState<string>('');
+
+  const selectedScenarioId = userSelectedScenarioId ?? paramScenarioId;
+  const setSelectedScenarioId = (id: string) => setUserSelectedScenarioId(id);
 
   const categories = ['All', 'Cyber & Digital Law', 'Commercial & Contract Law', 'Constitutional Law', 'Criminal Law'];
 

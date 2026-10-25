@@ -27,7 +27,12 @@ import {
   PhoneCall,
   Flame,
   Zap,
-  Tag
+  Tag,
+  Building2,
+  ShieldCheck,
+  FileCheck,
+  ExternalLink,
+  Mail
 } from 'lucide-react';
 import { GlobalSearch } from '@/components/GlobalSearch';
 import {
@@ -99,11 +104,11 @@ export default function HomePage() {
   const recentlyUpdatedLaws = [
     {
       id: 'bd-cyber-security-2023',
-      title: 'Cyber Security Act, 2023',
-      titleBn: 'সাইবার নিরাপত্তা আইন, ২০২৩',
+      title: 'Cyber Security Act, 2023 [Repealed / Historical Archive]',
+      titleBn: 'সাইবার নিরাপত্তা আইন, ২০২৩ [বাতিলকৃত / ঐতিহাসিক সংরক্ষিত]',
       jurisdiction: 'Bangladesh',
-      updateYear: '2023',
-      updateNote: 'Enacted to replace Digital Security Act 2018; converted several non-bailable speech offenses into bailable and fine-based sanctions.',
+      updateYear: '2025/2026',
+      updateNote: 'Formally repealed by interim government via Cyber Security Ordinance 2025 (transitioning to Cyber Security Act 2026); preserved for historical research and pending trial review.',
       url: '/law/bd-cyber-security-2023'
     },
     {
@@ -178,7 +183,7 @@ export default function HomePage() {
     { label: 'Writ Petitions (Art. 102)', href: '/law/bd-constitution-1972?section=Article+102' },
     { label: 'Filing an FIR vs GD', href: '/legal-outcome-guide?topic=fir-police-investigation' },
     { label: 'Meaning of Mens Rea', href: '/ai-assistant?term=Mens+Rea' },
-    { label: 'Temporary Injunction (Order 39)', href: '/law/bd-cpc-1908?section=Section+9' },
+    { label: 'Temporary Injunction (Order 39)', href: '/law/bd-cpc-1908?section=Order+39,+Rule+1' },
     { label: 'Talaq Notice & Maintenance', href: '/law/bd-muslim-family-laws-1961?section=Section+7' }
   ];
 
@@ -271,9 +276,9 @@ export default function HomePage() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {/* Situation 1 */}
-          <div className="p-5 rounded-xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800/90 shadow-xs flex flex-col justify-between space-y-4">
-            <div className="space-y-2">
+          {/* Situation 1: Arrest Safeguards */}
+          <div className="p-5 rounded-2xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-xs flex flex-col justify-between space-y-4 hover:border-zinc-300 dark:hover:border-zinc-700 transition-colors">
+            <div className="space-y-2.5">
               <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-rose-700 dark:text-rose-400 px-2 py-0.5 rounded bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/50 inline-block">
                 Constitutional Safeguard
               </span>
@@ -281,96 +286,100 @@ export default function HomePage() {
                 Arrest &amp; Police Custody
               </h3>
               <p className="text-xs text-zinc-600 dark:text-zinc-400 leading-relaxed">
-                Mandatory 24-hour court production, right to consult an advocate, and statutory remand protections under criminal procedure.
+                Mandatory 24-hour court production rule, right to legal counsel, custodial interrogation safeguards, and bail rights.
               </p>
               <div className="pt-1 text-[11px] text-zinc-500 space-y-0.5 font-mono">
-                <div>• Art. 33 (Constitution)</div>
-                <div>• CrPC Sec. 54 &amp; 167 (Remand)</div>
+                <div>• Art. 33 (Constitution of Bangladesh)</div>
+                <div>• CrPC 1898 Sec. 54, 61 &amp; 167 (Remand)</div>
               </div>
             </div>
             <Link
-              href="/legal-outcome-guide?topic=arrest-and-bail-rights"
+              href="/legal-outcome-guide?scenario=scenario-unlawful-arrest"
+              id="home-situation-arrest"
               className="pt-2.5 border-t border-zinc-100 dark:border-zinc-800 text-xs font-semibold text-zinc-900 dark:text-zinc-100 hover:text-amber-600 dark:hover:text-amber-400 transition-colors flex items-center justify-between"
             >
-              <span>View Statutory Steps</span>
+              <span>View 24-Hour Rights Roadmap</span>
               <ArrowRight className="w-3.5 h-3.5" />
             </Link>
           </div>
 
-          {/* Situation 2 */}
-          <div className="p-5 rounded-xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800/90 shadow-xs flex flex-col justify-between space-y-4">
-            <div className="space-y-2">
+          {/* Situation 2: Cyber Harassment & Extortion */}
+          <div className="p-5 rounded-2xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-xs flex flex-col justify-between space-y-4 hover:border-zinc-300 dark:hover:border-zinc-700 transition-colors">
+            <div className="space-y-2.5">
               <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-blue-700 dark:text-blue-400 px-2 py-0.5 rounded bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-900/50 inline-block">
-                Digital Security
+                Cyber &amp; Digital Law
               </span>
               <h3 className="text-sm font-bold text-zinc-900 dark:text-zinc-100">
-                Cyber Harassment &amp; Threats
+                Cyber Extortion &amp; Threats
               </h3>
               <p className="text-xs text-zinc-600 dark:text-zinc-400 leading-relaxed">
-                Statutory protections against online extortion, non-consensual image distribution, identity fraud, and reporting helplines.
+                Digital evidence preservation, FIR lodging at Cyber Tribunal, and navigating the 2025/2026 cybersecurity legislative transition.
               </p>
               <div className="pt-1 text-[11px] text-zinc-500 space-y-0.5 font-mono">
-                <div>• Cyber Security Act 2023</div>
-                <div>• Helpline: 01320-010148</div>
+                <div>• Cyber Legislation (2025/2026 Transition)</div>
+                <div>• Cyber Crime Helpline: 01320-010148</div>
               </div>
             </div>
             <Link
-              href="/law/bd-cyber-security-2023"
+              href="/legal-outcome-guide?scenario=scenario-cyber-extortion"
+              id="home-situation-cyber"
               className="pt-2.5 border-t border-zinc-100 dark:border-zinc-800 text-xs font-semibold text-zinc-900 dark:text-zinc-100 hover:text-amber-600 dark:hover:text-amber-400 transition-colors flex items-center justify-between"
             >
-              <span>Review Cyber Provisions</span>
+              <span>Explore Cyber Remedy Guide</span>
               <ArrowRight className="w-3.5 h-3.5" />
             </Link>
           </div>
 
-          {/* Situation 3 */}
-          <div className="p-5 rounded-xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800/90 shadow-xs flex flex-col justify-between space-y-4">
-            <div className="space-y-2">
+          {/* Situation 3: Property & Temporary Injunction */}
+          <div className="p-5 rounded-2xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-xs flex flex-col justify-between space-y-4 hover:border-zinc-300 dark:hover:border-zinc-700 transition-colors">
+            <div className="space-y-2.5">
               <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-amber-700 dark:text-amber-400 px-2 py-0.5 rounded bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-900/50 inline-block">
-                Property &amp; Civil Law
+                Civil Procedure &amp; Land
               </span>
               <h3 className="text-sm font-bold text-zinc-900 dark:text-zinc-100">
-                Eviction &amp; Land Disputes
+                Temporary Injunction (Order 39)
               </h3>
               <p className="text-xs text-zinc-600 dark:text-zinc-400 leading-relaxed">
-                Notice requirements, temporary civil injunction standards, and lawful possession remedies under the Code of Civil Procedure.
+                Preventing unlawful demolition, protecting peaceful possession, and proving prima facie case, irreparable loss, and balance of convenience.
               </p>
               <div className="pt-1 text-[11px] text-zinc-500 space-y-0.5 font-mono">
-                <div>• CPC 1908 (Order 39)</div>
-                <div>• Sec. 9 Civil Jurisdiction</div>
+                <div>• CPC 1908 (Order 39, Rule 1)</div>
+                <div>• Sec. 11 Res Judicata &amp; Sec. 89A ADR</div>
               </div>
             </div>
             <Link
-              href="/law/bd-cpc-1908"
+              href="/law/bd-cpc-1908?section=Order+39,+Rule+1"
+              id="home-situation-injunction"
               className="pt-2.5 border-t border-zinc-100 dark:border-zinc-800 text-xs font-semibold text-zinc-900 dark:text-zinc-100 hover:text-amber-600 dark:hover:text-amber-400 transition-colors flex items-center justify-between"
             >
-              <span>Explore Civil Remedies</span>
+              <span>Read Order 39 Statutory Text</span>
               <ArrowRight className="w-3.5 h-3.5" />
             </Link>
           </div>
 
-          {/* Situation 4 */}
-          <div className="p-5 rounded-xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800/90 shadow-xs flex flex-col justify-between space-y-4">
-            <div className="space-y-2">
+          {/* Situation 4: Commercial Contract Breach */}
+          <div className="p-5 rounded-2xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-xs flex flex-col justify-between space-y-4 hover:border-zinc-300 dark:hover:border-zinc-700 transition-colors">
+            <div className="space-y-2.5">
               <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400 px-2 py-0.5 rounded bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-900/50 inline-block">
-                Academic Research
+                Commercial &amp; Contract
               </span>
               <h3 className="text-sm font-bold text-zinc-900 dark:text-zinc-100">
-                Legal Education &amp; Bar Prep
+                Contract Breach &amp; Dues
               </h3>
               <p className="text-xs text-zinc-600 dark:text-zinc-400 leading-relaxed">
-                Structured learning paths, Latin jurisprudence maxims, standard citations, and comparative statutory frameworks.
+                Serving formal legal notice, claiming compensation under Section 73, calculating liquidated damages, and invoking arbitration clauses.
               </p>
               <div className="pt-1 text-[11px] text-zinc-500 space-y-0.5 font-mono">
-                <div>• Doctrines &amp; Maxims</div>
-                <div>• Standard Bluebook Format</div>
+                <div>• Contract Act 1872 (Sec. 73 &amp; 74)</div>
+                <div>• NI Act 1881 Sec. 138 (Cheque Bounce)</div>
               </div>
             </div>
             <Link
-              href="/knowledge-paths"
+              href="/legal-outcome-guide?scenario=scenario-commercial-contract-breach"
+              id="home-situation-contract"
               className="pt-2.5 border-t border-zinc-100 dark:border-zinc-800 text-xs font-semibold text-zinc-900 dark:text-zinc-100 hover:text-amber-600 dark:hover:text-amber-400 transition-colors flex items-center justify-between"
             >
-              <span>View Learning Modules</span>
+              <span>View Breach &amp; Money Suit Steps</span>
               <ArrowRight className="w-3.5 h-3.5" />
             </Link>
           </div>
@@ -651,19 +660,32 @@ export default function HomePage() {
               {featuredLaws.map((law) => (
                 <div
                   key={law.id}
-                  className="p-6 sm:p-7 rounded-2xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 hover:border-amber-500/40 shadow-sm transition-all flex flex-col justify-between space-y-4"
+                  className="p-6 sm:p-7 rounded-2xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700 shadow-xs transition-all flex flex-col justify-between space-y-4"
                 >
                   <div className="space-y-3">
-                    <div className="flex items-center justify-between gap-2">
-                      <span
-                        className={`text-[11px] font-bold px-2.5 py-0.5 rounded-full border ${
-                          law.jurisdiction === 'Bangladesh'
-                            ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20'
-                            : 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20'
-                        }`}
-                      >
-                        {law.jurisdiction}
-                      </span>
+                    <div className="flex items-center justify-between gap-2 flex-wrap">
+                      <div className="flex items-center gap-1.5">
+                        <span
+                          className={`text-[11px] font-bold px-2.5 py-0.5 rounded-full border ${
+                            law.jurisdiction === 'Bangladesh'
+                              ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20'
+                              : 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20'
+                          }`}
+                        >
+                          {law.jurisdiction}
+                        </span>
+                        <span
+                          className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border ${
+                            law.status === 'In Force' || law.status === 'Active Treaty'
+                              ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20'
+                              : law.status === 'Repealed'
+                              ? 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20'
+                              : 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20'
+                          }`}
+                        >
+                          {law.status}
+                        </span>
+                      </div>
                       <span className="text-xs text-zinc-400 font-medium">
                         {law.actNumber || `Enacted ${law.enactmentYear}`}
                       </span>
@@ -691,17 +713,22 @@ export default function HomePage() {
                   </div>
 
                   <div className="pt-4 border-t border-zinc-100 dark:border-zinc-800 flex items-center justify-between text-xs">
-                    <span className="text-zinc-500">
-                      {law.totalStatutorySectionsCount && law.totalStatutorySectionsCount > 0
-                        ? `${law.totalStatutorySectionsCount} Sections (${law.sections.length} Indexed)`
-                        : `${law.sections.length} ${law.sections.length === 1 ? 'Section' : 'Sections'}`}
-                    </span>
+                    <div className="flex flex-col text-[11px] text-zinc-500">
+                      <span>
+                        {law.totalStatutorySectionsCount && law.totalStatutorySectionsCount > 0
+                          ? `${law.totalStatutorySectionsCount} Sections (${law.sections.length} Indexed)`
+                          : `${law.sections.length} ${law.sections.length === 1 ? 'Section' : 'Sections'}`}
+                      </span>
+                      <span className="text-[10px] text-zinc-400">
+                        {law.isCuratedSubset ? 'Curated Core Provisions' : 'Full Codification'}
+                      </span>
+                    </div>
                     <Link
                       href={`/law/${law.id}`}
                       id={`featured-law-read-${law.id}`}
                       className="font-bold text-amber-600 dark:text-amber-400 hover:underline inline-flex items-center space-x-1"
                     >
-                      <span>Read Full Statute</span>
+                      <span>Read Statute</span>
                       <ArrowRight className="w-3.5 h-3.5" />
                     </Link>
                   </div>
@@ -720,36 +747,51 @@ export default function HomePage() {
               exit="exit"
               className="grid grid-cols-1 md:grid-cols-2 gap-6"
             >
-              {recentlyUpdatedLaws.map((law) => (
-                <div
-                  key={law.id}
-                  className="p-6 rounded-2xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-sm space-y-4"
-                >
-                  <div className="flex items-center justify-between">
-                    <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
-                      Amended / Updated {law.updateYear}
-                    </span>
-                    <span className="text-xs text-zinc-400">{law.jurisdiction}</span>
+              {recentlyUpdatedLaws.map((law) => {
+                const isRepealed = law.id === 'bd-cyber-security-2023';
+                return (
+                  <div
+                    key={law.id}
+                    className={`p-6 rounded-2xl bg-white dark:bg-zinc-900 border ${
+                      isRepealed ? 'border-rose-500/30' : 'border-zinc-200 dark:border-zinc-800'
+                    } shadow-xs space-y-4 flex flex-col justify-between`}
+                  >
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between">
+                        <span
+                          className={`text-[11px] font-bold px-2.5 py-0.5 rounded-full ${
+                            isRepealed
+                              ? 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/30'
+                              : 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20'
+                          }`}
+                        >
+                          {isRepealed ? 'Repealed / Historical Archive' : `Amended / Updated ${law.updateYear}`}
+                        </span>
+                        <span className="text-xs text-zinc-400">{law.jurisdiction}</span>
+                      </div>
+                      <div>
+                        <h3 className="text-base font-bold text-zinc-900 dark:text-white">{law.title}</h3>
+                        <p className="text-xs text-zinc-500 dark:text-zinc-400">{law.titleBn}</p>
+                      </div>
+                      <div className="p-3 rounded-xl bg-zinc-50 dark:bg-zinc-950 border border-zinc-100 dark:border-zinc-800 text-xs space-y-1">
+                        <span className="font-semibold text-zinc-800 dark:text-zinc-200 block">
+                          {isRepealed ? 'Statutory Status & Transition:' : 'Amendment Overview:'}
+                        </span>
+                        <p className="text-zinc-600 dark:text-zinc-400 leading-relaxed">{law.updateNote}</p>
+                      </div>
+                    </div>
+                    <div className="pt-2 flex justify-end">
+                      <Link
+                        href={law.url}
+                        className="text-xs font-bold text-amber-600 dark:text-amber-400 hover:underline flex items-center space-x-1"
+                      >
+                        <span>{isRepealed ? 'Review Historical Archive & Sections' : 'View Amendment History & Full Text'}</span>
+                        <ArrowRight className="w-3.5 h-3.5" />
+                      </Link>
+                    </div>
                   </div>
-                  <div>
-                    <h3 className="text-base font-bold text-zinc-900 dark:text-white">{law.title}</h3>
-                    <p className="text-xs text-zinc-500 dark:text-zinc-400">{law.titleBn}</p>
-                  </div>
-                  <div className="p-3 rounded-xl bg-zinc-50 dark:bg-zinc-950 border border-zinc-100 dark:border-zinc-800 text-xs space-y-1">
-                    <span className="font-semibold text-zinc-800 dark:text-zinc-200 block">Amendment Overview:</span>
-                    <p className="text-zinc-600 dark:text-zinc-400 leading-relaxed">{law.updateNote}</p>
-                  </div>
-                  <div className="pt-2 flex justify-end">
-                    <Link
-                      href={law.url}
-                      className="text-xs font-bold text-amber-600 dark:text-amber-400 hover:underline flex items-center space-x-1"
-                    >
-                      <span>View Amendment History & Full Text</span>
-                      <ArrowRight className="w-3.5 h-3.5" />
-                    </Link>
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </motion.div>
           )}
 
@@ -1023,7 +1065,68 @@ export default function HomePage() {
       </section>
 
       {/* ========================================================================= */}
-      {/* SECTION 7 — What We Are Working On (Roadmap Preview)                       */}
+      {/* SECTION 7 — Institutional Provenance & Legal Research Standards           */}
+      {/* ========================================================================= */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
+        <div className="p-8 sm:p-10 rounded-3xl bg-zinc-900 border border-zinc-800 text-zinc-100 space-y-8 shadow-xs">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-zinc-800 pb-6">
+            <div className="space-y-1">
+              <div className="flex items-center space-x-2 text-xs font-semibold text-blue-400">
+                <ShieldCheck className="w-4 h-4" />
+                <span>Authoritative Provenance &amp; Public Interest</span>
+              </div>
+              <h2 className="text-xl sm:text-2xl font-bold font-serif text-white">
+                Institutional Integrity &amp; Primary Sources
+              </h2>
+            </div>
+            <a
+              href="mailto:nyayota.contact@gmail.com?subject=Nyayota%20Editorial%20Inquiry%20or%20Discrepancy%20Report"
+              className="inline-flex items-center space-x-2 px-4 py-2 rounded-xl text-xs font-semibold bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-zinc-200 transition-colors"
+            >
+              <Mail className="w-3.5 h-3.5" />
+              <span>Contact Legal Editorial</span>
+            </a>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-xs">
+            {/* Pillar 1 */}
+            <div className="p-5 rounded-2xl bg-zinc-950 border border-zinc-800/80 space-y-3">
+              <div className="w-9 h-9 rounded-xl bg-blue-500/10 text-blue-400 border border-blue-500/20 flex items-center justify-center">
+                <Building2 className="w-4 h-4" />
+              </div>
+              <h3 className="font-bold text-sm text-white">Primary Source Citations</h3>
+              <p className="text-zinc-400 leading-relaxed">
+                Every national statute is cross-verified against official gazette publications and the Ministry of Law, Justice &amp; Parliamentary Affairs repository (<span className="text-zinc-300 font-mono">bdlaws.minlaw.gov.bd</span>). International treaties are cited against the United Nations Treaty Collection (<span className="text-zinc-300 font-mono">treaties.un.org</span>).
+              </p>
+            </div>
+
+            {/* Pillar 2 */}
+            <div className="p-5 rounded-2xl bg-zinc-950 border border-zinc-800/80 space-y-3">
+              <div className="w-9 h-9 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex items-center justify-center">
+                <FileCheck className="w-4 h-4" />
+              </div>
+              <h3 className="font-bold text-sm text-white">Open Access &amp; Privacy</h3>
+              <p className="text-zinc-400 leading-relaxed">
+                Nyayota is completely non-monetized, free from advertising, and requires no account or credit card. All personal research bookmarks and case notes remain exclusively stored on your local browser device. Released under the open-source MIT License.
+              </p>
+            </div>
+
+            {/* Pillar 3 */}
+            <div className="p-5 rounded-2xl bg-zinc-950 border border-zinc-800/80 space-y-3">
+              <div className="w-9 h-9 rounded-xl bg-amber-500/10 text-amber-400 border border-amber-500/20 flex items-center justify-center">
+                <AlertCircle className="w-4 h-4" />
+              </div>
+              <h3 className="font-bold text-sm text-white">Active Amendment Auditing</h3>
+              <p className="text-zinc-400 leading-relaxed">
+                Our editorial system tracks parliamentary repeals and judicial declarations. Outdated text (such as the repealed Cyber Security Act 2023) is preserved exclusively for historical and pending-trial reference with prominent transition notices.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ========================================================================= */}
+      {/* SECTION 8 — What We Are Working On (Roadmap Preview)                       */}
       {/* ========================================================================= */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
         <div className="border-t border-zinc-200 dark:border-zinc-800/80 pt-10 space-y-8">
