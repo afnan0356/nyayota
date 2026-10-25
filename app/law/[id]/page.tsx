@@ -1057,12 +1057,24 @@ function LawDetailViewer({
 
           {/* Extended International Metadata Strip */}
           {law.jurisdiction === 'International' && (
-            <div className="p-3.5 rounded-2xl bg-blue-950/40 border border-blue-500/20 text-xs space-y-2 text-blue-200">
-              <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
+            <div className="p-4 rounded-2xl bg-blue-950/40 border border-blue-500/20 text-xs space-y-2.5 text-blue-200">
+              <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5">
+                {law.instrumentType && (
+                  <div>
+                    <span className="text-zinc-400">Instrument Type: </span>
+                    <span className="font-bold text-amber-300">{law.instrumentType}</span>
+                  </div>
+                )}
                 {law.unCitationRef && (
                   <div>
                     <span className="text-zinc-400">UN / Citation: </span>
                     <span className="font-mono font-bold text-blue-300">{law.unCitationRef}</span>
+                  </div>
+                )}
+                {law.bangladeshRatificationStatus && (
+                  <div>
+                    <span className="text-zinc-400">Bangladesh Status: </span>
+                    <span className="font-bold text-emerald-300">🇧🇩 {law.bangladeshRatificationStatus}</span>
                   </div>
                 )}
                 {law.officialLanguages && law.officialLanguages.length > 0 && (
@@ -1078,6 +1090,12 @@ function LawDetailViewer({
                   </div>
                 )}
               </div>
+              {law.bangladeshDomesticApplicationNote && (
+                <div className="pt-2 border-t border-blue-500/20 text-[11px] text-zinc-300 leading-relaxed">
+                  <strong className="text-emerald-400">Domestic Application in Bangladesh: </strong>
+                  {law.bangladeshDomesticApplicationNote}
+                </div>
+              )}
               {law.sourceReproductionNotice && (
                 <p className="text-[11px] text-zinc-400 italic">
                   {law.sourceReproductionNotice}

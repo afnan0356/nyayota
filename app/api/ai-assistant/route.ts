@@ -6,7 +6,15 @@ export interface ChatMessage {
   content: string;
 }
 
-// In-memory sliding-window rate limiter (20 requests per 60 seconds per client IP)
+// ---------------------------------------------------------------------------
+// Rate Limiting Architecture & Serverless Deployment Note:
+// In-memory sliding-window rate limiter (20 requests per 60 seconds per client IP).
+// Note: In serverless environments (such as Vercel), each cold-started function instance
+// maintains its own in-memory state. While a multi-instance production environment
+// at scale would use an external distributed low-latency store (e.g. Upstash Redis),
+// this per-instance sliding-window limiter prevents single-container flooding and
+// runaway token exhaustion without requiring paid external infrastructure.
+// ---------------------------------------------------------------------------
 interface RateLimitRecord {
   timestamps: number[];
 }
@@ -18,7 +26,7 @@ function checkRateLimit(clientIp: string): { allowed: boolean; remaining: number
   const now = Date.now();
   const record = rateLimitMap.get(clientIp) || { timestamps: [] };
 
-  // Remove timestamps outside the sliding window
+  // Retain only timestamps within the sliding window
   const activeTimestamps = record.timestamps.filter((ts) => now - ts < RATE_LIMIT_WINDOW_MS);
 
   if (activeTimestamps.length >= MAX_REQUESTS_PER_WINDOW) {
@@ -29,8 +37,8 @@ function checkRateLimit(clientIp: string): { allowed: boolean; remaining: number
   activeTimestamps.push(now);
   rateLimitMap.set(clientIp, { timestamps: activeTimestamps });
 
-  // Periodically clean stale entries to prevent memory leaks
-  if (rateLimitMap.size > 2000) {
+  // Periodically clean stale entries to prevent memory buildup in warm containers
+  if (rateLimitMap.size > 1500) {
     for (const [key, val] of rateLimitMap.entries()) {
       if (val.timestamps.every((t) => now - t >= RATE_LIMIT_WINDOW_MS)) {
         rateLimitMap.delete(key);
@@ -41,12 +49,56 @@ function checkRateLimit(clientIp: string): { allowed: boolean; remaining: number
   return { allowed: true, remaining: MAX_REQUESTS_PER_WINDOW - activeTimestamps.length };
 }
 
+// Safely extract client IP respecting edge proxies without blind header trust
+function getClientIp(req: NextRequest): string {
+  // 1. Vercel Edge / Serverless trusted header
+  const vercelIp = req.headers.get('x-vercel-forwarded-for');
+  if (vercelIp) {
+    const candidate = vercelIp.split(',')[0].trim();
+    if (candidate) return candidate;
+  }
+
+  // 2. Standard X-Real-IP
+  const realIp = req.headers.get('x-real-ip');
+  if (realIp && realIp.trim()) return realIp.trim();
+
+  // 3. X-Forwarded-For: take first IP in proxy chain, sanitize
+  const forwarded = req.headers.get('x-forwarded-for');
+  if (forwarded) {
+    const candidate = forwarded.split(',')[0].trim();
+    if (candidate) return candidate;
+  }
+
+  return '127.0.0.1';
+}
+
+const SECURITY_HEADERS = {
+  'Cache-Control': 'no-store, no-cache, must-revalidate',
+  'X-Content-Type-Options': 'nosniff',
+};
+
 export async function POST(req: NextRequest) {
   try {
-    // 1. IP extraction and sliding-window rate limiting
-    const forwardedHeader = req.headers.get('x-forwarded-for');
-    const clientIp = forwardedHeader ? forwardedHeader.split(',')[0].trim() : req.headers.get('x-real-ip') || '127.0.0.1';
-    
+    // 1. Strict Content-Type check (prevent CSRF and non-JSON body attacks)
+    const contentType = req.headers.get('content-type') || '';
+    if (!contentType.toLowerCase().includes('application/json')) {
+      return NextResponse.json(
+        { error: 'Invalid Content-Type. Expected application/json.' },
+        { status: 415, headers: SECURITY_HEADERS }
+      );
+    }
+
+    // 2. Payload size safeguard (prevent memory exhaustion)
+    const contentLength = req.headers.get('content-length');
+    if (contentLength && parseInt(contentLength, 10) > 32768) {
+      return NextResponse.json(
+        { error: 'Payload exceeds maximum permitted size of 32KB.' },
+        { status: 413, headers: SECURITY_HEADERS }
+      );
+    }
+
+    // 3. Client IP extraction and sliding-window rate limiting
+    const clientIp = getClientIp(req);
     const rateLimit = checkRateLimit(clientIp);
     if (!rateLimit.allowed) {
       return NextResponse.json(
@@ -57,6 +109,7 @@ export async function POST(req: NextRequest) {
         {
           status: 429,
           headers: {
+            ...SECURITY_HEADERS,
             'Retry-After': '60',
             'X-RateLimit-Limit': String(MAX_REQUESTS_PER_WINDOW),
             'X-RateLimit-Remaining': '0',
@@ -65,30 +118,51 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // 2. Body parsing and strict input validation
+    // 4. Safe body parsing
     let body;
     try {
       body = await req.json();
     } catch {
-      return NextResponse.json({ error: 'Malformed JSON payload.' }, { status: 400 });
+      return NextResponse.json(
+        { error: 'Malformed JSON payload.' },
+        { status: 400, headers: SECURITY_HEADERS }
+      );
+    }
+
+    if (!body || typeof body !== 'object') {
+      return NextResponse.json(
+        { error: 'Request body must be a JSON object.' },
+        { status: 400, headers: SECURITY_HEADERS }
+      );
     }
 
     const { query, mode = 'explain', language = 'both', lawContext, messages = [] } = body;
 
+    // Validate query parameter
     if (!query || typeof query !== 'string' || query.trim().length === 0) {
-      return NextResponse.json({ error: 'Query parameter is required and must be non-empty.' }, { status: 400 });
-    }
-
-    // Enforce 1,500 character upper limit to avoid token exhaustion and DoS
-    const trimmedQuery = query.trim();
-    if (trimmedQuery.length > 1500) {
       return NextResponse.json(
-        { error: 'Query exceeds maximum allowed length of 1,500 characters.' },
-        { status: 400 }
+        { error: 'Query parameter is required and must be non-empty.' },
+        { status: 400, headers: SECURITY_HEADERS }
       );
     }
 
-    // Validate mode and language
+    const trimmedQuery = query.trim();
+    if (trimmedQuery.length < 2) {
+      return NextResponse.json(
+        { error: 'Query must be at least 2 characters long.' },
+        { status: 400, headers: SECURITY_HEADERS }
+      );
+    }
+
+    // Enforce 1,500 character upper limit to avoid token exhaustion and DoS
+    if (trimmedQuery.length > 1500) {
+      return NextResponse.json(
+        { error: 'Query exceeds maximum allowed length of 1,500 characters.' },
+        { status: 400, headers: SECURITY_HEADERS }
+      );
+    }
+
+    // Validate mode and language against strict whitelists
     const safeMode = typeof mode === 'string' && ['explain', 'outcome', 'compare', 'analogy', 'statute'].includes(mode)
       ? mode
       : 'explain';
@@ -96,15 +170,20 @@ export async function POST(req: NextRequest) {
       ? language
       : 'both';
 
-    // Limit conversation history to latest 10 messages with 2,000 character cap per message
+    // Limit conversation history to latest 10 messages with 2,000 char cap per message and 8,000 char total cap
     const validatedMessages: ChatMessage[] = [];
+    let totalHistoryLength = 0;
     if (Array.isArray(messages)) {
       messages.slice(-10).forEach((msg) => {
         if (msg && typeof msg === 'object' && typeof msg.content === 'string') {
-          validatedMessages.push({
-            role: msg.role === 'user' ? 'user' : 'assistant',
-            content: msg.content.slice(0, 2000),
-          });
+          const sanitizedContent = msg.content.trim().slice(0, 2000);
+          if (sanitizedContent && totalHistoryLength + sanitizedContent.length <= 8000) {
+            validatedMessages.push({
+              role: msg.role === 'user' ? 'user' : 'assistant',
+              content: sanitizedContent,
+            });
+            totalHistoryLength += sanitizedContent.length;
+          }
         }
       });
     }
@@ -147,7 +226,7 @@ CRITICAL OPERATIONAL RULES:
           apiKey,
           httpOptions: {
             headers: {
-              'User-Agent': 'aistudio-build',
+              'User-Agent': 'nyayota-legal-platform',
             },
           },
         });
@@ -167,40 +246,66 @@ CRITICAL OPERATIONAL RULES:
           parts: [{ text: userPrompt }]
         });
 
-        const response = await ai.models.generateContent({
-          model: 'gemini-3.7-flash',
-          contents,
-          config: {
-            systemInstruction,
-            temperature: 0.25, // rigorous and precise for legal analysis
-          },
-        });
+        // Upstream 12-second timeout race to prevent hanging requests
+        const timeoutPromise = new Promise<never>((_, reject) =>
+          setTimeout(() => reject(new Error('AI upstream generation request timed out after 12 seconds')), 12000)
+        );
 
-        return NextResponse.json({
-          text: response.text,
-          provider: 'gemini-3.7-flash',
-          timestamp: new Date().toISOString(),
-        });
+        const response = await Promise.race([
+          ai.models.generateContent({
+            model: 'gemini-2.5-flash',
+            contents,
+            config: {
+              systemInstruction,
+              temperature: 0.25,
+            },
+          }),
+          timeoutPromise,
+        ]);
+
+        return NextResponse.json(
+          {
+            text: response.text,
+            provider: 'gemini-2.5-flash',
+            timestamp: new Date().toISOString(),
+          },
+          {
+            headers: {
+              ...SECURITY_HEADERS,
+              'X-RateLimit-Limit': String(MAX_REQUESTS_PER_WINDOW),
+              'X-RateLimit-Remaining': String(rateLimit.remaining),
+            },
+          }
+        );
       } catch (geminiError: unknown) {
-        // Sanitized server-side error logging: never echo raw query payload
+        // Sanitized server-side error logging: never echo raw query payload or API keys
         const errorMsg = geminiError instanceof Error ? geminiError.message : 'Unknown upstream error';
         console.error('Upstream AI generation request encountered an issue:', errorMsg);
       }
     }
 
-    // High precision fallback educational analysis if API key is missing or offline
+    // High precision fallback educational analysis if API key is missing, timed out, or offline
     const fallbackResponse = generateLocalLegalAnalysis(trimmedQuery, safeMode, safeLanguage, lawContext);
-    return NextResponse.json({
-      text: fallbackResponse,
-      provider: 'nyayota-legal-engine-v1',
-      timestamp: new Date().toISOString(),
-    });
+    return NextResponse.json(
+      {
+        text: fallbackResponse,
+        provider: 'nyayota-legal-engine-v1',
+        timestamp: new Date().toISOString(),
+      },
+      {
+        headers: {
+          ...SECURITY_HEADERS,
+          'X-RateLimit-Limit': String(MAX_REQUESTS_PER_WINDOW),
+          'X-RateLimit-Remaining': String(rateLimit.remaining),
+        },
+      }
+    );
   } catch (error: unknown) {
     const errorMsg = error instanceof Error ? error.message : 'Internal error';
     console.error('AI assistant route encountered an error:', errorMsg);
     return NextResponse.json(
       { error: 'An error occurred while analyzing the legal query.' },
-      { status: 500 }
+      { status: 500, headers: SECURITY_HEADERS }
     );
   }
 }

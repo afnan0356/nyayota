@@ -141,7 +141,8 @@ export interface LawItem {
     | 'Investment Law'
     | 'Public International Law'
     | 'International Courts & Tribunals'
-    | 'Regional Law Systems';
+    | 'Regional Law Systems'
+    | 'Refugees & Migration';
   status: 'Active' | 'Amended' | 'Repealed' | 'Draft' | 'In Force' | 'Active Treaty' | 'Customary Law' | 'Declaratory Instrument' | 'Model Law' | 'Statute / Constitutional Charter';
   alternativeTitles?: string[];
   depositary?: string;
@@ -151,6 +152,14 @@ export interface LawItem {
   sourceReproductionNotice?: string;
   verificationStatus?: string;
   unCitationRef?: string;
+  instrumentType?:
+    | 'Multilateral Treaty'
+    | 'Declaratory Instrument'
+    | 'Model Law'
+    | 'Constitutive Statute'
+    | 'Treaty Protocol';
+  bangladeshRatificationStatus?: string;
+  bangladeshDomesticApplicationNote?: string;
   ratificationsCount?: number;
   coverageStatus?: CoverageStatus;
   sourceReliabilityStatus?: SourceReliabilityStatus;
@@ -890,228 +899,6 @@ export const LAWS_DATABASE: LawItem[] = [
     keywords: ['labor law', 'worker rights', 'maternity benefit', 'overtime', 'trade union', 'rmg', 'factory safety', 'shrom ain']
   },
   {
-    id: 'int-udhr-1948',
-    slug: 'universal-declaration-of-human-rights-1948',
-    title: 'Universal Declaration of Human Rights (UDHR)',
-    titleBn: 'মানবাধিকারের সার্বজনীন ঘোষণাপত্র (১৯৪৮)',
-    shortTitle: 'UDHR (UNGA Res 217 A)',
-    jurisdiction: 'International',
-    jurisdictionCode: 'INT',
-    category: 'Human Rights',
-    status: 'Customary Law',
-    enactmentYear: 1948,
-    totalStatutorySectionsCount: 30,
-    isCuratedSubset: true,
-    signatoriesCount: 193,
-    overview: 'Adopted by the United Nations General Assembly in Paris on 10 December 1948, the UDHR represents the foundational milestone document in the history of human rights, setting out 30 universal articles protecting every human being everywhere.',
-    overviewBn: 'জাতিসংঘ সাধারণ পরিষদ কর্তৃক গৃহীত ঐতিহাসিক দলিল যা বিশ্বের সকল মানুষের জন্য ৩০টি মৌলিক ও অবিচ্ছেদ্য মানবাধিকার নিশ্চিত করে।',
-    simpleSummary: 'A historic global agreement created after World War II stating that every person on Earth is born free and equal, with rights to life, education, fair trials, and freedom from torture.',
-    fullOfficialTextExcerpt: 'Whereas recognition of the inherent dignity and of the equal and inalienable rights of all members of the human family is the foundation of freedom, justice and peace in the world... Now, therefore, the General Assembly proclaims this Universal Declaration of Human Rights as a common standard of achievement for all peoples and all nations...',
-    keyHighlights: [
-      'Contains 30 foundational articles declaring all human beings born free and equal in dignity and rights (Art. 1).',
-      'Absolute prohibition against torture, cruel, inhuman or degrading treatment (Art. 5).',
-      'Serves as the foundation for the binding ICCPR and ICESCR global human rights covenants.'
-    ],
-    sections: [
-      {
-        number: 'Article 1',
-        title: 'Right to Equality and Dignity',
-        titleBn: 'সাম্য ও মানবিক মর্যাদার অধিকার',
-        content: 'All human beings are born free and equal in dignity and rights. They are endowed with reason and conscience and should act towards one another in a spirit of brotherhood.',
-        contentBn: 'সমস্ত মানুষ স্বাধীনভাবে এবং সমান মর্যাদা ও অধিকার নিয়ে জন্মগ্রহণ করে।',
-        simpleExplanation: 'Every single person has equal human value and rights simply by being born human.',
-        punishmentOrRemedy: 'Universal moral and customary legal baseline for national constitutions.',
-        keyConcepts: ['Inherent dignity', 'Equality', 'Universal rights']
-      },
-      {
-        number: 'Article 5',
-        title: 'Freedom from Torture and Inhuman Treatment',
-        titleBn: 'নির্যাতন ও অমানবিক আচরণ থেকে মুক্তি',
-        content: 'No one shall be subjected to torture or to cruel, inhuman or degrading treatment or punishment.',
-        contentBn: 'কাউকে নির্যাতন কিংবা নিষ্ঠুর, অমানবিক বা অবমাননাকর আচরণ বা শাস্তি দেওয়া যাবে না।',
-        simpleExplanation: 'Torture is strictly illegal worldwide with zero exceptions, even during war or national emergencies.',
-        punishmentOrRemedy: 'Customary international law norm (Jus Cogens).',
-        keyConcepts: ['Absolute prohibition', 'Anti-torture', 'Jus cogens']
-      },
-      {
-        number: 'Article 19',
-        title: 'Freedom of Opinion and Expression',
-        titleBn: 'মতপ্রকাশের স্বাধীনতা',
-        content: 'Everyone has the right to freedom of opinion and expression; this right includes freedom to hold opinions without interference and to seek, receive and impart information and ideas through any media and regardless of frontiers.',
-        contentBn: 'প্রত্যেকেরই মতামত পোষণ এবং মতপ্রকাশের অধিকার রয়েছে।',
-        simpleExplanation: 'You have the right to think what you want, say what you think, and share information without borders.',
-        punishmentOrRemedy: 'International human rights treaty reporting and UN Human Rights Council review.',
-        keyConcepts: ['Free expression', 'Access to information', 'Cross-border discourse']
-      }
-    ],
-    timeline: [
-      { year: '1948', title: 'UNGA Adoption in Paris', description: 'Proclaimed by UN General Assembly Resolution 217 A.', status: 'enacted' },
-      { year: '1966', title: 'Adoption of Twin Binding Covenants', description: 'Codified into binding treaty law via ICCPR and ICESCR.', status: 'enacted' },
-      { year: '1993', title: 'Vienna Declaration and Programme of Action', description: 'Reaffirmed human rights universality and indivisibility.', status: 'upheld' }
-    ],
-    relatedLawIds: ['int-iccpr-1966', 'int-geneva-1949', 'bd-constitution-1972'],
-    citations: {
-      standard: 'Universal Declaration of Human Rights, G.A. Res. 217A (III), U.N. Doc. A/810 (Dec. 10, 1948)',
-      academic: 'UDHR (1948), UN General Assembly Resolution 217 A (III).',
-      bluebook: 'G.A. Res. 217 (III) A, Universal Declaration of Human Rights (Dec. 10, 1948).'
-    },
-    keywords: ['human rights', 'udhr', 'united nations', 'equality', 'freedom from torture', 'free speech', 'international law', 'dignity']
-  },
-  {
-    id: 'int-iccpr-1966',
-    slug: 'international-covenant-on-civil-and-political-rights-1966',
-    title: 'International Covenant on Civil and Political Rights (ICCPR)',
-    titleBn: 'নাগরিক ও রাজনৈতিক অধিকার বিষয়ক আন্তর্জাতিক চুক্তি (১৯৬৬)',
-    shortTitle: 'ICCPR (UN Treaty Series vol. 999)',
-    jurisdiction: 'International',
-    jurisdictionCode: 'INT',
-    category: 'Human Rights',
-    status: 'Active Treaty',
-    enactmentYear: 1966,
-    totalStatutorySectionsCount: 53,
-    isCuratedSubset: true,
-    signatoriesCount: 174,
-    overview: 'A multilateral treaty adopted by the UN General Assembly that commits state parties to respect the civil and political rights of individuals, including right to life, freedom of religion, freedom of assembly, electoral rights, and due process.',
-    overviewBn: 'জাতিসংঘের একটি বাধ্যতামূলক আন্তর্জাতিক চুক্তি যা স্বাক্ষরকারী রাষ্ট্রগুলোকে তাদের নাগরিকদের জীবন, ধর্মীয় স্বাধীনতা, সমাবেশের অধিকার ও সুষ্ঠু বিচারের নিশ্চয়তা দিতে বাধ্য করে।',
-    simpleSummary: 'A legally binding international treaty requiring countries to protect their citizens\' rights to life, voting, fair court trials, peaceful protest, and religious freedom.',
-    fullOfficialTextExcerpt: 'The States Parties to the present Covenant, Considering that, in accordance with the principles proclaimed in the Charter of the United Nations, recognition of the inherent dignity and of the equal and inalienable rights of all members of the human family is the foundation of freedom, justice and peace in the world, Agree upon the following articles...',
-    keyHighlights: [
-      'Monitored by the UN Human Rights Committee based in Geneva.',
-      'Article 6 protects the right to life with strict restrictions on capital punishment.',
-      'Article 14 establishes comprehensive fair trial standards including presumption of innocence.'
-    ],
-    sections: [
-      {
-        number: 'Article 9',
-        title: 'Right to Liberty and Security of Person',
-        titleBn: 'ব্যক্তিগত স্বাধীনতা ও নিরাপত্তার অধিকার',
-        content: 'Everyone has the right to liberty and security of person. No one shall be subjected to arbitrary arrest or detention. No one shall be deprived of his liberty except on such grounds and in accordance with such procedure as are established by law.',
-        contentBn: 'কোনো ব্যক্তিকে বেআইনি বা খেয়ালখুশিমতো গ্রেপ্তার বা আটক রাখা যাবে না।',
-        simpleExplanation: 'Protects you from being arrested without lawful cause, with the right to be brought promptly before a judge.',
-        punishmentOrRemedy: 'Enforceable right to compensation for unlawful arrest (Art 9(5)).',
-        keyConcepts: ['Arbitrary arrest', 'Habeas corpus', 'Prompt judicial hearing']
-      },
-      {
-        number: 'Article 14',
-        title: 'Right to a Fair Trial',
-        titleBn: 'সুষ্ঠু বিচারের অধিকার',
-        content: 'All persons shall be equal before the courts and tribunals. In the determination of any criminal charge against him, or of his rights and obligations in a suit at law, everyone shall be entitled to a fair and public hearing by a competent, independent and impartial tribunal established by law.',
-        contentBn: 'আদালতের সামনে প্রত্যেকে সমান এবং নিরপেক্ষ আদালতের মাধ্যমে প্রকাশ্য ও সুষ্ঠু বিচার লাভের অধিকারী।',
-        simpleExplanation: 'Guarantees that trials must be heard by independent judges, with public hearings and legal defense assistance.',
-        punishmentOrRemedy: 'State obligation under international human rights law.',
-        keyConcepts: ['Impartial tribunal', 'Presumption of innocence', 'Legal counsel']
-      }
-    ],
-    timeline: [
-      { year: '1966', title: 'Adoption by UN General Assembly', description: 'Opened for signature on 16 December 1966.', status: 'enacted' },
-      { year: '1976', title: 'Entry into Force', description: 'Entered into force on 23 March 1976 following 35 ratifications.', status: 'enacted' },
-      { year: '2000', title: 'Bangladesh Accession', description: 'Bangladesh formally acceded to the Covenant.', status: 'upheld' }
-    ],
-    relatedLawIds: ['int-udhr-1948', 'bd-constitution-1972', 'bd-crpc-1898'],
-    citations: {
-      standard: 'International Covenant on Civil and Political Rights, Dec. 16, 1966, 999 U.N.T.S. 171',
-      academic: 'ICCPR, 999 UNTS 171, entered into force March 23, 1976.',
-      bluebook: 'International Covenant on Civil and Political Rights, art. 9, Dec. 16, 1966, 999 U.N.T.S. 171.'
-    },
-    keywords: ['iccpr', 'civil rights', 'political rights', 'fair trial', 'arbitrary detention', 'un human rights', 'treaty']
-  },
-  {
-    id: 'int-geneva-1949',
-    slug: 'geneva-conventions-1949',
-    title: 'The Geneva Conventions of 1949',
-    titleBn: 'জেনেভা কনভেনশন (১৯৪৯)',
-    shortTitle: 'Geneva Conventions I-IV (1949)',
-    jurisdiction: 'International',
-    jurisdictionCode: 'INT',
-    category: 'International Humanitarian',
-    status: 'Active Treaty',
-    enactmentYear: 1949,
-    totalStatutorySectionsCount: 159,
-    isCuratedSubset: true,
-    signatoriesCount: 196,
-    overview: 'The core body of international humanitarian law (IHL) establishing legal protections in times of armed conflict for wounded combatants, prisoners of war, medical personnel, and non-combatant civilians.',
-    overviewBn: 'আন্তর্জাতিক মানবিক আইনের মূল স্তম্ভ যা যুদ্ধকালীন সময়ে আহত সৈনিক, যুদ্ধবন্দী এবং সাধারণ বেসামরিক নাগরিকদের সুরক্ষা নিশ্চিত করে।',
-    simpleSummary: 'The international laws of war that mandate humane treatment for civilians, medical workers, and captured soldiers during armed conflicts.',
-    fullOfficialTextExcerpt: 'The High Contracting Parties undertake to respect and to ensure respect for the present Convention in all circumstances... Persons taking no active part in the hostilities, including members of armed forces who have laid down their arms and those placed hors de combat by sickness, wounds, detention, or any other cause, shall in all circumstances be treated humanely...',
-    keyHighlights: [
-      'Common Article 3 applies to non-international armed conflicts prohibiting murder, torture, and hostage-taking.',
-      'Fourth Geneva Convention provides comprehensive protections for civilian populations in occupied territories.',
-      'Universal ratification across all 196 sovereign states worldwide.'
-    ],
-    sections: [
-      {
-        number: 'Common Article 3',
-        title: 'Conflicts not of an international character',
-        titleBn: 'অভ্যন্তরীণ ও অ-আন্তর্জাতিক সশস্ত্র সংঘাতের নীতিমালা',
-        content: 'Persons taking no active part in the hostilities shall in all circumstances be treated humanely, without any adverse distinction. The following acts remain prohibited: (a) violence to life and person, in particular murder of all kinds, mutilation, cruel treatment and torture; (b) taking of hostages; (c) outrages upon personal dignity.',
-        contentBn: 'যুদ্ধে প্রত্যক্ষভাবে অংশ না নেওয়া ব্যক্তিদের যেকোনো পরিস্থিতিতে মানবিক আচরণ করতে হবে।',
-        simpleExplanation: 'Sets a baseline minimum standard of humanity that must be respected in every armed clash or civil conflict.',
-        punishmentOrRemedy: 'War crime prosecution before the International Criminal Court (ICC).',
-        keyConcepts: ['Civilian protection', 'Humane treatment', 'War crimes prohibition']
-      }
-    ],
-    timeline: [
-      { year: '1949', title: 'Adoption in Geneva', description: 'Concluded following the devastation of World War II.', status: 'enacted' },
-      { year: '1977', title: 'Additional Protocols I and II', description: 'Expanded protections to modern guerrilla conflicts and civilian infrastructure.', status: 'amended' },
-      { year: '2005', title: 'Additional Protocol III', description: 'Adopted the Red Crystal as an additional protective emblem.', status: 'amended' }
-    ],
-    relatedLawIds: ['int-udhr-1948', 'int-iccpr-1966'],
-    citations: {
-      standard: 'Geneva Conventions of 12 August 1949, 75 U.N.T.S. 287',
-      academic: 'Geneva Conventions I-IV (1949), International Committee of the Red Cross (ICRC).',
-      bluebook: 'Geneva Convention Relative to the Protection of Civilian Persons in Time of War, Aug. 12, 1949, 6 U.S.T. 3516, 75 U.N.T.S. 287.'
-    },
-    keywords: ['geneva conventions', 'ihl', 'laws of war', 'humanitarian law', 'war crimes', 'icrc', 'civilian protection']
-  },
-  {
-    id: 'int-unclos-1982',
-    slug: 'un-convention-on-the-law-of-the-sea-1982',
-    title: 'United Nations Convention on the Law of the Sea (UNCLOS)',
-    titleBn: 'জাতিসংঘ সমুদ্র আইন কনভেনশন (১৯৮২)',
-    shortTitle: 'UNCLOS (1982)',
-    jurisdiction: 'International',
-    jurisdictionCode: 'INT',
-    category: 'Commercial & Contract',
-    status: 'Active Treaty',
-    enactmentYear: 1982,
-    totalStatutorySectionsCount: 320,
-    isCuratedSubset: true,
-    signatoriesCount: 169,
-    overview: 'Known as the Constitution for the Oceans, UNCLOS establishes a comprehensive legal framework governing maritime zones, territorial seas (12 NM), Exclusive Economic Zones (EEZ up to 200 NM), continental shelves, and maritime dispute resolution tribunals (ITLOS).',
-    overviewBn: 'সমুদ্রের সংবিধান হিসেবে পরিচিত আন্তর্জাতিক চুক্তি যা রাষ্ট্রগুলোর জলসীমা, অর্থনৈতিক অঞ্চল (EEZ) ও সমুদ্র সম্পদের অধিকার নির্ধারণ করে।',
-    simpleSummary: 'Defines how countries can use the world\'s oceans, how far out into the sea their borders reach (including Bangladesh\'s historic maritime settlements in the Bay of Bengal), and how to prevent marine pollution.',
-    fullOfficialTextExcerpt: 'Prompted by the desire to settle, in a spirit of mutual understanding and cooperation, all issues relating to the law of the sea and aware of the historic significance of this Convention as an important contribution to the maintenance of peace, justice and progress for all peoples of the world...',
-    keyHighlights: [
-      'Defines 12-nautical-mile Territorial Sea and 200-nautical-mile Exclusive Economic Zone (EEZ).',
-      'Established the International Tribunal for the Law of the Sea (ITLOS) in Hamburg.',
-      'Provided the legal framework for Bangladesh\'s historic maritime boundary delimitation judgments with Myanmar (2012) and India (2014).'
-    ],
-    sections: [
-      {
-        number: 'Article 56',
-        title: 'Rights, jurisdiction and duties of the coastal State in the Exclusive Economic Zone',
-        titleBn: 'অনন্য অর্থনৈতিক অঞ্চলে (EEZ) উপকূলীয় রাষ্ট্রের অধিকার ও দায়িত্ব',
-        content: 'In the exclusive economic zone, the coastal State has sovereign rights for the purpose of exploring and exploiting, conserving and managing the natural resources, whether living or non-living, of the waters superjacent to the seabed and of the seabed and its subsoil.',
-        contentBn: '২০০ নটিক্যাল মাইল পর্যন্ত বিস্তৃত অর্থনৈতিক অঞ্চলে উপকূলীয় রাষ্ট্রের সকল প্রাকৃতিক ও সামুদ্রিক সম্পদের ওপর সার্বভৌম অধিকার থাকবে।',
-        simpleExplanation: 'Gives coastal countries sole rights to fish, drill for gas, and harvest marine energy up to 200 nautical miles from their coast.',
-        punishmentOrRemedy: 'Compulsory dispute resolution before ITLOS or the Permanent Court of Arbitration (PCA).',
-        keyConcepts: ['EEZ', 'Sovereign resource rights', 'Maritime boundary']
-      }
-    ],
-    timeline: [
-      { year: '1982', title: 'Conclusion at Montego Bay', description: 'Adopted after 9 years of global diplomatic negotiation.', status: 'enacted' },
-      { year: '1994', title: 'Entry into Force', description: 'Entered into force establishing global ocean management.', status: 'enacted' },
-      { year: '2012', title: 'Bangladesh v. Myanmar ITLOS Award', description: 'Historic tribunal ruling granting Bangladesh its rightful maritime zone in Bay of Bengal.', status: 'upheld' }
-    ],
-    relatedLawIds: ['int-udhr-1948', 'bd-constitution-1972'],
-    citations: {
-      standard: 'United Nations Convention on the Law of the Sea, Dec. 10, 1982, 1833 U.N.T.S. 397',
-      academic: 'UNCLOS 1982, UN Treaty Series, vol. 1833, p. 397.',
-      bluebook: 'United Nations Convention on the Law of the Sea, Dec. 10, 1982, 1833 U.N.T.S. 397.'
-    },
-    keywords: ['unclos', 'maritime law', 'bay of bengal', 'eez', 'territorial sea', 'itlos', 'marine resources', 'oceans']
-  },
-  {
     id: 'bd-cpc-1908',
     slug: 'code-of-civil-procedure-1908',
     title: 'The Code of Civil Procedure, 1908',
@@ -1408,111 +1195,6 @@ export const LAWS_DATABASE: LawItem[] = [
       chicago: 'The Contract Act, 1872 (Act IX of 1872). Dhaka: Government Press.'
     },
     keywords: ['contract', 'agreement', 'breach of contract', 'damages', 'consideration', 'indemnity', 'commercial law', 'free consent']
-  },
-  {
-    id: 'int-paris-agreement-2015',
-    slug: 'paris-agreement-climate-change-2015',
-    title: 'The Paris Agreement on Climate Change (2015)',
-    titleBn: 'প্যারিস জলবায়ু চুক্তি (২০১৫)',
-    shortTitle: 'Paris Agreement (UNFCCC / COP21)',
-    jurisdiction: 'International',
-    jurisdictionCode: 'INT',
-    category: 'Environmental Law',
-    status: 'Active Treaty',
-    enactmentYear: 2015,
-    totalStatutorySectionsCount: 29,
-    isCuratedSubset: true,
-    signatoriesCount: 195,
-    overview: 'A legally binding international treaty on climate change adopted by 196 Parties at COP21 in Paris, aiming to limit global temperature increase to well below 2°C above pre-industrial levels, with efforts to limit warming to 1.5°C through Nationally Determined Contributions (NDCs).',
-    overviewBn: 'জলবায়ু পরিবর্তন মোকাবেলায় বৈশ্বিক তাপমাত্রা বৃদ্ধি ১.৫ থেকে ২ ডিগ্রি সেলসিয়াসের মধ্যে সীমাবদ্ধ রাখার ঐতিহাসিক আন্তর্জাতিক চুক্তি।',
-    simpleSummary: 'The world\'s foremost climate pact where countries committed to cut greenhouse gas emissions and fund climate resilience for vulnerable nations like Bangladesh.',
-    fullOfficialTextExcerpt: 'The Parties to this Agreement, Being Parties to the United Nations Framework Convention on Climate Change... In pursuit of the objective of the Convention, and being guided by its principles, including the principle of equity and common but differentiated responsibilities... Have agreed as follows...',
-    keyHighlights: [
-      'Sets the overarching target of holding global average temperature rise to well below 2°C and pursuing 1.5°C limit.',
-      'Requires all parties to formulate, communicate, and update successive Nationally Determined Contributions (NDCs) every 5 years.',
-      'Mandates climate finance mechanisms (minimum $100 billion annual baseline) to assist developing and climate-vulnerable countries.'
-    ],
-    sections: [
-      {
-        number: 'Article 2',
-        title: 'Long-term Temperature and Climate Goal',
-        titleBn: 'দীর্ঘমেয়াদী তাপমাত্রা নিয়ন্ত্রণ ও জলবায়ু সহনশীলতার লক্ষ্য',
-        content: 'This Agreement aims to strengthen the global response to the threat of climate change by holding the increase in the global average temperature to well below 2°C above pre-industrial levels and pursuing efforts to limit the temperature increase to 1.5°C.',
-        contentBn: 'বৈশ্বিক গড় তাপমাত্রা বৃদ্ধি প্রাক-শিল্পযুগের তুলনায় ২ ডিগ্রি সেলসিয়াসের নিচে রাখা এবং ১.৫ ডিগ্রির মধ্যে সীমাবদ্ধ রাখার লক্ষ্য নির্ধারণ।',
-        simpleExplanation: 'The core legal benchmark preventing catastrophic global warming and sea-level rise.',
-        punishmentOrRemedy: 'Multilateral transparency and compliance review under Article 15.',
-        keyConcepts: ['1.5C target', 'Global warming', 'Climate mitigation']
-      },
-      {
-        number: 'Article 9',
-        title: 'Climate Finance for Developing Nations',
-        titleBn: 'উন্নয়নশীল দেশগুলোর জন্য জলবায়ু অর্থায়ন',
-        content: 'Developed country Parties shall provide financial resources to assist developing country Parties with respect to both mitigation and adaptation in continuation of their existing obligations under the Convention.',
-        contentBn: 'জলবায়ু পরিবর্তনের ক্ষতি মোকাবেলা ও সবুজ রূপান্তরে উন্নত দেশগুলো উন্নয়নশীল রাষ্ট্রগুলোকে আর্থিক সহায়তা প্রদানে দায়বদ্ধ।',
-        simpleExplanation: 'Wealthy industrialized countries are obligated to provide funds to climate-vulnerable nations like Bangladesh to build coastal embankments and renewable grids.',
-        punishmentOrRemedy: 'Global Stocktake mechanism under Article 14.',
-        keyConcepts: ['Climate finance', 'Loss and damage', 'Adaptation funding']
-      }
-    ],
-    timeline: [
-      { year: '2015', title: 'Adoption at COP21 in Paris', description: 'Adopted on 12 December 2015 by consensus of 196 nations.', status: 'enacted' },
-      { year: '2016', title: 'Historic Entry into Force', description: 'Entered into force on 4 November 2016 after ratification by over 55 countries representing 55% of global emissions.', status: 'enacted' },
-      { year: '2023', title: 'First Global Stocktake (COP28)', description: 'Concluded UAE Consensus evaluating progress toward 1.5°C transition.', status: 'upheld' }
-    ],
-    relatedLawIds: ['bd-environment-act-1995', 'int-unclos-1982', 'bd-constitution-1972'],
-    citations: {
-      standard: 'Paris Agreement to the United Nations Framework Convention on Climate Change, Dec. 12, 2015, T.I.A.S. No. 16-1104',
-      academic: 'Paris Agreement (2015), UNFCCC, FCCC/CP/2015/L.9/Rev.1.',
-      bluebook: 'Paris Agreement, Dec. 12, 2015, U.N. Doc. FCCC/CP/2015/L.9/Rev.1.'
-    },
-    keywords: ['paris agreement', 'climate change', 'unfccc', 'global warming', 'ndc', 'carbon emissions', 'climate finance', 'environment']
-  },
-  {
-    id: 'int-cisg-1980',
-    slug: 'un-convention-contracts-international-sale-goods-1980',
-    title: 'United Nations Convention on Contracts for the International Sale of Goods (CISG)',
-    titleBn: 'আন্তর্জাতিক পণ্য বিক্রয় চুক্তি সংক্রান্ত জাতিসংঘ কনভেনশন (১৯৮০)',
-    shortTitle: 'CISG (Vienna Convention 1980)',
-    jurisdiction: 'International',
-    jurisdictionCode: 'INT',
-    category: 'Commercial & Contract',
-    status: 'Active Treaty',
-    enactmentYear: 1980,
-    totalStatutorySectionsCount: 101,
-    isCuratedSubset: true,
-    signatoriesCount: 95,
-    overview: 'The uniform multilateral legal code prepared by UNCITRAL governing the formation of international commercial sales contracts, rights and obligations of buyers and sellers, remedies for breach of contract, and risk of loss in global trade.',
-    overviewBn: 'আন্তর্জাতিক বাণিজ্যিক পণ্য ক্রয়-বিক্রয় চুক্তি, ক্রেতা-বিক্রেতার অধিকার ও দায়িত্ব এবং চুক্তিভঙ্গের ক্ষতিপূরণ সংক্রান্ত ইউনিফর্ম আইন।',
-    simpleSummary: 'The universal international contract law book that governs cross-border import and export deals, defining when a commercial deal is legally binding and what damages can be claimed.',
-    fullOfficialTextExcerpt: 'The States Parties to this Convention, Bearing in mind the broad objectives in the resolutions adopted by the sixth special session of the General Assembly on the establishment of a New International Economic Order... Have agreed as follows...',
-    keyHighlights: [
-      'Applies to contracts of sale of goods between parties whose places of business are in different Contracting States.',
-      'Governs offer and acceptance standards, avoidance of contract, and buyer\'s right to demand specific performance.',
-      'Establishes rules for Fundamental Breach of contract (Article 25) and damages calculation for international shipments.'
-    ],
-    sections: [
-      {
-        number: 'Article 25',
-        title: 'Fundamental Breach of Contract',
-        titleBn: 'চুক্তির মৌলিক বা গুরুতর লঙ্ঘন',
-        content: 'A breach of contract committed by one of the parties is fundamental if it results in such detriment to the other party as substantially to deprive him of what he is entitled to expect under the contract, unless the party in breach did not foresee and a reasonable person would not have foreseen such a result.',
-        contentBn: 'চুক্তিভঙ্গ তখনই মৌলিক লঙ্ঘন হিসেবে গণ্য হবে যখন এটি অপর পক্ষের প্রত্যাশিত অধিকারকে চরমভাবে ব্যাহত করে।',
-        simpleExplanation: 'A breach so serious that the victim is deprived of the core benefit of the contract, giving them the right to immediately cancel the deal and claim full damages.',
-        punishmentOrRemedy: 'Avoidance of contract and damages under Article 74.',
-        keyConcepts: ['Fundamental breach', 'Contract cancellation', 'Commercial damages']
-      }
-    ],
-    timeline: [
-      { year: '1980', title: 'Adoption in Vienna', description: 'Concluded at the diplomatic conference in Vienna under UNCITRAL.', status: 'enacted' },
-      { year: '1988', title: 'Entry into Force', description: 'Became the dominant international commercial sales framework.', status: 'enacted' }
-    ],
-    relatedLawIds: ['int-unclos-1982', 'bd-constitution-1972'],
-    citations: {
-      standard: 'United Nations Convention on Contracts for the International Sale of Goods, Apr. 11, 1980, 1489 U.N.T.S. 3',
-      academic: 'CISG (1980), 1489 UNTS 3, UNCITRAL.',
-      bluebook: 'United Nations Convention on Contracts for the International Sale of Goods, Apr. 11, 1980, S. Treaty Doc. No. 98-9 (1983), 1489 U.N.T.S. 3.'
-    },
-    keywords: ['cisg', 'commercial law', 'international sale of goods', 'contracts', 'uncitral', 'export', 'import', 'breach of contract']
   },
   ...INTERNATIONAL_TREATIES_DATABASE
 ];

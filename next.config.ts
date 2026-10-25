@@ -1,5 +1,20 @@
 import type {NextConfig} from 'next';
 
+// Comprehensive Content Security Policy tailored for Next.js App Router, Tailwind CSS, Google Fonts, and local assets.
+// Allows framing by Google AI Studio preview environment and the production deployment.
+const cspHeader = `
+  default-src 'self';
+  script-src 'self' 'unsafe-inline' 'unsafe-eval';
+  style-src 'self' 'unsafe-inline';
+  img-src 'self' data: https: blob:;
+  font-src 'self' data: https://fonts.gstatic.com;
+  connect-src 'self' https://generativelanguage.googleapis.com;
+  frame-ancestors 'self' https://*.google.com https://*.run.app https://nyayota.vercel.app;
+  form-action 'self';
+  base-uri 'self';
+  object-src 'none';
+`.replace(/\s{2,}/g, ' ').trim();
+
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   eslint: {
@@ -27,8 +42,8 @@ const nextConfig: NextConfig = {
         source: '/(.*)',
         headers: [
           {
-            key: 'X-Frame-Options',
-            value: 'SAMEORIGIN',
+            key: 'Content-Security-Policy',
+            value: cspHeader,
           },
           {
             key: 'X-Content-Type-Options',
@@ -52,7 +67,7 @@ const nextConfig: NextConfig = {
   },
   webpack: (config, {dev}) => {
     // HMR is disabled in AI Studio via DISABLE_HMR env var.
-    // Do not modifyâfile watching is disabled to prevent flickering during agent edits.
+    // Do not modifyâ€”file watching is disabled to prevent flickering during agent edits.
     if (dev && process.env.DISABLE_HMR === 'true') {
       config.watchOptions = {
         ignored: /.*/,

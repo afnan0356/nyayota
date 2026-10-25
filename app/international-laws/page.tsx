@@ -34,7 +34,10 @@ import {
   DollarSign,
   Landmark,
   Compass,
-  X
+  X,
+  ChevronDown,
+  ChevronUp,
+  GraduationCap
 } from 'lucide-react';
 import { LAWS_DATABASE, LawItem } from '@/lib/legal-data';
 import {
@@ -77,6 +80,7 @@ function getCategoryIcon(iconName: string) {
 
 export default function InternationalLawsPage() {
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
+  const [selectedInstrumentType, setSelectedInstrumentType] = useState<string>('All');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [selectedDepositary, setSelectedDepositary] = useState<string>('All');
   const [selectedStatus, setSelectedStatus] = useState<string>('All');
@@ -84,6 +88,7 @@ export default function InternationalLawsPage() {
   const [copiedCitationId, setCopiedCitationId] = useState<string | null>(null);
   const [sourcesModalOpen, setSourcesModalOpen] = useState<boolean>(false);
   const [activeSourceDetail, setActiveSourceDetail] = useState<OfficialSourceRegistryItem | null>(null);
+  const [educationalFrameworkOpen, setEducationalFrameworkOpen] = useState<boolean>(false);
 
   // All International instruments in database
   const internationalInstruments = useMemo(() => {
@@ -117,6 +122,9 @@ export default function InternationalLawsPage() {
       const matchesCategory =
         selectedCategory === 'All' || law.category === selectedCategory;
 
+      const matchesInstrumentType =
+        selectedInstrumentType === 'All' || law.instrumentType === selectedInstrumentType;
+
       const matchesDepositary =
         selectedDepositary === 'All' ||
         law.depositary === selectedDepositary ||
@@ -135,11 +143,13 @@ export default function InternationalLawsPage() {
         (law.alternativeTitles && law.alternativeTitles.some((alt) => alt.toLowerCase().includes(q))) ||
         (law.unCitationRef && law.unCitationRef.toLowerCase().includes(q)) ||
         (law.keywords && law.keywords.some((k) => k.toLowerCase().includes(q))) ||
-        (law.depositary && law.depositary.toLowerCase().includes(q));
+        (law.depositary && law.depositary.toLowerCase().includes(q)) ||
+        (law.bangladeshRatificationStatus && law.bangladeshRatificationStatus.toLowerCase().includes(q)) ||
+        (law.bangladeshDomesticApplicationNote && law.bangladeshDomesticApplicationNote.toLowerCase().includes(q));
 
-      return matchesCategory && matchesDepositary && matchesStatus && matchesSearch;
+      return matchesCategory && matchesInstrumentType && matchesDepositary && matchesStatus && matchesSearch;
     });
-  }, [internationalInstruments, selectedCategory, selectedDepositary, selectedStatus, searchQuery]);
+  }, [internationalInstruments, selectedCategory, selectedInstrumentType, selectedDepositary, selectedStatus, searchQuery]);
 
   const handleCopyCitation = (id: string, citationText: string) => {
     navigator.clipboard.writeText(citationText);
@@ -180,6 +190,99 @@ export default function InternationalLawsPage() {
             <span>Official Sources & Ingestion Registry ({INTERNATIONAL_SOURCES_REGISTRY.length})</span>
           </button>
         </div>
+      </div>
+
+      {/* Bangladesh & International Law: Practical Research Framework */}
+      <div className="rounded-3xl border border-zinc-200 dark:border-zinc-800 bg-linear-to-br from-blue-50/50 via-white to-zinc-50/50 dark:from-zinc-900 dark:via-zinc-900/90 dark:to-zinc-950 p-6 shadow-xs">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div className="space-y-1">
+            <div className="inline-flex items-center space-x-2 text-xs font-bold text-blue-700 dark:text-blue-400">
+              <GraduationCap className="w-4 h-4" />
+              <span>Bangladesh & International Law: Practical Research Framework</span>
+            </div>
+            <h2 className="text-base sm:text-lg font-bold text-zinc-900 dark:text-white">
+              Dualism, Constitutional Directives & Domestic Enabling Statutes
+            </h2>
+            <p className="text-xs text-zinc-600 dark:text-zinc-400 max-w-3xl leading-relaxed">
+              How international instruments operate in Bangladesh courts, from parliamentary transposition under Articles 25 &amp; 145A of the Constitution to the critical differences between Multilateral Treaties, Declaratory Instruments, and Model Laws.
+            </p>
+          </div>
+          <button
+            type="button"
+            id="toggle-educational-framework-btn"
+            onClick={() => setEducationalFrameworkOpen(!educationalFrameworkOpen)}
+            className="px-3.5 py-2 rounded-xl bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-xs font-semibold text-zinc-700 dark:text-zinc-300 hover:text-zinc-900 dark:hover:text-white inline-flex items-center space-x-2 shrink-0 transition-colors cursor-pointer self-start md:self-center shadow-xs"
+          >
+            <span>{educationalFrameworkOpen ? 'Hide Research Framework' : 'Explore Legal Principles'}</span>
+            {educationalFrameworkOpen ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+          </button>
+        </div>
+
+        {educationalFrameworkOpen && (
+          <div className="mt-6 pt-6 border-t border-zinc-200/80 dark:border-zinc-800/80 grid grid-cols-1 md:grid-cols-3 gap-6 text-xs text-zinc-600 dark:text-zinc-300">
+            {/* Column 1: Dualist Doctrine & Constitution */}
+            <div className="space-y-3">
+              <div className="flex items-center space-x-2 font-bold text-zinc-900 dark:text-white text-xs uppercase tracking-wider">
+                <Scale className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                <span>1. Dualist Constitutional Baseline</span>
+              </div>
+              <p className="leading-relaxed text-[11px]">
+                <strong>Dualism in Bangladesh:</strong> International treaties are <em>not self-executing</em> in domestic courts. A treaty entered into or ratified by the State does not automatically become municipal law without domestic enabling legislation enacted by the Jatiya Sangsad (Parliament).
+              </p>
+              <div className="p-3 rounded-2xl bg-white/80 dark:bg-zinc-950/60 border border-zinc-200/70 dark:border-zinc-800 space-y-1.5 text-[11px]">
+                <div>
+                  <span className="font-bold text-zinc-900 dark:text-zinc-100">Article 25 (State Policy):</span>
+                  <p className="text-zinc-500 dark:text-zinc-400 mt-0.5">Mandates respect for international law and UN Charter principles in international relations. While non-justiciable under Art. 8(2), it acts as an interpretive guide for fundamental rights.</p>
+                </div>
+                <div className="pt-1.5 border-t border-zinc-100 dark:border-zinc-800">
+                  <span className="font-bold text-zinc-900 dark:text-zinc-100">Article 145A (Treaties):</span>
+                  <p className="text-zinc-500 dark:text-zinc-400 mt-0.5">Requires all foreign treaties to be submitted to the President, who shall cause them to be laid before Parliament.</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Column 2: Instrument Typology */}
+            <div className="space-y-3">
+              <div className="flex items-center space-x-2 font-bold text-zinc-900 dark:text-white text-xs uppercase tracking-wider">
+                <FileText className="w-4 h-4 text-purple-600 dark:text-purple-400" />
+                <span>2. Typology of Instruments</span>
+              </div>
+              <ul className="space-y-2 text-[11px] leading-relaxed">
+                <li className="p-2.5 rounded-xl bg-white/80 dark:bg-zinc-950/60 border border-zinc-200/70 dark:border-zinc-800">
+                  <strong className="text-zinc-900 dark:text-white block">Multilateral Treaties (e.g. ICCPR, UNCLOS):</strong>
+                  Binding interstate covenants requiring signature, ratification/accession, and domestic incorporation.
+                </li>
+                <li className="p-2.5 rounded-xl bg-white/80 dark:bg-zinc-950/60 border border-zinc-200/70 dark:border-zinc-800">
+                  <strong className="text-zinc-900 dark:text-white block">Declaratory Instruments (e.g. UDHR):</strong>
+                  Non-treaty resolutions adopted by the UN General Assembly. Morally authoritative, often codifying customary international law (opinio juris).
+                </li>
+                <li className="p-2.5 rounded-xl bg-white/80 dark:bg-zinc-950/60 border border-zinc-200/70 dark:border-zinc-800">
+                  <strong className="text-zinc-900 dark:text-white block">Model Laws (e.g. UNCITRAL Model Law):</strong>
+                  Legislative blueprints not open to state ratification; rather, enacted by parliaments into domestic codes.
+                </li>
+              </ul>
+            </div>
+
+            {/* Column 3: Domestic Transposition & Precedent */}
+            <div className="space-y-3">
+              <div className="flex items-center space-x-2 font-bold text-zinc-900 dark:text-white text-xs uppercase tracking-wider">
+                <Gavel className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                <span>3. Domestic Transposition in BD</span>
+              </div>
+              <div className="p-3 rounded-2xl bg-white/80 dark:bg-zinc-950/60 border border-zinc-200/70 dark:border-zinc-800 space-y-2 text-[11px]">
+                <strong className="text-zinc-900 dark:text-white block">Key Enabling Acts in Bangladesh:</strong>
+                <div className="space-y-1 text-zinc-600 dark:text-zinc-400">
+                  <div>• <strong>Arbitration Act, 2001 (Act 1 of 2001):</strong> Domestic enactment of the UNCITRAL Model Law.</div>
+                  <div>• <strong>Geneva Conventions Act, 2007 (Act 59 of 2007):</strong> Transposition of the 1949 Geneva Conventions.</div>
+                  <div>• <strong>Maritime Zones Act, 1974 / 2021:</strong> Domestic statutory regime implementing UNCLOS 1982.</div>
+                </div>
+                <div className="pt-2 border-t border-zinc-100 dark:border-zinc-800 text-[10px] text-zinc-500 italic">
+                  <strong>Judicial Precedent:</strong> In <em>BNWLA v. Bangladesh</em>, the Supreme Court confirmed international human rights conventions may be used by the judiciary to interpret and expand domestic fundamental rights when not in conflict with statutory law.
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* 12-Division Taxonomy Carousel / Grid */}
@@ -316,6 +419,21 @@ export default function InternationalLawsPage() {
 
         {/* Filters and View Controls */}
         <div className="flex flex-wrap items-center gap-2.5">
+          {/* Instrument Type Filter */}
+          <select
+            id="instrument-type-filter-select"
+            value={selectedInstrumentType}
+            onChange={(e) => setSelectedInstrumentType(e.target.value)}
+            className="px-3 py-2 text-xs bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-xl text-zinc-700 dark:text-zinc-300 focus:outline-none focus:ring-2 focus:ring-blue-500/40"
+          >
+            <option value="All">All Instrument Types</option>
+            <option value="Multilateral Treaty">Multilateral Treaty</option>
+            <option value="Declaratory Instrument">Declaratory Instrument</option>
+            <option value="Model Law">Model Law</option>
+            <option value="Constitutive Statute">Constitutive Statute</option>
+            <option value="Treaty Protocol">Treaty Protocol</option>
+          </select>
+
           {/* Status Filter */}
           <select
             id="status-filter-select"
@@ -382,12 +500,14 @@ export default function InternationalLawsPage() {
         <div>
           Showing <span className="font-bold text-zinc-900 dark:text-white">{filteredInstruments.length}</span> of {internationalInstruments.length} international instruments
           {selectedCategory !== 'All' && <span> in <strong className="text-blue-600 dark:text-blue-400">{selectedCategory}</strong></span>}
+          {selectedInstrumentType !== 'All' && <span> (<span className="text-purple-600 dark:text-purple-400 font-semibold">{selectedInstrumentType}</span>)</span>}
         </div>
-        {(selectedCategory !== 'All' || selectedStatus !== 'All' || selectedDepositary !== 'All' || searchQuery) && (
+        {(selectedCategory !== 'All' || selectedInstrumentType !== 'All' || selectedStatus !== 'All' || selectedDepositary !== 'All' || searchQuery) && (
           <button
             type="button"
             onClick={() => {
               setSelectedCategory('All');
+              setSelectedInstrumentType('All');
               setSelectedStatus('All');
               setSelectedDepositary('All');
               setSearchQuery('');
@@ -415,9 +535,35 @@ export default function InternationalLawsPage() {
                       <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20">
                         {law.category}
                       </span>
+                      {law.instrumentType && (
+                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${
+                          law.instrumentType === 'Declaratory Instrument'
+                            ? 'bg-purple-500/10 text-purple-700 dark:text-purple-300 border-purple-500/30'
+                            : law.instrumentType === 'Model Law'
+                            ? 'bg-amber-500/10 text-amber-700 dark:text-amber-300 border-amber-500/30'
+                            : law.instrumentType === 'Constitutive Statute'
+                            ? 'bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 border-indigo-500/30'
+                            : 'bg-cyan-500/10 text-cyan-700 dark:text-cyan-300 border-cyan-500/30'
+                        }`}>
+                          {law.instrumentType}
+                        </span>
+                      )}
                       <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 border border-zinc-200 dark:border-zinc-700">
                         {law.status}
                       </span>
+                      {law.bangladeshRatificationStatus && (
+                        <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border inline-flex items-center space-x-1 ${
+                          law.bangladeshRatificationStatus.includes('Ratified') ||
+                          law.bangladeshRatificationStatus.includes('Party') ||
+                          law.bangladeshRatificationStatus.includes('Domestically Enacted')
+                            ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/30'
+                            : law.bangladeshRatificationStatus.includes('Customary')
+                            ? 'bg-purple-500/10 text-purple-700 dark:text-purple-400 border-purple-500/30'
+                            : 'bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/30'
+                        }`}>
+                          <span>🇧🇩 {law.bangladeshRatificationStatus}</span>
+                        </span>
+                      )}
                       {law.verificationStatus && (
                         <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 inline-flex items-center space-x-1">
                           <CheckCircle2 className="w-3 h-3" />
@@ -480,6 +626,19 @@ export default function InternationalLawsPage() {
                       </span>
                     </div>
                   </div>
+
+                  {/* Bangladesh Legal Application & Enabling Note */}
+                  {law.bangladeshDomesticApplicationNote && (
+                    <div className="p-3 rounded-2xl bg-emerald-500/5 dark:bg-emerald-950/20 border border-emerald-500/20 space-y-1">
+                      <div className="flex items-center space-x-1.5 text-emerald-700 dark:text-emerald-400 font-bold text-[11px]">
+                        <Scale className="w-3.5 h-3.5" />
+                        <span>Bangladesh Legal Application &amp; Enabling Framework</span>
+                      </div>
+                      <p className="text-zinc-600 dark:text-zinc-300 text-xs leading-relaxed">
+                        {law.bangladeshDomesticApplicationNote}
+                      </p>
+                    </div>
+                  )}
 
                   {/* Key Highlights */}
                   {law.keyHighlights && law.keyHighlights.length > 0 && (
@@ -581,11 +740,13 @@ export default function InternationalLawsPage() {
               <thead className="bg-zinc-50 dark:bg-zinc-950/70 border-b border-zinc-200 dark:border-zinc-800 text-[11px] uppercase font-bold text-zinc-500 tracking-wider">
                 <tr>
                   <th className="px-5 py-3.5">Instrument Title</th>
-                  <th className="px-4 py-3.5">Category</th>
-                  <th className="px-4 py-3.5">Year / Adoption</th>
-                  <th className="px-4 py-3.5">Depositary</th>
-                  <th className="px-4 py-3.5">Parties</th>
-                  <th className="px-4 py-3.5">Status</th>
+                  <th className="px-3 py-3.5">Type</th>
+                  <th className="px-3 py-3.5">Category</th>
+                  <th className="px-3 py-3.5">Adoption</th>
+                  <th className="px-3 py-3.5">Depositary</th>
+                  <th className="px-3 py-3.5">Parties</th>
+                  <th className="px-3 py-3.5">Bangladesh Status</th>
+                  <th className="px-3 py-3.5">Status</th>
                   <th className="px-5 py-3.5 text-right">Actions</th>
                 </tr>
               </thead>
@@ -607,26 +768,60 @@ export default function InternationalLawsPage() {
                         </span>
                       )}
                     </td>
-                    <td className="px-4 py-4">
+                    <td className="px-3 py-4 whitespace-nowrap">
+                      {law.instrumentType ? (
+                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${
+                          law.instrumentType === 'Declaratory Instrument'
+                            ? 'bg-purple-500/10 text-purple-700 dark:text-purple-300 border-purple-500/30'
+                            : law.instrumentType === 'Model Law'
+                            ? 'bg-amber-500/10 text-amber-700 dark:text-amber-300 border-amber-500/30'
+                            : law.instrumentType === 'Constitutive Statute'
+                            ? 'bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 border-indigo-500/30'
+                            : 'bg-cyan-500/10 text-cyan-700 dark:text-cyan-300 border-cyan-500/30'
+                        }`}>
+                          {law.instrumentType}
+                        </span>
+                      ) : (
+                        <span className="text-zinc-400 text-[11px]">Treaty</span>
+                      )}
+                    </td>
+                    <td className="px-3 py-4">
                       <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20 whitespace-nowrap">
                         {law.category}
                       </span>
                     </td>
-                    <td className="px-4 py-4 whitespace-nowrap">
+                    <td className="px-3 py-4 whitespace-nowrap">
                       <span className="font-mono text-zinc-800 dark:text-zinc-200 font-semibold">{law.enactmentYear}</span>
                       {law.entryIntoForceDate && (
                         <span className="text-[10px] text-zinc-400 block">In force: {law.entryIntoForceDate}</span>
                       )}
                     </td>
-                    <td className="px-4 py-4 text-zinc-600 dark:text-zinc-300">
-                      <span className="truncate block max-w-[180px]" title={law.depositary || law.sourceOrganization || ''}>
+                    <td className="px-3 py-4 text-zinc-600 dark:text-zinc-300">
+                      <span className="truncate block max-w-[160px]" title={law.depositary || law.sourceOrganization || ''}>
                         {law.depositary || law.sourceOrganization || 'International Agency'}
                       </span>
                     </td>
-                    <td className="px-4 py-4 font-semibold text-zinc-800 dark:text-zinc-200 whitespace-nowrap">
+                    <td className="px-3 py-4 font-semibold text-zinc-800 dark:text-zinc-200 whitespace-nowrap">
                       {law.ratificationsCount || law.signatoriesCount
                         ? `${law.ratificationsCount || law.signatoriesCount} States`
                         : 'Customary'}
+                    </td>
+                    <td className="px-3 py-4 whitespace-nowrap">
+                      {law.bangladeshRatificationStatus ? (
+                        <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border inline-flex items-center space-x-1 ${
+                          law.bangladeshRatificationStatus.includes('Ratified') ||
+                          law.bangladeshRatificationStatus.includes('Party') ||
+                          law.bangladeshRatificationStatus.includes('Domestically Enacted')
+                            ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/30'
+                            : law.bangladeshRatificationStatus.includes('Customary')
+                            ? 'bg-purple-500/10 text-purple-700 dark:text-purple-400 border-purple-500/30'
+                            : 'bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/30'
+                        }`}>
+                          <span>🇧🇩 {law.bangladeshRatificationStatus}</span>
+                        </span>
+                      ) : (
+                        <span className="text-zinc-400 text-[11px]">—</span>
+                      )}
                     </td>
                     <td className="px-4 py-4 whitespace-nowrap">
                       <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300">

@@ -2,7 +2,21 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { Scale, Globe, Shield, BookOpen, AlertTriangle, Compass, ArrowRight } from 'lucide-react';
+import { Scale, Heart, ArrowRight } from 'lucide-react';
+
+/**
+ * DONATION & SUPPORT CONFIGURATION
+ * 
+ * To activate live contributions when a verified non-profit account or payment
+ * processor is established, set `isConfigured: true` and supply `donationUrl`.
+ * When unconfigured, the section renders in a transparent, informational state
+ * without broken buttons, fake accounts, or misleading payment flows.
+ */
+export const SUPPORT_DONATION_CONFIG = {
+  isConfigured: false,
+  donationUrl: null as string | null, // e.g. 'https://opencollective.com/nyayota' once verified
+  contactEmail: 'nyayota.contact@gmail.com',
+};
 
 export function Footer() {
   return (
@@ -194,8 +208,60 @@ export function Footer() {
           </div>
         </div>
 
+        {/* Phase 2: Understated "Support Nyayota" Section */}
+        <div className="mt-10 pt-8 border-t border-zinc-200 dark:border-zinc-800/80">
+          <div className="rounded-2xl p-5 sm:p-6 bg-zinc-50 dark:bg-zinc-900/60 border border-zinc-200/90 dark:border-zinc-800 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+            <div className="space-y-1.5 max-w-2xl">
+              <div className="flex items-center space-x-2">
+                <Heart className="w-4 h-4 text-rose-500 fill-rose-500/20" />
+                <h4 className="text-sm font-bold text-zinc-900 dark:text-zinc-100">
+                  Support Nyayota
+                </h4>
+                <span className="text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full bg-zinc-200/70 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400">
+                  Voluntary Contribution
+                </span>
+              </div>
+              <p className="text-xs text-zinc-600 dark:text-zinc-400 leading-relaxed">
+                Help keep Nyayota accessible and support the continued development of legal information, verified statutory indexes, and public research resources.
+              </p>
+              <p className="text-[11px] text-zinc-500 dark:text-zinc-500">
+                Nyayota is an independent educational and civic project. Voluntary support assists with infrastructure maintenance and data verification.
+              </p>
+            </div>
+
+            <div className="shrink-0 flex flex-col sm:flex-row items-start sm:items-center gap-3">
+              {SUPPORT_DONATION_CONFIG.isConfigured && SUPPORT_DONATION_CONFIG.donationUrl ? (
+                <a
+                  href={SUPPORT_DONATION_CONFIG.donationUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  id="footer-donate-btn"
+                  className="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-zinc-950 font-bold text-xs inline-flex items-center space-x-2 transition-colors shadow-sm focus:outline-none focus:ring-2 focus:ring-amber-500/50"
+                >
+                  <span>Support Nyayota</span>
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </a>
+              ) : (
+                <div className="flex flex-col sm:flex-row sm:items-center gap-2.5">
+                  <div className="inline-flex items-center space-x-2 px-3 py-1.5 rounded-xl bg-zinc-200/60 dark:bg-zinc-800/80 text-zinc-600 dark:text-zinc-400 text-xs border border-zinc-300/50 dark:border-zinc-700/50">
+                    <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
+                    <span className="text-[11px] font-medium">Donation gateway: Setup in progress</span>
+                  </div>
+                  <a
+                    href={`mailto:${SUPPORT_DONATION_CONFIG.contactEmail}?subject=Support%20Nyayota%20Inquiry`}
+                    id="footer-support-inquiry-link"
+                    className="text-xs font-semibold text-zinc-700 dark:text-zinc-300 hover:text-amber-600 dark:hover:text-amber-400 underline underline-offset-4 transition-colors focus:outline-none focus:ring-1 focus:ring-amber-500"
+                  >
+                    Inquire via Email
+                  </a>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+
         {/* Bottom Subfooter */}
-        <div className="mt-12 pt-6 border-t border-zinc-200 dark:border-zinc-800/80 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-zinc-500">
+        <div className="mt-8 pt-6 border-t border-zinc-200 dark:border-zinc-800/80 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-zinc-500">
           <p>© {new Date().getFullYear()} Nyayota. Open legal information project.</p>
           <div className="flex items-center space-x-4">
             <span className="text-[11px]">Primary sources: Official Gazette of Bangladesh and UN Treaty Series.</span>

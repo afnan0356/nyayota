@@ -295,6 +295,28 @@ export const INTERNATIONAL_LAW_CATEGORIES: InternationalCategoryMeta[] = [
       badgeBg: 'bg-teal-500/10',
       badgeText: 'text-teal-600 dark:text-teal-400'
     }
+  },
+  {
+    id: 'refugees-migration',
+    slug: 'refugees-migration',
+    name: 'Refugees & Migration',
+    nameBn: 'শরণার্থী, অভিবাসন ও আন্তর্জাতিক অপরাধ প্রতিরোধ',
+    description: '1951 Refugee Convention, non-refoulement customary baselines, UNTOC Palermo Protocols on human trafficking, and UNCAC anti-corruption standards.',
+    descriptionBn: '১৯৫১ শরণার্থী কনভেনশন, বলপূর্বক প্রত্যাবাসন নিষেধাজ্ঞা (নন-রিফৌলমেন্ট), মানবপাচার প্রতিরোধে পালের্মো প্রটোকল ও জাতিসংঘ দুর্নীতিবিরোধী কনভেনশন।',
+    iconName: 'Users',
+    primaryDepositaries: ['UN Secretary-General', 'UNHCR', 'UNODC'],
+    keyInstrumentsCount: 4,
+    featuredThemes: ['Non-Refoulement (Art. 33)', 'Refugee Status Definition', 'Trafficking in Persons (Palermo)', 'Transnational Organized Crime (UNTOC)', 'Anti-Corruption (UNCAC)'],
+    color: {
+      bgLight: 'bg-amber-50',
+      textLight: 'text-amber-800',
+      borderLight: 'border-amber-200',
+      bgDark: 'dark:bg-amber-950/40',
+      textDark: 'dark:text-amber-200',
+      borderDark: 'dark:border-amber-800/40',
+      badgeBg: 'bg-amber-500/10',
+      badgeText: 'text-amber-600 dark:text-amber-400'
+    }
   }
 ];
 
@@ -445,6 +467,32 @@ export const INTERNATIONAL_SOURCES_REGISTRY: OfficialSourceRegistryItem[] = [
     reproductionNotice: 'Text reproduced from the official publications of the International Court of Justice (Peace Palace, The Hague).',
     bulkCapabilityDescription: 'Complete case law index with authentic bilingual English/French judgment corpora.',
     verifiedInstrumentsCount: '180+ Contentious Cases & Advisory Proceedings',
+    status: 'Verified Active Source'
+  },
+  {
+    id: 'src-unhcr',
+    name: 'UN High Commissioner for Refugees (Refworld Legal Collection)',
+    acronym: 'UNHCR',
+    scope: '1951 Convention relating to the Status of Refugees, 1967 Protocol, Executive Committee conclusions, and global asylum jurisprudence.',
+    officialUrl: 'https://www.unhcr.org/',
+    depositaryType: 'UN Specialized Agency',
+    ingestionProtocol: 'Direct Document URL',
+    reproductionNotice: 'Text reproduced from UNHCR Refworld and UN Treaty Series. Depositary: Secretary-General of the United Nations.',
+    bulkCapabilityDescription: 'Global refugee status determination guidance, protection guidelines, and state practice records.',
+    verifiedInstrumentsCount: '1951 Convention + 1967 Protocol + 10,000+ legal guidelines',
+    status: 'Verified Active Source'
+  },
+  {
+    id: 'src-unodc',
+    name: 'UN Office on Drugs and Crime (SHERLOC & TRACK Portals)',
+    acronym: 'UNODC',
+    scope: 'United Nations Convention against Transnational Organized Crime (UNTOC), Palermo Protocols on Trafficking in Persons, and UN Convention against Corruption (UNCAC).',
+    officialUrl: 'https://www.unodc.org/',
+    depositaryType: 'UN Specialized Agency',
+    ingestionProtocol: 'Direct Document URL',
+    reproductionNotice: 'Text reproduced from the United Nations Treaty Collection and UNODC SHERLOC knowledge portal.',
+    bulkCapabilityDescription: 'Electronic evidence database, legislative guides, and international legal cooperation mechanisms.',
+    verifiedInstrumentsCount: 'UNTOC + 3 Protocols + UNCAC + 4,000+ case records',
     status: 'Verified Active Source'
   }
 ];
