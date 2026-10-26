@@ -3056,6 +3056,127 @@ export const LEGAL_OUTCOME_SCENARIOS_DATA: LegalOutcomeScenario[] = [
       { step: 3, title: 'High Court Rule Nisi & Production Order', description: 'Bench orders police chief to produce detainee in courtroom within designated hours.' },
       { step: 4, title: 'Release & Inquiry', description: 'Detainee released if detention was unlawful; inquiry ordered into offending officers.' }
     ]
+  },
+  {
+    id: 'scenario-temporary-injunction-property',
+    jurisdiction: 'Bangladesh',
+    legalArea: 'Civil Procedure & Property',
+    topicTitle: 'Disputed Land Encroachment & Temporary Injunction (Order 39)',
+    topicTitleBn: 'জমি জবরদখল ও দেওয়ানি আদালতের অস্থায়ী নিষেধাজ্ঞা (অর্ডার ৩৯)',
+    scenarioSummary: 'An adjoining landowner or unlawful occupant attempts to trespass, demolish boundaries, or alienate ancestral property while title is in dispute.',
+    scenarioSummaryBn: 'মালিকানা বিরোধ চলাকালীন জমি জবরদখল, সীমানা প্রাচীর ভাঙা বা বেআইনিভাবে জমি হস্তান্তরের বিরুদ্ধে দেওয়ানি আদালতে অস্থায়ী নিষেধাজ্ঞা প্রাপ্তির প্রক্রিয়া।',
+    applicableStatutes: [
+      {
+        lawId: 'bd-cpc-1908',
+        title: 'The Code of Civil Procedure, 1908',
+        section: 'Order 39, Rule 1',
+        explanation: 'Governs applications for temporary injunctions to stay waste, damage, or alienation of property in dispute until disposal of suit.'
+      },
+      {
+        lawId: 'bd-cpc-1908',
+        title: 'The Code of Civil Procedure, 1908',
+        section: 'Section 9 & 11',
+        explanation: 'Civil court plenary jurisdiction to try all suits of a civil nature and Res Judicata bar on previously adjudicated issues.'
+      }
+    ],
+    proceduralClassification: {
+      cognizableStatus: 'Non-Cognizable (Warrant required)',
+      bailStatus: 'Bailable as of right',
+      trialCourt: 'Senior Assistant Judge / Joint District Judge (Civil Jurisdiction)',
+      filingMechanism: 'Civil Suit in District Court'
+    },
+    statutoryConsequences: {
+      potentialPenalties: [
+        'Violation of court injunction order triggers contempt proceedings and civil imprisonment under Order 39, Rule 2(3) for up to six months.',
+        'Attachment and auction of contemnor property to enforce compliance.'
+      ],
+      civilRemedies: [
+        'Ad-interim temporary injunction restraining the defendant from entering land or changing land nature.',
+        'Status Quo order preserving existing possession and boundaries.',
+        'Local inspection / Advocate Commissioner appointment to document field reality.'
+      ]
+    },
+    outcomeFactors: {
+      aggravating: [
+        'Defying express status-quo orders or cutting trees/destroying structures pendente lite.',
+        'Deploying musclemen or armed trespassers to create artificial possession.'
+      ],
+      mitigating: [
+        'Bona fide purchaser for value without notice claiming legal title.',
+        'Willingness to maintain status-quo until final decree.'
+      ]
+    },
+    evidentiaryRequirements: [
+      'Original Registered Title Deed (Dalil) and Record of Rights (CS, SA, RS, or City Survey Porcha).',
+      'Mutation Khatian (Namjari) and up-to-date Land Development Tax (Dakhila) receipts.',
+      'Photographs, boundary demarcation reports, or police report showing attempted encroachment.'
+    ],
+    proceduralSteps: [
+      { step: 1, title: 'File Title Suit with Order 39 Application', description: 'Submit plaint for declaration of title along with separate verified application for temporary injunction under Order 39, Rules 1 & 2.' },
+      { step: 2, title: 'Demonstrate the 3 Mandatory Legal Tests', description: 'Prove: (a) Prima facie arguable case; (b) Balance of convenience in plaintiff\'s favor; (c) Irreparable loss if injunction is refused.' },
+      { step: 3, title: 'Ad-Interim Order & Show-Cause Notice', description: 'Court issues immediate ad-interim restraint order and serves 7-day show cause notice upon the opposite party.' },
+      { step: 4, title: 'Injunction Hearing & Police Assistance', description: 'After hearing both sides, court confirms injunction and orders local police administration to maintain peace under Section 151 CPC.' }
+    ]
+  },
+  {
+    id: 'scenario-cheque-dishonor-ni-act',
+    jurisdiction: 'Bangladesh',
+    legalArea: 'Banking & Financial',
+    topicTitle: 'Cheque Dishonor & Financial Recovery (NI Act Section 138)',
+    topicTitleBn: 'ব্যাংক চেক ডিজঅনার ও অর্থ আদায়ের আইনি প্রক্রিয়া (এনআই এক্ট ১৩৮ ধারা)',
+    scenarioSummary: 'A business partner, debtor, or client issues a bank cheque that bounces due to insufficient funds, stopped payment, or closed account.',
+    scenarioSummaryBn: 'পর্যাপ্ত তহবিল না থাকায় বা স্টপ পেমেন্টের কারণে ব্যাংকের চেক প্রত্যাখ্যাত হলে দেনাদারের বিরুদ্ধে ১৩৮ ধারায় মামলা ও অর্থ আদায়ের আইনি পথ।',
+    applicableStatutes: [
+      {
+        lawId: 'bd-contract-act-1872',
+        title: 'Contract Act 1872',
+        section: 'Section 73 & 74',
+        explanation: 'Enforces the underlying contractual consideration and debt obligation that led to the cheque issuance.'
+      },
+      {
+        lawId: 'bd-penal-code-1860',
+        title: 'Penal Code 1860',
+        section: 'Section 420',
+        explanation: 'Criminal offense of cheating and dishonestly inducing delivery of property (if fraudulent intent existed at inception).'
+      }
+    ],
+    proceduralClassification: {
+      cognizableStatus: 'Non-Cognizable (Warrant required)',
+      bailStatus: 'Bailable as of right',
+      trialCourt: 'Joint Sessions Judge / Special Magistrate (Metropolitan/District)',
+      filingMechanism: 'Complaint Case (CR) before Magistrate'
+    },
+    statutoryConsequences: {
+      potentialPenalties: [
+        'Imprisonment for a term which may extend to 1 (one) year under Section 138(1) of the Negotiable Instruments Act 1881.',
+        'Mandatory fine which may extend to twice (2x) the cheque amount, awarded as compensation to the complainant.'
+      ],
+      civilRemedies: [
+        'Recovery of the full dishonored cheque amount as a judicial fine.',
+        'Parallel Summary Suit under Order XXXVII of the Code of Civil Procedure 1908 for commercial debt recovery.'
+      ]
+    },
+    outcomeFactors: {
+      aggravating: [
+        'Issuing cheques on deliberately closed or frozen bank accounts.',
+        'Habitual fraudster issuing multiple dishonored instruments to multiple creditors.'
+      ],
+      mitigating: [
+        'Full payment of cheque amount before trial charge framing.',
+        'Security cheque issued without enforceable existing debt consideration.'
+      ]
+    },
+    evidentiaryRequirements: [
+      'Original signed cheque leaf with drawer\'s signature.',
+      'Bank Dishonor Memo / Return Slip specifying reason ("Insufficient Funds" or "Refer to Drawer").',
+      'Copy of Statutory Legal Demand Notice, Registered Post postal receipt, and Acknowledgment Due (AD) card.'
+    ],
+    proceduralSteps: [
+      { step: 1, title: 'Present Cheque Within Validity Period', description: 'Deposit the cheque in bank within 6 months from the date written on it.' },
+      { step: 2, title: 'Serve Statutory Legal Notice (30 Days)', description: 'Within 30 days of receiving the bank dishonor memo, serve a formal demand notice giving the drawer 30 days to pay.' },
+      { step: 3, title: 'Wait Mandatory 30-Day Cure Period', description: 'If the drawer fails to pay within 30 days of receiving notice, cause of action arises for criminal prosecution.' },
+      { step: 4, title: 'File CR Case in Magistrate Court (30 Days)', description: 'File the formal Complaint Register (CR) case within exactly 30 days following expiry of the cure period.' }
+    ]
   }
 ];
 

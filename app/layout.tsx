@@ -13,7 +13,10 @@ const inter = Inter({
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://nyayota.vercel.app'),
-  title: 'Nyayota: Free Legal Information and Research Platform',
+  title: {
+    default: 'Nyayota: Free Legal Information and Research Platform',
+    template: '%s | Nyayota',
+  },
   description: 'An open legal research and knowledge platform making laws understandable, searchable, comparable, and accessible globally.',
   keywords: [
     'legal research',
@@ -21,26 +24,90 @@ export const metadata: Metadata = {
     'international law',
     'penal code 1860',
     'constitution of bangladesh',
-    'crpc',
+    'crpc 1898',
+    'code of civil procedure 1908',
     'human rights',
     'udhr',
     'legal outcome guide',
-    'ai legal explainer'
+    'ai legal explainer',
+    'statute comparison'
   ],
   authors: [{ name: 'Nyayota Legal Initiative' }],
+  creator: 'Nyayota Legal Initiative',
+  publisher: 'Nyayota Legal Initiative',
+  alternates: {
+    canonical: 'https://nyayota.vercel.app',
+  },
   openGraph: {
-    title: 'Nyayota: Legal Information and Research Platform',
-    description: 'Understand laws easily with simple language summaries, multilingual translations, comparison tools, and educational outcome guides.',
+    title: 'Nyayota: Free Legal Information and Research Platform',
+    description: 'Understand laws easily with simple language summaries, bilingual comparative analysis, structured outcome guides, and legal citations.',
     url: 'https://nyayota.vercel.app',
     siteName: 'Nyayota',
+    locale: 'en_US',
     type: 'website',
   },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Nyayota: Free Legal Information and Research Platform',
+    description: 'Understand statutory provisions with plain language breakdowns, cross-statute comparisons, and procedural outcome guides.',
+  },
+  icons: {
+    icon: '/icon.svg',
+  },
+};
+
+const structuredSchema = {
+  '@context': 'https://schema.org',
+  '@graph': [
+    {
+      '@type': 'WebSite',
+      '@id': 'https://nyayota.vercel.app/#website',
+      url: 'https://nyayota.vercel.app',
+      name: 'Nyayota',
+      description: 'An open legal research and knowledge platform making laws understandable, searchable, comparable, and accessible globally.',
+      inLanguage: ['en', 'bn'],
+      potentialAction: {
+        '@type': 'SearchAction',
+        target: {
+          '@type': 'EntryPoint',
+          urlTemplate: 'https://nyayota.vercel.app/search?q={search_term_string}',
+        },
+        'query-input': 'required name=search_term_string',
+      },
+    },
+    {
+      '@type': 'WebApplication',
+      '@id': 'https://nyayota.vercel.app/#webapp',
+      name: 'Nyayota',
+      applicationCategory: 'EducationalApplication',
+      operatingSystem: 'All',
+      url: 'https://nyayota.vercel.app',
+      description: 'Public legal research platform featuring bilingual statutory analysis, legal outcome guides, comparative law grids, and citation tools.',
+      offers: {
+        '@type': 'Offer',
+        price: '0',
+        priceCurrency: 'USD',
+      },
+    },
+    {
+      '@type': 'Organization',
+      '@id': 'https://nyayota.vercel.app/#organization',
+      name: 'Nyayota Legal Initiative',
+      url: 'https://nyayota.vercel.app',
+      email: 'nyayota.contact@gmail.com',
+      sameAs: ['https://nyayota.vercel.app/about'],
+    },
+  ],
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredSchema) }}
+        />
         <script
           dangerouslySetInnerHTML={{
             __html: `

@@ -21,7 +21,8 @@ import {
   Share2,
   FolderPlus,
   Shield,
-  ArrowRight
+  ArrowRight,
+  Printer
 } from 'lucide-react';
 import {
   ResearchNote,
@@ -191,6 +192,10 @@ function ResearchContent() {
     URL.revokeObjectURL(url);
   };
 
+  const handlePrintDossier = () => {
+    window.print();
+  };
+
   // Collect all unique tags
   const allTags = ['All', ...Array.from(new Set(notes.flatMap((n) => n.tags || [])))];
 
@@ -221,7 +226,17 @@ function ResearchContent() {
           </p>
         </div>
 
-        <div className="flex items-center space-x-2 shrink-0">
+        <div className="flex flex-wrap items-center gap-2 shrink-0">
+          <button
+            type="button"
+            id="print-dossier-btn"
+            onClick={handlePrintDossier}
+            className="px-3.5 py-2 rounded-xl bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-800 dark:text-zinc-200 font-bold text-xs hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors inline-flex items-center space-x-1.5 shadow-xs"
+            title="Print or save as PDF"
+          >
+            <Printer className="w-3.5 h-3.5" />
+            <span>Print Dossier</span>
+          </button>
           <button
             type="button"
             id="download-dossier-btn"

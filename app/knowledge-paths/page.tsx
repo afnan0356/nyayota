@@ -17,7 +17,8 @@ import {
   Award,
   Check,
   Eye,
-  EyeOff
+  EyeOff,
+  RotateCcw
 } from 'lucide-react';
 import {
   KNOWLEDGE_PATHS_DATA,
@@ -25,19 +26,50 @@ import {
   LAWS_DATABASE
 } from '@/lib/legal-data';
 
+function getInitialCompletedSteps(): Record<string, boolean> {
+  if (typeof window === 'undefined') return {};
+  try {
+    const stored = localStorage.getItem('nyayota_knowledge_progress');
+    return stored ? JSON.parse(stored) : {};
+  } catch {
+    return {};
+  }
+}
+
 function KnowledgePathsContent() {
   const [selectedPathId, setSelectedPathId] = useState<string>(KNOWLEDGE_PATHS_DATA[0].id);
-  const [completedSteps, setCompletedSteps] = useState<Record<string, boolean>>({});
+  const [completedSteps, setCompletedSteps] = useState<Record<string, boolean>>(getInitialCompletedSteps);
   const [revealedAnswers, setRevealedAnswers] = useState<Record<string, boolean>>({});
 
   const activePath =
     KNOWLEDGE_PATHS_DATA.find((p) => p.id === selectedPathId) || KNOWLEDGE_PATHS_DATA[0];
 
   const toggleStepCompleted = (stepKey: string) => {
-    setCompletedSteps((prev) => ({
-      ...prev,
-      [stepKey]: !prev[stepKey],
-    }));
+    setCompletedSteps((prev) => {
+      const next = {
+        ...prev,
+        [stepKey]: !prev[stepKey],
+      };
+      try {
+        localStorage.setItem('nyayota_knowledge_progress', JSON.stringify(next));
+      } catch {
+        // Storage write fail
+      }
+      return next;
+    });
+  };
+
+  const handleResetPathProgress = () => {
+    setCompletedSteps((prev) => {
+      const next = { ...prev };
+      activePath.milestones.forEach((_, idx) => {
+        delete next[`${activePath.id}-${idx}`];
+      });
+      try {
+        localStorage.setItem('nyayota_knowledge_progress', JSON.stringify(next));
+      } catch {}
+      return next;
+    });
   };
 
   const toggleAnswer = (key: string) => {
@@ -183,9 +215,22 @@ function KnowledgePathsContent() {
               <div className="space-y-1.5 pt-2">
                 <div className="flex items-center justify-between text-xs font-bold">
                   <span className="text-zinc-500">Milestone Progress:</span>
-                  <span className="text-amber-600 dark:text-amber-400">
-                    {pathCompletedCount} of {activePath.milestones.length} Completed ({progressPercentage}%)
-                  </span>
+                  <div className="flex items-center space-x-2.5">
+                    <span className="text-amber-600 dark:text-amber-400">
+                      {pathCompletedCount} of {activePath.milestones.length} Completed ({progressPercentage}%)
+                    </span>
+                    {pathCompletedCount > 0 && (
+                      <button
+                        type="button"
+                        onClick={handleResetPathProgress}
+                        className="text-[11px] text-zinc-400 hover:text-red-500 dark:hover:text-red-400 font-medium inline-flex items-center space-x-1 transition-colors"
+                        title="Reset progress for this pathway"
+                      >
+                        <RotateCcw className="w-3 h-3" />
+                        <span>Reset</span>
+                      </button>
+                    )}
+                  </div>
                 </div>
                 <div className="w-full h-2 rounded-full bg-zinc-100 dark:bg-zinc-800 overflow-hidden">
                   <div

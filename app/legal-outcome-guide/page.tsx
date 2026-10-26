@@ -24,7 +24,9 @@ import {
   Gavel,
   HelpCircle,
   Check,
-  AlertCircle
+  AlertCircle,
+  Copy,
+  Printer
 } from 'lucide-react';
 import {
   LEGAL_OUTCOME_SCENARIOS_DATA,
@@ -44,7 +46,13 @@ const TOPIC_TO_SCENARIO_MAP: Record<string, string> = {
   'cyber-blackmail': 'scenario-cyber-extortion',
   'theft-fraud': 'scenario-theft-fraud',
   'contract-breach': 'scenario-commercial-contract-breach',
-  'commercial-contract-breach': 'scenario-commercial-contract-breach'
+  'commercial-contract-breach': 'scenario-commercial-contract-breach',
+  'temporary-injunction': 'scenario-temporary-injunction-property',
+  'order-39': 'scenario-temporary-injunction-property',
+  'land-encroachment': 'scenario-temporary-injunction-property',
+  'cheque-dishonor': 'scenario-cheque-dishonor-ni-act',
+  'ni-act': 'scenario-cheque-dishonor-ni-act',
+  'check-bounce': 'scenario-cheque-dishonor-ni-act'
 };
 
 function resolveScenarioId(param: string | null): string {
@@ -66,11 +74,20 @@ function LegalOutcomeGuideContent() {
   const [userSelectedScenarioId, setUserSelectedScenarioId] = useState<string | null>(null);
   const [filterCategory, setFilterCategory] = useState<string>('All');
   const [searchQuery, setSearchQuery] = useState<string>('');
+  const [copiedPlanToast, setCopiedPlanToast] = useState(false);
 
   const selectedScenarioId = userSelectedScenarioId ?? paramScenarioId;
   const setSelectedScenarioId = (id: string) => setUserSelectedScenarioId(id);
 
-  const categories = ['All', 'Cyber & Digital Law', 'Commercial & Contract Law', 'Constitutional Law', 'Criminal Law'];
+  const categories = [
+    'All',
+    'Criminal Law',
+    'Constitutional Law',
+    'Civil Procedure & Property',
+    'Commercial & Contract Law',
+    'Cyber & Digital Law',
+    'Banking & Financial'
+  ];
 
   const filteredScenarios = LEGAL_OUTCOME_SCENARIOS_DATA.filter((s) => {
     const matchCat = filterCategory === 'All' || s.legalArea === filterCategory;
@@ -249,13 +266,44 @@ function LegalOutcomeGuideContent() {
                     {activeScenario.legalArea} • {activeScenario.jurisdiction}
                   </span>
 
-                  <Link
-                    href={`/ai-assistant?query=${encodeURIComponent(`Explain procedural rights and statutory remedies for the scenario: ${activeScenario.topicTitle}`)}`}
-                    className="px-3.5 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-zinc-950 font-bold text-xs inline-flex items-center space-x-1.5 shadow-sm transition-colors"
-                  >
-                    <Sparkles className="w-3.5 h-3.5" />
-                    <span>Ask AI About This Scenario</span>
-                  </Link>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <button
+                      type="button"
+                      id="btn-copy-action-plan"
+                      onClick={() => {
+                        const planText = `LEGAL ACTION PLAN: ${activeScenario.topicTitle} (${activeScenario.topicTitleBn})\nJurisdiction: ${activeScenario.jurisdiction} • ${activeScenario.legalArea}\n\nSUMMARY:\n${activeScenario.scenarioSummary}\n\nPROCEDURAL CLASSIFICATION:\n- Cognizability: ${activeScenario.proceduralClassification.cognizableStatus}\n- Bail Status: ${activeScenario.proceduralClassification.bailStatus}\n- Trial Court: ${activeScenario.proceduralClassification.trialCourt}\n- Filing Mechanism: ${activeScenario.proceduralClassification.filingMechanism}\n\nSTEP-BY-STEP ACTION PATHWAY:\n${activeScenario.proceduralSteps.map((s) => `${s.step}. ${s.title}: ${s.description}`).join('\n')}\n\nEVIDENCE PRESERVATION CHECKLIST:\n${activeScenario.evidentiaryRequirements.map((e) => `[ ] ${e}`).join('\n')}\n\nAPPLICABLE STATUTES:\n${activeScenario.applicableStatutes.map((st) => `- ${st.title} (${st.section}): ${st.explanation}`).join('\n')}\n\nOfficial Source: Nyayota Bangladesh Legal Platform (https://nyayota.vercel.app/legal-outcome-guide?scenario=${activeScenario.id})`;
+                        navigator.clipboard.writeText(planText);
+                        setCopiedPlanToast(true);
+                        setTimeout(() => setCopiedPlanToast(false), 2000);
+                      }}
+                      className="px-3 py-1.5 rounded-xl bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 text-zinc-800 dark:text-zinc-200 text-xs font-semibold inline-flex items-center space-x-1.5 transition-colors cursor-pointer"
+                      title="Copy full action plan and evidence checklist"
+                    >
+                      {copiedPlanToast ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5 text-amber-500" />}
+                      <span>{copiedPlanToast ? 'Action Plan Copied!' : 'Copy Action Plan'}</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      id="btn-print-action-guide"
+                      onClick={() => {
+                        if (typeof window !== 'undefined') window.print();
+                      }}
+                      className="px-3 py-1.5 rounded-xl bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 text-zinc-800 dark:text-zinc-200 text-xs font-semibold inline-flex items-center space-x-1.5 transition-colors cursor-pointer"
+                      title="Print scenario guide"
+                    >
+                      <Printer className="w-3.5 h-3.5" />
+                      <span>Print Guide</span>
+                    </button>
+
+                    <Link
+                      href={`/ai-assistant?query=${encodeURIComponent(`Explain procedural rights and statutory remedies for the scenario: ${activeScenario.topicTitle}`)}`}
+                      className="px-3.5 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-zinc-950 font-bold text-xs inline-flex items-center space-x-1.5 shadow-sm transition-colors"
+                    >
+                      <Sparkles className="w-3.5 h-3.5" />
+                      <span>Ask AI About This Scenario</span>
+                    </Link>
+                  </div>
                 </div>
 
                 <div>
@@ -321,10 +369,10 @@ function LegalOutcomeGuideContent() {
                           {statute.title}
                         </span>
                         <Link
-                          href={`/law/${statute.lawId}`}
+                          href={`/law/${statute.lawId}${statute.section ? `?section=${encodeURIComponent(statute.section)}` : ''}`}
                           className="text-[11px] font-bold text-amber-600 dark:text-amber-400 hover:underline inline-flex items-center space-x-0.5"
                         >
-                          <span>View</span>
+                          <span>View Section</span>
                           <ExternalLink className="w-3 h-3" />
                         </Link>
                       </div>

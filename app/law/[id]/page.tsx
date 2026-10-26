@@ -472,6 +472,42 @@ function LawDetailViewer({
     ).slice(0, 3);
   }, [law]);
 
+  // Synchronize dynamic browser title with current statute and section
+  useEffect(() => {
+    if (typeof document !== 'undefined') {
+      const sectionSnippet = activeSection ? ` - ${activeSection.number}: ${activeSection.title}` : '';
+      document.title = `${law.title}${sectionSnippet} | Nyayota`;
+    }
+  }, [law.title, activeSection]);
+
+  // Schema.org Legislation structured data
+  const legislationJsonLd = useMemo(() => {
+    return {
+      '@context': 'https://schema.org',
+      '@type': 'Legislation',
+      name: law.title,
+      alternateName: law.titleBn,
+      description: law.simpleSummary || law.overview,
+      legislationJurisdiction: law.jurisdiction,
+      legislationType: law.category,
+      datePublished: `${law.enactmentYear}-01-01`,
+      url: `https://nyayota.vercel.app/law/${law.id}`,
+      inLanguage: ['en', 'bn'],
+      isAccessibleForFree: true,
+      publisher: {
+        '@type': 'Organization',
+        name: 'Nyayota Legal Initiative',
+        url: 'https://nyayota.vercel.app',
+      },
+      hasPart: law.sections.map((sec) => ({
+        '@type': 'Legislation',
+        name: `${sec.number}: ${sec.title}`,
+        alternateName: sec.titleBn,
+        description: sec.simpleExplanation,
+      })),
+    };
+  }, [law]);
+
   // Section Notes derived data
   const sectionNotesCountMap = useMemo(() => {
     if (notesVersion < 0) return {};
@@ -631,6 +667,10 @@ function LawDetailViewer({
   if (readingMode) {
     return (
       <div className="fixed inset-0 z-50 bg-white dark:bg-zinc-950 overflow-y-auto transition-colors flex flex-col">
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(legislationJsonLd) }}
+        />
         {/* Sticky Control Bar */}
         <header className="sticky top-0 z-20 border-b border-zinc-200 dark:border-zinc-800 bg-white/95 dark:bg-zinc-950/95 backdrop-blur px-4 sm:px-8 py-3 flex items-center justify-between gap-4">
           <div className="flex items-center space-x-3 truncate">
@@ -955,6 +995,10 @@ function LawDetailViewer({
   // -------------------------------------------------------------
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full space-y-8">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(legislationJsonLd) }}
+      />
       {/* Breadcrumb Navigation */}
       <nav aria-label="Breadcrumb" className="flex items-center justify-between text-xs text-zinc-500">
         <div className="flex items-center space-x-2">
