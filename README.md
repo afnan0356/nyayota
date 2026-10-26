@@ -97,6 +97,7 @@ The following table reflects the actual implementation status of features verifi
 | **Legal Outcome Guide** | Practical citizen workflows covering arrest rights, bail, filing an FIR vs. GD, tenancy disputes, cheque dishonor, and labor claims. | `/app/legal-outcome-guide` | **Implemented** |
 | **AI Legal Explainer** | Structured educational statutory queries powered by Google's `@google/genai` (`gemini-3.7-flash`) with prompt isolation. | `/app/api/ai-assistant/route.ts`, `/app/ai-assistant` | **Implemented** |
 | **Heuristic Fallback Engine** | Embedded offline legal reasoning engine providing educational analyses when no `GEMINI_API_KEY` is present. | `/app/api/ai-assistant/route.ts` | **Implemented** |
+| **Deterministic Nyayota AI Engine** | Source-grounded legal retrieval engine, 10-category intent classifier, IPC cross-jurisdiction disambiguation, and deterministic routing. | `/lib/nyayota-ai/*`, `tests/*` | **Phase 2A & 3 Implemented (Core Engine)** |
 | **Bilingual Legal Glossary** | Jurisprudential dictionary containing English legal terms, Bengali definitions, and Latin doctrines (*mens rea*, *habeas corpus*, etc.). | `/app/glossary`, `/components/GlossaryModal.tsx` | **Implemented** |
 | **Standard Legal Citations** | One-click modal generating formatted citations in **Bluebook**, **OSCOLA**, **APA (7th)**, **MLA (9th)**, and **Chicago** standards. | `/components/CitationModal.tsx` | **Implemented** |
 | **Private In-Browser Bookmarks** | Client-side bookmark drawer for saving laws and individual sections directly in `localStorage` without telemetry or accounts. | `/components/BookmarkDrawer.tsx`, `/lib/bookmarks.ts` | **Implemented** |
@@ -193,6 +194,7 @@ flowchart TD
 2. **Deterministic Statutory Storage:** Every enactment has an explicit identity, volume index, enactment date, section hierarchy, and cryptographic SHA-256 hash stored in version-controlled files under `/lib/bdcode-data/`.
 3. **Graceful Degradation:** The AI Assistant API route (`/api/ai-assistant`) checks for `GEMINI_API_KEY`. If configured, it invokes `gemini-3.7-flash` with strict legal system instructions. If the key is absent or the external service fails, it automatically falls back to an internal heuristic legal analysis engine without breaking the user experience.
 4. **Client-Side Privacy:** Research notes, bookmarks, and search queries are stored purely within the user's browser `localStorage`. No user telemetry or tracking identifiers are collected.
+5. **Dual-Track AI Strategy (Production vs. Deterministic Grounding):** Production `/api/ai-assistant` leverages server-side Gemini (`gemini-3.7-flash`) with sliding-window rate limiting. In parallel, `/lib/nyayota-ai/` implements a 100% deterministic, zero-cost retrieval, intent classification, and routing engine that operates strictly over indexed primary legislation without third-party LLM hallucination risks.
 
 ---
 
@@ -500,8 +502,9 @@ Contributions to Nyayota are welcomed, particularly in verifying statutory accur
    - Maintain accurate bilingual titles (`title` in English, `titleBn` in Bengali).
    - Do not commit copyrighted commentary or proprietary legal textbook text.
 4. **Validate Your Changes:**
-   Run the linter and production build before submitting:
+   Run the test suite, linter, and production build before submitting:
    ```bash
+   npm test        # or bun test
    npm run lint
    npm run build
    ```
@@ -515,6 +518,7 @@ Nyayota is released under the **[MIT License](LICENSE)**.
 
 - **Platform Source Code:** The application codebase, user interface, custom software components, and original styling in this repository are open source and licensed under the [MIT License](LICENSE). Copyright &copy; 2026 Md. Afnan. See the [`LICENSE`](LICENSE) file for the complete terms and conditions.
 - **Primary Statutory Texts:** Codified legislation, Acts of Parliament, President's Orders, government gazette notifications, and international multilateral treaties reproduced herein are public government works and official statutory instruments. They are reproduced for educational, research, and non-commercial public knowledge purposes in accordance with public-domain legal principles and fair dealing provisions under international copyright conventions and national copyright laws.
+- **Brand Protection & IP Audit:** For our detailed intellectual property evaluation, trademark safeguards, and proposed dual-licensing roadmap, see [`docs/LEGAL_AND_BRAND_PROTECTION_AUDIT.md`](docs/LEGAL_AND_BRAND_PROTECTION_AUDIT.md).
 
 ---
 

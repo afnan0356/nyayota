@@ -162,3 +162,142 @@ export interface LegalRetrievalResponse {
   /** High-level retrieval outcome status */
   status: 'success' | 'no-match' | 'empty-query' | 'ambiguous-section' | 'act-found-section-missing';
 }
+
+// ============================================================================
+// Phase 3: Intent Classification & Query Routing Types
+// ============================================================================
+
+/**
+ * 10 Deterministic Intent Categories for Nyayota AI
+ */
+export type IntentCategory =
+  | 'greeting'                   // Greetings and simple conversational openings
+  | 'nyayota_help'                // Questions about using Nyayota, features, languages, bug/correction reports
+  | 'direct_legal_reference'     // Specific statute, section, article, order, or rule reference
+  | 'legal_concept'              // Legal term, maxim, doctrine, or definition
+  | 'statute_overview'           // Overview or summary request for a specific statute
+  | 'legal_scenario'             // Procedural legal question or citizen scenario
+  | 'clarification_needed'       // Ambiguous query (e.g. standalone section number, cross-jurisdiction confusion)
+  | 'unsupported_legal_query'    // Legal request outside indexed Bangladesh/international materials (e.g. foreign law)
+  | 'out_of_scope'               // Completely non-legal query (coding, weather, trivia, recipes, etc.)
+  | 'unknown';                   // Unintelligible text, gibberish, or keyboard smash
+
+/**
+ * Detected Jurisdiction for Query Routing
+ */
+export type DetectedJurisdiction =
+  | 'Bangladesh'      // Domestic Bangladesh law (Acts of Parliament, BD Code, Constitution)
+  | 'International'   // Multilateral treaties, UN conventions, international law
+  | 'India'           // Explicitly Indian law (IPC, Indian CrPC, Supreme Court of India)
+  | 'unclear'         // Ambiguous jurisdiction (e.g. "IPC" mixed with BD context or standalone foreign terms)
+  | 'unknown';        // Non-legal or undetectable jurisdiction
+
+/**
+ * Execution pipeline routing path
+ */
+export type ProcessingPath =
+  | 'greeting_handler'           // Deterministic greeting response
+  | 'nyayota_help_handler'        // Deterministic Nyayota platform help & contact guidance
+  | 'retrieval_engine'           // Route to legal retrieval engine (LAWS_DATABASE, BD Code, Treaties, Glossary)
+  | 'clarification_handler'      // Deterministic clarification prompt generator
+  | 'unsupported_legal_handler'   // Clear notice that query is outside indexed legal scope
+  | 'out_of_scope_handler'       // Polite redirect for non-legal queries
+  | 'unknown_handler';           // Prompt to clarify with legal keywords
+
+/**
+ * Structured result of deterministic intent classification
+ */
+export interface IntentClassificationResult {
+  /** Original user query */
+  originalQuery: string;
+
+  /** Lowercased, whitespace-collapsed, Bengali-numeral normalized query */
+  normalizedQuery: string;
+
+  /** Primary categorized intent */
+  primaryIntent: IntentCategory;
+
+  /** Classification confidence score (0.0 to 1.0) */
+  confidence: number;
+
+  /** Detected legal jurisdiction */
+  detectedJurisdiction: DetectedJurisdiction;
+
+  /** Explanation for jurisdiction classification */
+  jurisdictionReason?: string;
+
+  /** Next processing stage in the engine */
+  suggestedProcessingPath: ProcessingPath;
+
+  /** Matching regex patterns or rule identifiers triggered */
+  matchedPatterns: string[];
+
+  /** Detected statute candidate names or abbreviations */
+  detectedActHints: string[];
+
+  /** Detected section, article, or rule number */
+  detectedSectionNumber?: string;
+
+  /** Detected legal concepts or glossary terms */
+  detectedLegalTerms: string[];
+
+  /** Detected language */
+  detectedLanguage: 'en' | 'bn' | 'mixed';
+
+  /** Whether the query is too ambiguous to answer directly */
+  requiresClarification: boolean;
+
+  /** Clarification prompt explaining ambiguity to the user */
+  clarificationPrompt?: string;
+
+  /** Structured options the user can select to disambiguate */
+  clarificationOptions?: string[];
+}
+
+/**
+ * Complete outcome of the Query Routing Engine
+ */
+export interface QueryRouteResult {
+  /** Original user query */
+  query: string;
+
+  /** Normalized query */
+  normalizedQuery: string;
+
+  /** Intent classification analysis */
+  intent: IntentClassificationResult;
+
+  /** Selected processing path */
+  processingPath: ProcessingPath;
+
+  /** Legal retrieval response if retrieval was executed */
+  retrievalResponse?: LegalRetrievalResponse;
+
+  /** Deterministic English message for non-retrieval paths */
+  deterministicMessage?: string;
+
+  /** Deterministic Bengali message for non-retrieval paths */
+  deterministicMessageBn?: string;
+
+  /** Clarification question for ambiguous queries */
+  clarificationPrompt?: string;
+
+  /** Disambiguation options */
+  clarificationOptions?: string[];
+
+  /** Technical reason for routing decision */
+  routingReason: string;
+
+  /** Total routing & retrieval execution time in milliseconds */
+  executionTimeMs: number;
+
+  /** High-level routing status */
+  status:
+    | 'routed-to-retrieval'
+    | 'handled-deterministically'
+    | 'clarification-required'
+    | 'unsupported'
+    | 'out-of-scope'
+    | 'unknown';
+}
+

@@ -86,7 +86,6 @@ const KNOWN_ACT_REGISTRY: KnownActMeta[] = [
       'দণ্ডবিধি',
       'দণ্ডবিধি ১৮৬০',
       'দন্ডবিধি',
-      'ipc',
       'act xlv of 1860',
       'act 45 of 1860',
       'penal',
