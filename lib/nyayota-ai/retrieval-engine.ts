@@ -29,6 +29,7 @@ import {
   AmbiguityStatus,
   MatchReasonType,
   SourceCompleteness,
+  CrossReferenceMention,
 } from './types';
 
 // ============================================================================
@@ -240,8 +241,11 @@ export function extractLegalTokens(query: string): ParsedLegalTokens {
   // 1. Detect explicit Act references
   for (const act of KNOWN_ACT_REGISTRY) {
     for (const alias of act.aliases) {
-      const aliasRegex = new RegExp(`\\b${alias.replace(/\./g, '\\.')}\\b`, 'i');
-      if (aliasRegex.test(normalized)) {
+      const isNonAscii = /[^\x00-\x7F]/.test(alias);
+      const isMatch = isNonAscii
+        ? normalized.includes(alias)
+        : new RegExp(`\\b${alias.replace(/\./g, '\\.')}\\b`, 'i').test(normalized);
+      if (isMatch) {
         detectedActId = act.lawId;
         detectedActTitle = act.canonicalTitle;
         break;
@@ -293,7 +297,23 @@ export function extractLegalTokens(query: string): ParsedLegalTokens {
     };
   }
 
-  // 5. Detect Standalone numeric token if query is short (e.g. "300", "54", "102", "89A")
+  // 5. Detect number attached to detected Act (e.g. "Penal Code 302", "CrPC 54", "দণ্ডবিধি ৩০২")
+  if (detectedActId) {
+    const enactmentYears = new Set(['1860', '1898', '1908', '1972', '2006', '1872', '1961', '1995', '2023', '1948', '1966']);
+    const numbersInQuery = normalized.match(/\b([0-9]+[a-z]?)\b/gi) || [];
+    const nonYearNumbers = numbersInQuery.filter((n) => !enactmentYears.has(n));
+    if (nonYearNumbers.length === 1) {
+      const num = nonYearNumbers[0].toUpperCase();
+      return {
+        sectionNumber: `Section ${num}`,
+        detectedActId,
+        detectedActTitle,
+        cleanRemainingTokens: normalized.split(' ').filter(Boolean),
+      };
+    }
+  }
+
+  // 6. Detect Standalone numeric token if query is short (e.g. "300", "54", "102", "89A")
   const standaloneNumericMatch = normalized.match(/^([0-9]+[a-z]?)$/i);
   if (standaloneNumericMatch) {
     const num = standaloneNumericMatch[1].toUpperCase();
@@ -338,13 +358,24 @@ export function normalizeSectionIdentifier(raw: string): string {
 /**
  * Searches across curated LAWS_DATABASE provisions and metadata
  */
+interface LawsDbSearchResult {
+  results: LegalRetrievalResult[];
+  sectionExceeds?: {
+    sectionNumber: string;
+    statuteTitle: string;
+    totalStatutorySections: number;
+  };
+}
+
 function searchLawsDatabase(
   query: string,
   normalized: string,
   parsedTokens: ParsedLegalTokens,
-  targetJurisdiction?: string
-): LegalRetrievalResult[] {
+  targetJurisdiction?: string,
+  crossReferenceMentions: CrossReferenceMention[] = []
+): LawsDbSearchResult {
   const results: LegalRetrievalResult[] = [];
+  let sectionExceeds: { sectionNumber: string; statuteTitle: string; totalStatutorySections: number } | undefined;
 
   for (const law of LAWS_DATABASE) {
     if (targetJurisdiction && targetJurisdiction !== 'All' && law.jurisdiction !== targetJurisdiction) {
@@ -358,6 +389,19 @@ function searchLawsDatabase(
     const actNumberLower = (law.actNumber || '').toLowerCase();
     const isTargetAct = parsedTokens.detectedActId === law.id;
 
+    // Check if queried section exceeds total codified sections of this statute
+    if (isTargetAct && parsedTokens.sectionNumber && law.totalStatutorySectionsCount) {
+      const qSecNorm = normalizeSectionIdentifier(parsedTokens.sectionNumber);
+      const qNum = parseInt(qSecNorm, 10);
+      if (!isNaN(qNum) && qNum > law.totalStatutorySectionsCount) {
+        sectionExceeds = {
+          sectionNumber: parsedTokens.sectionNumber,
+          statuteTitle: law.title,
+          totalStatutorySections: law.totalStatutorySectionsCount,
+        };
+      }
+    }
+
     // --- A. Section-Level Provision Matching ---
     if (law.sections && law.sections.length > 0) {
       for (const sec of law.sections) {
@@ -365,6 +409,7 @@ function searchLawsDatabase(
         const secTitleLower = sec.title.toLowerCase();
         const secContentLower = sec.content.toLowerCase();
         const secExplainLower = (sec.simpleExplanation || '').toLowerCase();
+        const secPenaltyLower = (sec.punishmentOrRemedy || '').toLowerCase();
 
         const matchReasons: MatchReasonType[] = [];
         let score = 0;
@@ -381,23 +426,45 @@ function searchLawsDatabase(
             } else if (!parsedTokens.detectedActId) {
               score = 88; // Candidate section without explicit Act
               matchReasons.push('exact-section-candidate');
+            } else {
+              // Target Act was explicitly specified and this is a different Act
+              continue;
             }
+          } else {
+            // Queried section does not match this provision's section number.
+            // Check if this section references the queried section in its penalty or text (e.g. Sec 300 citing Sec 302)
+            const secRefRegex = new RegExp(`\\b(?:section|sec|ধারা)?\\s*${queryNormSec}\\b`, 'i');
+            if (secRefRegex.test(secPenaltyLower) || secRefRegex.test(secContentLower) || secRefRegex.test(secExplainLower)) {
+              if (isTargetAct || !parsedTokens.detectedActId) {
+                crossReferenceMentions.push({
+                  statuteId: law.id,
+                  statuteTitle: law.title,
+                  referencingSection: sec.number,
+                  referencingSectionTitle: sec.title,
+                  context: sec.punishmentOrRemedy || sec.content,
+                  note: `${sec.number} (${sec.title}) cross-references ${parsedTokens.sectionNumber} in its penalty or procedural clause.`,
+                });
+              }
+            }
+            // CRITICAL PROVISION ACCURACY GUARANTEE:
+            // When a specific section is queried, a provision with a different section number
+            // must NEVER be scored or returned as a matching provision!
+            continue;
           }
-        }
+        } else {
+          // General topic queries without specific section number
+          if (secTitleLower.includes(normalized) || (sec.titleBn && sec.titleBn.toLowerCase().includes(normalized))) {
+            score = Math.max(score, isTargetAct ? 85 : 70);
+            matchReasons.push('section-title-match');
+          }
 
-        // 2. Section Title Match
-        if (secTitleLower.includes(normalized) || (sec.titleBn && sec.titleBn.toLowerCase().includes(normalized))) {
-          score = Math.max(score, isTargetAct ? 85 : 70);
-          matchReasons.push('section-title-match');
-        }
-
-        // 3. Verbatim Content or Explanation Match
-        if (secContentLower.includes(normalized)) {
-          score = Math.max(score, isTargetAct ? 65 : 45);
-          matchReasons.push('statutory-content-match');
-        } else if (secExplainLower.includes(normalized)) {
-          score = Math.max(score, isTargetAct ? 60 : 40);
-          matchReasons.push('explanation-match');
+          if (secContentLower.includes(normalized)) {
+            score = Math.max(score, isTargetAct ? 65 : 45);
+            matchReasons.push('statutory-content-match');
+          } else if (secExplainLower.includes(normalized)) {
+            score = Math.max(score, isTargetAct ? 60 : 40);
+            matchReasons.push('explanation-match');
+          }
         }
 
         if (score > 0) {
@@ -469,7 +536,7 @@ function searchLawsDatabase(
     }
   }
 
-  return results;
+  return { results, sectionExceeds };
 }
 
 /**
@@ -532,6 +599,9 @@ function searchBangladeshCodeCatalog(
     if (record.sections && record.sections.length > 0) {
       for (const sec of record.sections) {
         if (parsedTokens.sectionNumber) {
+          if (parsedTokens.detectedActId && parsedTokens.detectedActId !== record.id) {
+            continue;
+          }
           const qSecNorm = normalizeSectionIdentifier(parsedTokens.sectionNumber);
           const secNorm = normalizeSectionIdentifier(sec.number);
           if (qSecNorm === secNorm) {
@@ -725,11 +795,13 @@ export function retrieveLegalSources(
   const parsedTokens = extractLegalTokens(normalized);
 
   // 2. Query Curated Datasets
-  const lawsDbMatches = searchLawsDatabase(
+  const crossReferenceMentions: CrossReferenceMention[] = [];
+  const { results: lawsDbMatches, sectionExceeds } = searchLawsDatabase(
     query,
     normalized,
     parsedTokens,
-    options.targetJurisdiction
+    options.targetJurisdiction,
+    crossReferenceMentions
   );
 
   const existingLawIds = new Set(LAWS_DATABASE.map((l) => l.id));
@@ -776,6 +848,8 @@ export function retrieveLegalSources(
       const exactActMatch = sectionProvisionMatches.find((m) => m.sourceId === parsedTokens.detectedActId);
       if (exactActMatch) {
         ambiguityStatus = 'unambiguous';
+      } else if (sectionExceeds) {
+        ambiguityStatus = 'section-exceeds-statute-range';
       } else {
         // The Act was recognized, but the section was not found in our curated subset
         ambiguityStatus = 'act-found-section-missing';
@@ -795,7 +869,7 @@ export function retrieveLegalSources(
             note: `Multiple statutes contain ${parsedTokens.sectionNumber}. Please specify the relevant Act.`,
           };
         });
-      } else if (sectionProvisionMatches.length === 1) {
+      } else {
         ambiguityStatus = 'section-only-no-act';
         ambiguousCandidates = sectionProvisionMatches;
       }
@@ -827,12 +901,14 @@ export function retrieveLegalSources(
 
   // Determine high-level outcome status
   let status: LegalRetrievalResponse['status'] = 'success';
-  if (finalResults.length === 0) {
-    status = 'no-match';
+  if (sectionExceeds) {
+    status = 'section-exceeds-statute-range';
   } else if (ambiguityStatus === 'act-found-section-missing') {
     status = 'act-found-section-missing';
-  } else if (ambiguityStatus === 'ambiguous-section-multiple-acts') {
+  } else if (ambiguityStatus === 'ambiguous-section-multiple-acts' || ambiguityStatus === 'section-only-no-act') {
     status = 'ambiguous-section';
+  } else if (finalResults.length === 0) {
+    status = 'no-match';
   }
 
   return {
@@ -844,6 +920,8 @@ export function retrieveLegalSources(
     ambiguousCandidates,
     detectedActHints: parsedTokens.detectedActTitle ? [parsedTokens.detectedActTitle] : undefined,
     detectedSectionNumber: parsedTokens.sectionNumber,
+    crossReferenceMentions: crossReferenceMentions.length > 0 ? crossReferenceMentions : undefined,
+    sectionExceedsStatuteRange: sectionExceeds,
     executionTimeMs,
     status,
   };

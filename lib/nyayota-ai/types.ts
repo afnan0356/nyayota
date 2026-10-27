@@ -23,6 +23,7 @@ export type MatchReasonType =
   | 'statutory-content-match'     // Matched verbatim statutory text
   | 'explanation-match'           // Matched curated plain-language breakdown
   | 'keyword-match'               // Matched explicit indexing keywords
+  | 'cross-reference-mention'     // Section queried is cited in another section's text/penalty
   | 'token-overlap';              // Multi-token intersection across metadata
 
 export type AmbiguityStatus =
@@ -30,6 +31,7 @@ export type AmbiguityStatus =
   | 'ambiguous-section-multiple-acts'   // Section number was provided without a clear Act, matching multiple statutes
   | 'section-only-no-act'               // User typed only a section number (e.g. "Section 54")
   | 'act-found-section-missing'         // The Act is known in Nyayota, but the requested section is not in the curated subset
+  | 'section-exceeds-statute-range'     // Section number exceeds the total codified sections count of the Act
   | 'none';                             // No ambiguity detected / broad topic query
 
 export type SourceCompleteness =
@@ -156,11 +158,36 @@ export interface LegalRetrievalResponse {
   /** Detected section or article number token */
   detectedSectionNumber?: string;
 
+  /** Cross-reference mentions where the queried section is referenced in another section's text/penalty */
+  crossReferenceMentions?: CrossReferenceMention[];
+
+  /** Whether the queried section exceeds total statutory sections count */
+  sectionExceedsStatuteRange?: {
+    sectionNumber: string;
+    statuteTitle: string;
+    totalStatutorySections: number;
+  };
+
   /** Retrieval execution time in milliseconds */
   executionTimeMs: number;
 
   /** High-level retrieval outcome status */
-  status: 'success' | 'no-match' | 'empty-query' | 'ambiguous-section' | 'act-found-section-missing';
+  status:
+    | 'success'
+    | 'no-match'
+    | 'empty-query'
+    | 'ambiguous-section'
+    | 'act-found-section-missing'
+    | 'section-exceeds-statute-range';
+}
+
+export interface CrossReferenceMention {
+  statuteId: string;
+  statuteTitle: string;
+  referencingSection: string;
+  referencingSectionTitle: string;
+  context: string;
+  note: string;
 }
 
 // ============================================================================

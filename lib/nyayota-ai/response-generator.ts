@@ -23,6 +23,7 @@ import {
   RetrievalOptions,
 } from './types';
 import { routeQuery } from './query-router';
+import { normalizeSectionIdentifier } from './retrieval-engine';
 
 export interface ResponseGenerationOptions extends RetrievalOptions {
   /** Target language preference ('en' | 'bn' | 'both', defaults to 'both') */
@@ -194,9 +195,66 @@ function buildDirectReferenceResponse(
     return buildNoRecordsFoundResponse(route, startTime);
   }
 
-  // Case B: Act was recognized, but specific requested section is missing from curated subset
-  if (retrieval.status === 'act-found-section-missing') {
-    const actRecord = retrieval.results[0];
+  // Case B1: Section number exceeds the total codified sections of the statute
+  if (retrieval.status === 'section-exceeds-statute-range' || retrieval.sectionExceedsStatuteRange) {
+    const actRecord =
+      retrieval.results.find((r) => r.recordType === 'statute-metadata') ||
+      retrieval.results[0];
+    const info = retrieval.sectionExceedsStatuteRange;
+    const actTitle = info?.statuteTitle || actRecord?.displayTitle || 'The Requested Statute';
+    const actTitleBn = actRecord?.displayTitleBn;
+    const secNum = info?.sectionNumber || retrieval.detectedSectionNumber || 'the requested section';
+    const totalCount = info?.totalStatutorySections || 'known';
+
+    return {
+      query: route.query,
+      normalizedQuery: route.normalizedQuery,
+      detectedIntent: 'direct_legal_reference',
+      detectedJurisdiction: 'Bangladesh',
+      status: 'partial-coverage',
+      headline: `${actTitle} — ${secNum} (Not in Curated Subset)`,
+      headlineBn: actTitleBn ? `${actTitleBn} — ${secNum} (সংগৃহীত সেটে অনুপস্থিত)` : undefined,
+      summary:
+        `The statute "${actTitle}" is indexed in Nyayota, but ${secNum} is not present in our curated high-frequency section subset (${actTitle} contains ${totalCount} codified sections in total; ${secNum} exceeds the enacted statutory structure).`,
+      summaryBn:
+        `"${actTitleBn || actTitle}" আইনটি ন্যায়তায় অন্তর্ভুক্ত রয়েছে, তবে ${secNum} আমাদের সংগৃহীত সেটে অনুপস্থিত (${actTitleBn || actTitle} সর্বমোট ${totalCount}টি সংবিধিবদ্ধ ধারা ধারণ করে; ${secNum} এই আইনের মোট ধারার সংখ্যা অতিক্রম করে)।`,
+      structuredExplanation:
+        `### Statutory Boundary: Section Not Extant in Act\n\n` +
+        `You searched for **${secNum}** under **${actTitle}**.\n\n` +
+        `**Non-Existence in Law:**\n` +
+        `According to the official codified text published under the Bangladesh Code, **${actTitle}** contains a total of **${totalCount} sections**.\n\n` +
+        `Because **${secNum}** exceeds the maximum number of sections enacted for this statute, this provision does not exist in Bangladesh law under this Act.\n\n` +
+        `#### Next steps:\n` +
+        `1. Review the statute overview: \`${actRecord?.internalDestination || `/law/${actRecord?.sourceId}`}\`\n` +
+        `2. Check whether you meant a section from another procedural statute (e.g. CrPC or CPC).\n` +
+        `3. Consult the official legislative gazette at: [Laws of Bangladesh Portal](${actRecord?.officialSourceUrl || 'http://bdlaws.minlaw.gov.bd'})`,
+      structuredExplanationBn:
+        `### সংবিধিবদ্ধ সীমা: আইনে ধারার অনুপস্থিতি\n\n` +
+        `আপনি **${actTitleBn || actTitle}**-এর অধীন **${secNum}** অনুসন্ধান করেছেন।\n\n` +
+        `**আইনে অস্তিত্বহীনতা:**\n` +
+        `বাংলাদেশ কোডের সরকারি সংবিধিবদ্ধ পাঠ্য অনুযায়ী, **${actTitleBn || actTitle}**-এ সর্বমোট **${totalCount}টি ধারা** রয়েছে।\n\n` +
+        `যেহেতু **${secNum}** এই আইনের মোট ধারার সংখ্যা অতিক্রম করে, তাই এই আইনের অধীনে এই ধারাটির কোনো আইনি অস্তিত্ব নেই।`,
+      sources: actRecord ? [mapResultToCitation(actRecord)] : [],
+      limitations: [
+        `Nyayota currently curates a high-frequency subset of provisions for ${actTitle}. ${secNum} is not yet digitized in our curated database (${actTitle} contains ${totalCount} codified sections in total; ${secNum} exceeds the enacted statutory structure).`,
+        'Absence from Nyayota does not mean this section does not exist in Bangladesh law.',
+      ],
+      limitationsBn: [
+        `ন্যায়তা বর্তমানে ${actTitleBn || actTitle}-এর সর্বাধিক ব্যবহৃত প্রধান ধারাগুলো সংরক্ষণ করেছে (${actTitleBn || actTitle} সর্বমোট ${totalCount}টি ধারা ধারণ করে; ${secNum} এই আইনের মোট সংখ্যা অতিক্রম করে)।`,
+        'ন্যায়তার সংগ্রহে অনুপস্থিতির অর্থ এই নয় যে বাংলাদেশের আইনে এই ধারাটি নেই।',
+      ],
+      disclaimer: STANDARD_DISCLAIMER_EN,
+      disclaimerBn: STANDARD_DISCLAIMER_BN,
+      generatedAt: new Date().toISOString(),
+      executionTimeMs: Date.now() - startTime,
+    };
+  }
+
+  // Case B2: Act was recognized, but specific requested section is missing from curated subset
+  if (retrieval.status === 'act-found-section-missing' || retrieval.ambiguityStatus === 'act-found-section-missing') {
+    const actRecord =
+      retrieval.results.find((r) => r.recordType === 'statute-metadata') ||
+      retrieval.results[0];
     const actTitle = actRecord ? actRecord.displayTitle : 'The Requested Statute';
     const actTitleBn = actRecord?.displayTitleBn;
     const secNum = retrieval.detectedSectionNumber || 'the requested section';
@@ -210,6 +268,30 @@ function buildDirectReferenceResponse(
       `ন্যায়তা বর্তমানে ${actTitleBn || actTitle}-এর সর্বাধিক ব্যবহৃত প্রধান ধারাগুলো সংরক্ষণ করেছে। ${secNum} এখনো আমাদের ডাটাবেসে অন্তর্ভুক্ত হয়নি।`,
       'ন্যায়তার সংগ্রহে অনুপস্থিতির অর্থ এই নয় যে বাংলাদেশের আইনে এই ধারাটি নেই।',
     ];
+
+    let crossRefMarkdown = '';
+    let crossRefMarkdownBn = '';
+
+    if (retrieval.crossReferenceMentions && retrieval.crossReferenceMentions.length > 0) {
+      crossRefMarkdown =
+        `\n\n#### Related In-Repo Cross-Reference Notice:\n` +
+        retrieval.crossReferenceMentions
+          .map(
+            (m) =>
+              `- **${m.referencingSection} (${m.referencingSectionTitle}):** "${m.context}"\n  *Note: ${m.note}*`
+          )
+          .join('\n') +
+        `\n\n*Important: The above mention is a cross-reference in ${retrieval.crossReferenceMentions[0].referencingSection}'s penalty or procedural text. The verbatim statutory text of ${secNum} itself is not yet digitized in Nyayota's curated subset.*`;
+
+      crossRefMarkdownBn =
+        `\n\n#### ডাটাবেসে সম্পর্কিত রেফারেন্স বিজ্ঞপ্তি:\n` +
+        retrieval.crossReferenceMentions
+          .map(
+            (m) =>
+              `- **${m.referencingSection} (${m.referencingSectionTitle}):** "${m.context}"\n  *(দ্রষ্টব্য: এটি ${m.referencingSection}-এর দণ্ড বা কার্যবিধি সংক্রান্ত ধারায় উল্লিখিত ক্রস-রেফারেন্স। ${secNum}-এর মূল সংবিধিবদ্ধ পাঠ্য এখনো ন্যায়তায় ডিজিটাইজ হয়নি।)*`
+          )
+          .join('\n');
+    }
 
     return {
       query: route.query,
@@ -229,20 +311,26 @@ function buildDirectReferenceResponse(
         `**Curated Coverage Limitation:**\n` +
         `Nyayota's repository currently indexes selected high-frequency provisions of this Act. ` +
         `The specific section you queried (**${secNum}**) is not present in the current curated dataset.\n\n` +
+        `**Statutory Existence vs. Database Curation:**\n` +
+        `This section exists in enacted Bangladesh law under **${actTitle}**, but its full text has not yet been digitized in Nyayota's curated open-access collection.\n\n` +
         `#### How to consult this provision:\n` +
         `1. Browse the general overview of this statute in Nyayota at: \`${actRecord?.internalDestination || `/law/${actRecord?.sourceId}`}\`\n` +
         (actRecord?.officialSourceUrl ? `2. Consult the official government legislative gazette at: [Laws of Bangladesh Portal](${actRecord.officialSourceUrl})\n` : '') +
-        `3. Refer to the printed Bangladesh Code volume published by the Ministry of Law, Justice and Parliamentary Affairs.`,
+        `3. Refer to the printed Bangladesh Code volume published by the Ministry of Law, Justice and Parliamentary Affairs.` +
+        crossRefMarkdown,
       structuredExplanationBn:
         `### সনাক্তকৃত আইন: ${actTitleBn || actTitle}\n\n` +
         `আপনি **${actTitleBn || actTitle}**-এর অধীন **${secNum}** অনুসন্ধান করেছেন।\n\n` +
         `**সংগ্রহের সীমাবদ্ধতা:**\n` +
         `ন্যায়তার ডাটাবেসে বর্তমানে এই আইনের নির্বাচিত গুরুত্বপূর্ণ ধারাগুলো অন্তর্ভুক্ত রয়েছে। ` +
         `আপনার অনুসন্ধানকৃত নির্দিষ্ট ধারাটি (**${secNum}**) বর্তমান ডিজিটাল সেটে অন্তর্ভুক্ত নয়।\n\n` +
+        `**আইনে উপস্থিতি বনাম ডাটাবেসে সংগ্রহ:**\n` +
+        `এই ধারাটি বাংলাদেশের সংবিধিবদ্ধ আইনে **${actTitleBn || actTitle}**-এর অধীন বিদ্যমান, তবে ন্যায়তার উন্মুক্ত ডাটাবেসে এটি এখনো ডিজিটাইজ করা হয়নি।\n\n` +
         `#### পরামর্শ:\n` +
         `১. ন্যায়তায় এই আইনের সাধারণ বিবরণ দেখুন: \`${actRecord?.internalDestination || `/law/${actRecord?.sourceId}`}\`\n` +
         (actRecord?.officialSourceUrl ? `২. সরকারি সরকারি আইন পোর্টাল দেখুন: [বাংলাদেশ সরকারের লেজিসলেটিভ পোর্টাল](${actRecord.officialSourceUrl})\n` : '') +
-        `৩. আইন, বিচার ও সংসদ বিষয়ক মন্ত্রণালয় কর্তৃক প্রকাশিত বাংলাদেশ কোড দেখুন।`,
+        `৩. আইন, বিচার ও সংসদ বিষয়ক মন্ত্রণালয় কর্তৃক প্রকাশিত বাংলাদেশ কোড দেখুন।` +
+        crossRefMarkdownBn,
       sources: actRecord ? [mapResultToCitation(actRecord)] : [],
       limitations,
       limitationsBn,
@@ -254,9 +342,32 @@ function buildDirectReferenceResponse(
   }
 
   // Case C: Exact provision found (statutory-provision or treaty-provision)
-  const provisionResult =
-    retrieval.results.find((r) => r.recordType === 'statutory-provision' || r.recordType === 'treaty-provision') ||
-    retrieval.results[0];
+  const targetSecNorm = retrieval.detectedSectionNumber
+    ? normalizeSectionIdentifier(retrieval.detectedSectionNumber)
+    : undefined;
+
+  const provisionResult = targetSecNorm
+    ? retrieval.results.find(
+        (r) =>
+          (r.recordType === 'statutory-provision' || r.recordType === 'treaty-provision') &&
+          r.identifier &&
+          normalizeSectionIdentifier(r.identifier) === targetSecNorm
+      )
+    : retrieval.results.find(
+        (r) => r.recordType === 'statutory-provision' || r.recordType === 'treaty-provision'
+      ) || retrieval.results[0];
+
+  // SECTION FIDELITY ENFORCEMENT:
+  // If a specific section was queried, but no retrieved provision matches that section,
+  // we must NOT present an unrelated provision! Instead, fallback to act-found-section-missing.
+  if (targetSecNorm && (!provisionResult || !provisionResult.identifier || normalizeSectionIdentifier(provisionResult.identifier) !== targetSecNorm)) {
+    retrieval.status = 'act-found-section-missing';
+    return buildDirectReferenceResponse(route, startTime);
+  }
+
+  if (!provisionResult) {
+    return buildNoRecordsFoundResponse(route, startTime);
+  }
 
   const citations = retrieval.results.slice(0, 3).map(mapResultToCitation);
   const isCuratedSubset = provisionResult.sourceCompleteness === 'curated-section-subset';

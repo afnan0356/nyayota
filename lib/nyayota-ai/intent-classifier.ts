@@ -237,7 +237,15 @@ export function classifyIntent(rawQuery: string): IntentClassificationResult {
   // 5. Jurisdiction Detection: Indian Law / IPC Strict Safety Rule
   const isIndianQuery = INDIAN_JURISDICTION_REGEX.test(normalized);
   const sectionMatch = normalized.match(SECTION_OR_ARTICLE_EXTRACT_REGEX) || normalized.match(STANDALONE_NUMBER_REGEX);
-  const detectedSectionNumber = sectionMatch ? sectionMatch[1] : undefined;
+  let detectedSectionNumber = sectionMatch ? sectionMatch[1] : undefined;
+  if (!detectedSectionNumber) {
+    const enactmentYears = new Set(['1860', '1898', '1908', '1972', '2006', '1872', '1961', '1995', '2023', '1948', '1966']);
+    const numbersInQuery = normalized.match(/\b([0-9]+[a-z]?)\b/gi) || [];
+    const nonYearNumbers = numbersInQuery.filter((n) => !enactmentYears.has(n));
+    if (nonYearNumbers.length === 1) {
+      detectedSectionNumber = nonYearNumbers[0];
+    }
+  }
 
   if (isIndianQuery) {
     const ipcDetails = buildIpcClarification(detectedSectionNumber);
