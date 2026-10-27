@@ -579,11 +579,15 @@ function searchGlossary(normalized: string): LegalRetrievalResult[] {
     let score = 0;
     const reasons: MatchReasonType[] = [];
 
-    if (termLower === normalized || termBnLower.includes(normalized)) {
-      score = 82;
+    if (termLower === normalized || (termBnLower && termBnLower === normalized)) {
+      score = 90;
       reasons.push('glossary-exact');
-    } else if (termLower.includes(normalized)) {
-      score = 75;
+    } else if (
+      normalized.includes(termLower) ||
+      termLower.includes(normalized) ||
+      (termBnLower && normalized.includes(termBnLower))
+    ) {
+      score = 80;
       reasons.push('glossary-exact');
     } else if (defLower.includes(normalized)) {
       score = 45;
@@ -627,10 +631,31 @@ function searchOutcomeScenarios(normalized: string): LegalRetrievalResult[] {
     let score = 0;
     const reasons: MatchReasonType[] = [];
 
-    if (titleLower.includes(normalized) || titleBnLower.includes(normalized)) {
-      score = 74;
+    const isExactTitle = titleLower === normalized || (titleBnLower && titleBnLower === normalized);
+    const isContained =
+      normalized.includes(titleLower) ||
+      titleLower.includes(normalized) ||
+      (titleBnLower && normalized.includes(titleBnLower));
+
+    const isKeywordHit =
+      (normalized.includes('cheque') && scenario.id === 'scenario-cheque-dishonor-ni-act') ||
+      (normalized.includes('arrest') && scenario.id === 'scenario-unlawful-arrest') ||
+      (normalized.includes('gd') && scenario.id === 'scenario-unlawful-arrest') ||
+      (normalized.includes('theft') && scenario.id === 'scenario-theft-fraud') ||
+      (normalized.includes('contract') && scenario.id === 'scenario-commercial-contract-breach') ||
+      (normalized.includes('injunction') && scenario.id === 'scenario-temporary-injunction-property') ||
+      (normalized.includes('cyber') && scenario.id === 'scenario-cyber-extortion');
+
+    if (isExactTitle) {
+      score = 90;
       reasons.push('scenario-match');
-    } else if (summaryLower.includes(normalized) || legalAreaLower.includes(normalized)) {
+    } else if (isContained) {
+      score = 80;
+      reasons.push('scenario-match');
+    } else if (isKeywordHit) {
+      score = 75;
+      reasons.push('scenario-match');
+    } else if (summaryLower.includes(normalized) || legalAreaLower.includes(normalized) || normalized.includes(legalAreaLower)) {
       score = 58;
       reasons.push('keyword-match');
     }
@@ -642,8 +667,10 @@ function searchOutcomeScenarios(normalized: string): LegalRetrievalResult[] {
         sourceId: scenario.id,
         displayTitle: scenario.topicTitle,
         displayTitleBn: scenario.topicTitleBn,
-        identifier: scenario.legalArea,
-        matchingText: scenario.scenarioSummary,
+        matchingText: scenario.proceduralSteps && scenario.proceduralSteps.length > 0
+          ? `${scenario.scenarioSummary}\n\nProcedural Steps:\n` +
+            scenario.proceduralSteps.map((s) => `${s.step}. ${s.title}: ${s.description}`).join('\n')
+          : scenario.scenarioSummary,
         matchingTextBn: scenario.scenarioSummaryBn,
         explanation: `Procedural guidance: ${scenario.proceduralClassification.filingMechanism} (${scenario.proceduralClassification.trialCourt})`,
         penaltyOrRemedy: scenario.statutoryConsequences.civilRemedies.join('; ') || scenario.statutoryConsequences.potentialPenalties.join('; '),

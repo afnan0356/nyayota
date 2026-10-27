@@ -301,3 +301,136 @@ export interface QueryRouteResult {
     | 'unknown';
 }
 
+// ============================================================================
+// Phase 4: Source-Grounded Deterministic Response Generator Types
+// ============================================================================
+
+/**
+ * High-level generation status of the deterministic response
+ */
+export type ResponseStatus =
+  | 'grounded-answer'         // Answer fully supported by retrieved statutory, treaty, or glossary records
+  | 'partial-coverage'        // Curated subset available; certain provisions of the Act are unindexed
+  | 'clarification-required'  // Query requires user disambiguation (IPC notice or multi-act section)
+  | 'unsupported-scope'       // Query is outside indexed legal collection or asks for foreign law
+  | 'out-of-scope'            // Query is non-legal (coding, weather, trivia, recipes)
+  | 'conversational'          // Greetings, platform help, website feature guides
+  | 'no-records-found'        // Legitimate legal query, but 0 matches in current Nyayota index
+  | 'unintelligible';         // Empty string or gibberish input
+
+/**
+ * Traceable, verified legal citation attached to a deterministic response
+ */
+export interface DeterministicSourceCitation {
+  /** Primary identifier of the statute or document (e.g. "bd-penal-code-1860") */
+  sourceId: string;
+
+  /** Human-readable title of the statute */
+  title: string;
+
+  /** Official Bengali title if available */
+  titleBn?: string;
+
+  /** Section number, Article number, or Order/Rule if applicable */
+  identifier?: string;
+
+  /** Type of legal record retrieved */
+  recordType: RetrievalRecordType;
+
+  /** Degree of statutory completeness in Nyayota's repository */
+  sourceCompleteness: SourceCompleteness;
+
+  /** Jurisdiction (e.g. "Bangladesh", "International") */
+  jurisdiction: string;
+
+  /** Verified internal link within Nyayota (e.g. "/law/bd-penal-code-1860?section=Section%20300") */
+  internalUrl?: string;
+
+  /** Authentic external official government or UN source URL (only if present in dataset) */
+  officialUrl?: string;
+
+  /** Official Gazette notification or legislative publication reference */
+  officialGazetteRef?: string;
+
+  /** Statutory status (e.g. "In Force", "Repealed", "Amended") */
+  status?: string;
+
+  /** Repeal or amendment warning note */
+  repealNote?: string;
+
+  /** Whether the parent statute is only partially indexed as a curated subset */
+  isCuratedSubset: boolean;
+
+  /** Verbatim excerpt of the legal provision or definition */
+  verbatimExcerpt: string;
+
+  /** Verbatim Bengali text if available in dataset */
+  verbatimExcerptBn?: string;
+}
+
+/**
+ * Complete, structured, source-grounded response generated deterministically
+ */
+export interface DeterministicLegalResponse {
+  /** Original user query */
+  query: string;
+
+  /** Normalized query */
+  normalizedQuery: string;
+
+  /** Detected intent category */
+  detectedIntent: IntentCategory;
+
+  /** Detected legal jurisdiction */
+  detectedJurisdiction: DetectedJurisdiction;
+
+  /** High-level generation status */
+  status: ResponseStatus;
+
+  /** Main heading for the response card */
+  headline: string;
+
+  /** Main heading in Bengali */
+  headlineBn?: string;
+
+  /** Concise plain-language summary of the legal answer */
+  summary: string;
+
+  /** Concise plain-language summary in Bengali */
+  summaryBn?: string;
+
+  /** Comprehensive structured educational explanation (Markdown formatted) */
+  structuredExplanation: string;
+
+  /** Comprehensive structured educational explanation in Bengali (Markdown formatted) */
+  structuredExplanationBn?: string;
+
+  /** List of verified, traceable source records supporting the response */
+  sources: DeterministicSourceCitation[];
+
+  /** Explicit statutory limitations, coverage notes, or omissions */
+  limitations: string[];
+
+  /** Explicit statutory limitations in Bengali */
+  limitationsBn?: string[];
+
+  /** Prompt question when user disambiguation is required */
+  clarificationPrompt?: string;
+
+  /** Structured disambiguation options for the user to select */
+  clarificationOptions?: string[];
+
+  /** Proportionate legal educational disclaimer */
+  disclaimer: string;
+
+  /** Proportionate legal educational disclaimer in Bengali */
+  disclaimerBn?: string;
+
+  /** Timestamp of generation */
+  generatedAt: string;
+
+  /** End-to-end execution time in milliseconds */
+  executionTimeMs: number;
+}
+
+
