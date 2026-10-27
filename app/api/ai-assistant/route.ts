@@ -1,5 +1,6 @@
 import { GoogleGenAI } from '@google/genai';
 import { NextRequest, NextResponse } from 'next/server';
+import { executeNyayotaAIPipeline } from '@/lib/nyayota-ai';
 
 export interface ChatMessage {
   role: 'user' | 'assistant' | 'system';
@@ -170,6 +171,60 @@ export async function POST(req: NextRequest) {
       ? language
       : 'both';
 
+    // Validate engine / assistant mode selection
+    const isExplicitDeterministic =
+      body.engine === 'deterministic' ||
+      body.assistantMode === 'deterministic' ||
+      body.engine === 'source-grounded';
+    const isExplicitGeneral =
+      body.engine === 'general' ||
+      body.assistantMode === 'general' ||
+      body.engine === 'gemini';
+
+    const selectedEngine: 'deterministic' | 'general' = isExplicitGeneral
+      ? 'general'
+      : isExplicitDeterministic
+      ? 'deterministic'
+      : 'deterministic'; // Default to deterministic source-grounded research for Nyayota
+
+    // -------------------------------------------------------------------------
+    // Deterministic Source-Grounded Legal Pipeline (Zero External AI dependency)
+    // -------------------------------------------------------------------------
+    if (selectedEngine === 'deterministic') {
+      try {
+        const deterministicResult = await executeNyayotaAIPipeline({
+          query: trimmedQuery,
+          language: safeLanguage === 'bengali' ? 'bn' : safeLanguage === 'english' ? 'en' : 'both',
+          mode: safeMode === 'compare' ? 'compare' : safeMode === 'statute' ? 'cite' : 'explain',
+          lawContext,
+        });
+
+        return NextResponse.json(
+          {
+            text: deterministicResult.text,
+            provider: 'nyayota-deterministic-engine',
+            engine: 'deterministic',
+            timestamp: new Date().toISOString(),
+            deterministicResponse: deterministicResult,
+          },
+          {
+            headers: {
+              ...SECURITY_HEADERS,
+              'X-RateLimit-Limit': String(MAX_REQUESTS_PER_WINDOW),
+              'X-RateLimit-Remaining': String(rateLimit.remaining),
+            },
+          }
+        );
+      } catch (detError: unknown) {
+        const errorMsg = detError instanceof Error ? detError.message : 'Unknown deterministic pipeline error';
+        console.error('Deterministic legal pipeline encountered an issue:', errorMsg);
+        return NextResponse.json(
+          { error: 'An error occurred during deterministic legal retrieval.' },
+          { status: 500, headers: SECURITY_HEADERS }
+        );
+      }
+    }
+
     // Limit conversation history to latest 10 messages with 2,000 char cap per message and 8,000 char total cap
     const validatedMessages: ChatMessage[] = [];
     let totalHistoryLength = 0;
@@ -267,6 +322,7 @@ CRITICAL OPERATIONAL RULES:
           {
             text: response.text,
             provider: 'gemini-2.5-flash',
+            engine: 'general',
             timestamp: new Date().toISOString(),
           },
           {
@@ -290,6 +346,7 @@ CRITICAL OPERATIONAL RULES:
       {
         text: fallbackResponse,
         provider: 'nyayota-legal-engine-v1',
+        engine: 'general',
         timestamp: new Date().toISOString(),
       },
       {

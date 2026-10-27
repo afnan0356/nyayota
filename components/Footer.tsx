@@ -3,19 +3,17 @@
 import React from 'react';
 import Link from 'next/link';
 import { Scale, Heart, ArrowRight } from 'lucide-react';
+import { DONATION_CONFIG } from '@/lib/donation-config';
 
 /**
  * DONATION & SUPPORT CONFIGURATION
  * 
- * To activate live contributions when a verified non-profit account or payment
- * processor is established, set `isConfigured: true` and supply `donationUrl`.
- * When unconfigured, the section renders in a transparent, informational state
- * without broken buttons, fake accounts, or misleading payment flows.
+ * Backed by centralized /lib/donation-config.ts with verified crypto addresses.
  */
 export const SUPPORT_DONATION_CONFIG = {
-  isConfigured: false,
-  donationUrl: null as string | null, // e.g. 'https://opencollective.com/nyayota' once verified
-  contactEmail: 'nyayota.contact@gmail.com',
+  isConfigured: DONATION_CONFIG.isConfigured,
+  donationUrl: DONATION_CONFIG.donationUrl,
+  contactEmail: DONATION_CONFIG.contactEmail,
 };
 
 export function Footer() {
@@ -231,16 +229,14 @@ export function Footer() {
 
             <div className="shrink-0 flex flex-col sm:flex-row items-start sm:items-center gap-3">
               {SUPPORT_DONATION_CONFIG.isConfigured && SUPPORT_DONATION_CONFIG.donationUrl ? (
-                <a
+                <Link
                   href={SUPPORT_DONATION_CONFIG.donationUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
                   id="footer-donate-btn"
                   className="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-zinc-950 font-bold text-xs inline-flex items-center space-x-2 transition-colors shadow-sm focus:outline-none focus:ring-2 focus:ring-amber-500/50"
                 >
                   <span>Support Nyayota</span>
                   <ArrowRight className="w-3.5 h-3.5" />
-                </a>
+                </Link>
               ) : (
                 <div className="flex flex-col sm:flex-row sm:items-center gap-2.5">
                   <div className="inline-flex items-center space-x-2 px-3 py-1.5 rounded-xl bg-zinc-200/60 dark:bg-zinc-800/80 text-zinc-600 dark:text-zinc-400 text-xs border border-zinc-300/50 dark:border-zinc-700/50">

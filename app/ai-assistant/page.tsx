@@ -14,8 +14,6 @@ import {
   Info,
   Layers,
   HelpCircle,
-  Volume2,
-  Share2,
   RefreshCw,
   Trash2,
   ArrowRight,
@@ -23,19 +21,24 @@ import {
   Download,
   FileText,
   User,
-  CornerDownLeft,
   Search,
   ExternalLink,
   ChevronRight,
-  ShieldAlert
+  ShieldAlert,
+  Cpu,
+  Database,
+  CheckCircle2,
+  AlertCircle
 } from 'lucide-react';
 import {
   GLOSSARY_TERMS,
   GlossaryTerm,
   LAWS_DATABASE,
-  getEnrichedLaw,
   LawItem
 } from '@/lib/legal-data';
+import { NyayotaAIServiceResponse } from '@/lib/nyayota-ai/service';
+import { CitationCard } from '@/components/CitationCard';
+import { ClarificationCard } from '@/components/ClarificationCard';
 
 interface ChatMessageItem {
   id: string;
@@ -43,6 +46,8 @@ interface ChatMessageItem {
   content: string;
   timestamp: string;
   lawContextTitle?: string;
+  engine?: 'deterministic' | 'general';
+  deterministicResponse?: NyayotaAIServiceResponse;
 }
 
 function AIAssistantContent() {
@@ -61,23 +66,27 @@ function AIAssistantContent() {
   const [inputQuery, setInputQuery] = useState(
     promptParam || initialQuery || (termParam ? `Define the legal term: ${termParam}` : '')
   );
+
+  // Assistant Mode: Source-Grounded Deterministic Engine vs General AI Assistant (Gemini)
+  const [assistantEngine, setAssistantEngine] = useState<'deterministic' | 'general'>('deterministic');
+
+  // Query formatting / stylistic mode
   const [mode, setMode] = useState<'explain' | 'bangla' | 'compare' | 'cite'>('explain');
   const [isLoading, setIsLoading] = useState(false);
   const [chatMessages, setChatMessages] = useState<ChatMessageItem[]>(() => [
     {
       id: 'welcome-msg',
       role: 'assistant',
-      content: `### Welcome to the Nyayota AI Legal Knowledge Assistant ⚖️
+      engine: 'deterministic',
+      content: `### Welcome to Nyayota AI Legal Knowledge Assistant ⚖️
 
-I am an interactive, neutral educational legal research assistant. I can help you:
-- **Understand Statutes:** Translate archaic legislative drafting into plain language.
-- **Learn Legal Concepts:** Clarify terms like *Mens Rea*, *Duty of Care*, *Ultra Vires*, or *Habeas Corpus*.
-- **Explore Procedural Rights:** Understand bailable vs non-bailable offenses and constitutional protections.
-- **Generate Citations:** Format statutory and journal citations in Bluebook, APA, and MLA styles.
+Select between two research modes above:
+1. **Source-Grounded Legal Research (Deterministic):** Fast, traceable legal answers grounded exclusively in verified Bangladesh statutes and UN treaties stored in this repository. Zero external AI hallucinations.
+2. **General AI Assistant (Gemini):** Broad conversational legal explainer for conceptual analogies, hypothetical fact scenarios, and cross-disciplinary legal context.
 
 *Educational Information Only — Not Legal Advice. Nyayota is designed for educational exploration, academic research, and public legal literacy.*`,
-      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-    }
+      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+    },
   ]);
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [glossarySearch, setGlossarySearch] = useState(termParam || '');
@@ -95,15 +104,14 @@ I am an interactive, neutral educational legal research assistant. I can help yo
     scrollToBottom();
   }, [chatMessages, isLoading]);
 
-  // Master Prompt 04 Suggested Questions
+  // Suggested Prompts tailored for both statutory retrieval and conceptual inquiry
   const suggestedPrompts = [
-    { title: 'What is negligence?', query: 'What is negligence and what are the 4 essential elements required to prove duty of care in civil law?' },
-    { title: 'Explain cyber law simply', query: 'Explain cyber law and digital rights in simple language without legal jargon.' },
-    { title: 'What are human rights?', query: 'What are human rights under the UDHR and how are they protected under Part III of the Constitution?' },
-    { title: 'Explain like I am 15', query: 'Explain the difference between Murder (Section 300) and Culpable Homicide (Section 299) like I am 15.' },
-    { title: 'Compare two concepts', query: 'Compare the legal concept of Mens Rea (Guilty Mind) vs Actus Reus (Guilty Act).' },
-    { title: 'Police arrest powers (Sec 54)', query: 'What are the strict procedural limits on warrantless police arrest under Section 54 of CrPC and Article 33?' },
-    { title: 'High Court Writs (Art 102)', query: 'Explain how Habeas Corpus and Mandamus writs work under Article 102 of the Bangladesh Constitution.' }
+    { title: 'Penal Code Sec 300 (Murder)', query: 'The Penal Code, 1860 Section 300' },
+    { title: 'CrPC Sec 54 (Arrest)', query: 'The Code of Criminal Procedure, 1898 Section 54' },
+    { title: 'Penal Code Sec 302 (Penalty)', query: 'The Penal Code, 1860 Section 302' },
+    { title: 'Section 54 (Disambiguation)', query: 'Section 54' },
+    { title: 'What is negligence?', query: 'What is negligence and what are the essential elements required to prove duty of care in civil law?' },
+    { title: 'High Court Writs (Art 102)', query: 'Article 102 The Constitution of the People\'s Republic of Bangladesh' },
   ];
 
   // Law context specific prompt chips
@@ -112,8 +120,7 @@ I am an interactive, neutral educational legal research assistant. I can help yo
         `Explain ${activeLawContext.shortTitle}${sectionParam ? ` ${sectionParam}` : ''} in plain language`,
         `What are the key provisions and practical takeaways of ${activeLawContext.shortTitle}?`,
         `What are common real-world misunderstandings about ${activeLawContext.shortTitle}?`,
-        `Explain ${activeLawContext.shortTitle} like I am 15`,
-        `What is the prescribed penalty or statutory remedy in ${activeLawContext.shortTitle}?`
+        `What is the prescribed penalty or statutory remedy in ${activeLawContext.shortTitle}?`,
       ]
     : [];
 
@@ -126,7 +133,7 @@ I am an interactive, neutral educational legal research assistant. I can help yo
       role: 'user',
       content: q,
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-      lawContextTitle: activeLawContext ? `${activeLawContext.shortTitle}${sectionParam ? ` (${sectionParam})` : ''}` : undefined
+      lawContextTitle: activeLawContext ? `${activeLawContext.shortTitle}${sectionParam ? ` (${sectionParam})` : ''}` : undefined,
     };
 
     setChatMessages((prev) => [...prev, userMsg]);
@@ -157,19 +164,23 @@ I am an interactive, neutral educational legal research assistant. I can help yo
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           query: q,
+          engine: assistantEngine,
           mode,
-          language: mode === 'bangla' ? 'bn' : 'both',
+          language: mode === 'bangla' ? 'bengali' : 'both',
           lawContext: lawContextPayload,
-          messages: chatMessages.slice(-4).map((m) => ({ role: m.role, content: m.content }))
+          messages: chatMessages.slice(-4).map((m) => ({ role: m.role, content: m.content })),
         }),
       });
 
       const data = await res.json();
+
       const assistantMsg: ChatMessageItem = {
         id: `ai-${Date.now()}`,
         role: 'assistant',
         content: data.text || 'Unable to analyze the legal query at this moment. Please check your query.',
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        engine: data.engine || assistantEngine,
+        deterministicResponse: data.deterministicResponse,
       };
 
       setChatMessages((prev) => [...prev, assistantMsg]);
@@ -180,8 +191,8 @@ I am an interactive, neutral educational legal research assistant. I can help yo
           id: `ai-err-${Date.now()}`,
           role: 'assistant',
           content: 'A network communication error occurred while analyzing the legal request. Please try again.',
-          timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-        }
+          timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        },
       ]);
     } finally {
       setIsLoading(false);
@@ -199,15 +210,23 @@ I am an interactive, neutral educational legal research assistant. I can help yo
       {
         id: `welcome-${Date.now()}`,
         role: 'assistant',
-        content: `### New Legal Research Session Started ⚖️\n\nHow can I help you analyze statutes, Latin maxims, or constitutional provisions today?\n\n*Educational Information Only — Not Legal Advice.*`,
-        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-      }
+        engine: assistantEngine,
+        content: `### New Legal Research Session Started ⚖️\n\nCurrent Engine: **${
+          assistantEngine === 'deterministic'
+            ? 'Source-Grounded Legal Research (Deterministic)'
+            : 'General AI Assistant (Gemini)'
+        }**\n\nHow can I help you analyze statutes, sections, or constitutional provisions today?\n\n*Educational Information Only — Not Legal Advice.*`,
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      },
     ]);
   };
 
   const handleExportChat = () => {
     const exportText = chatMessages
-      .map((m) => `[${m.timestamp}] ${m.role === 'user' ? 'USER' : 'NYAYOTA AI ASSISTANT'}:\n${m.content}\n\n---\n`)
+      .map(
+        (m) =>
+          `[${m.timestamp}] ${m.role === 'user' ? 'USER' : `NYAYOTA AI (${m.engine || 'assistant'})`}:\n${m.content}\n\n---\n`
+      )
       .join('\n');
     const blob = new Blob([exportText], { type: 'text/markdown' });
     const url = URL.createObjectURL(blob);
@@ -231,14 +250,14 @@ I am an interactive, neutral educational legal research assistant. I can help yo
       <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 border-b border-zinc-200 dark:border-zinc-800 pb-6">
         <div className="space-y-2 max-w-3xl">
           <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-md bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 text-xs font-semibold">
-            <Sparkles className="w-3.5 h-3.5" />
-            <span>AI Legal Knowledge Assistant</span>
+            <Scale className="w-3.5 h-3.5" />
+            <span>Nyayota Legal Intelligence</span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-extrabold text-zinc-900 dark:text-white tracking-tight">
-            AI Legal Assistant & Statutory Explainer
+            AI Legal Assistant & Research Console
           </h1>
           <p className="text-xs sm:text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed">
-            Ask questions about statutes, request plain-language explanations, explore legal terminology, and generate verified citations.
+            Search codified Bangladesh statutes, verify provisions, explore international covenants, and generate source-grounded legal analysis.
           </p>
         </div>
 
@@ -246,11 +265,84 @@ I am an interactive, neutral educational legal research assistant. I can help yo
         <div className="p-3 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-800 dark:text-amber-300 text-xs max-w-xs shrink-0 space-y-1">
           <div className="flex items-center space-x-1.5 font-bold">
             <ShieldAlert className="w-4 h-4 text-amber-500 shrink-0" />
-            <span>Educational Information Only</span>
+            <span>Educational Research Only</span>
           </div>
           <p className="text-[11px] text-zinc-600 dark:text-zinc-400 leading-tight">
-            Not legal advice. Does not provide legal representation or guarantee judicial outcomes.
+            Not legal representation. Does not constitute formal legal advice or guarantee court outcomes.
           </p>
+        </div>
+      </div>
+
+      {/* ASSISTANT ENGINE SELECTOR (Deterministic vs General AI) */}
+      <div className="p-4 sm:p-5 rounded-3xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-sm space-y-3">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <div className="flex items-center space-x-2">
+            <Cpu className="w-4 h-4 text-amber-500" />
+            <span className="text-xs font-bold uppercase tracking-wider text-zinc-900 dark:text-white">
+              Assistant Mode Engine
+            </span>
+          </div>
+          <span className="text-[11px] text-zinc-500">
+            Current: <strong className="text-amber-600 dark:text-amber-400">{assistantEngine === 'deterministic' ? 'Source-Grounded Pipeline' : 'General AI (Gemini)'}</strong>
+          </span>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          {/* Option 1: Source-Grounded Legal Research */}
+          <button
+            type="button"
+            id="engine-selector-deterministic"
+            onClick={() => setAssistantEngine('deterministic')}
+            className={`p-4 rounded-2xl border text-left transition-all ${
+              assistantEngine === 'deterministic'
+                ? 'bg-amber-500/10 border-amber-500 text-zinc-900 dark:text-white shadow-xs ring-1 ring-amber-500'
+                : 'bg-zinc-50 dark:bg-zinc-950/70 border-zinc-200 dark:border-zinc-800 text-zinc-700 dark:text-zinc-300 hover:border-zinc-300 dark:hover:border-zinc-700'
+            }`}
+          >
+            <div className="flex items-center justify-between mb-1.5">
+              <div className="flex items-center space-x-2 font-bold text-sm">
+                <Database className="w-4 h-4 text-amber-500" />
+                <span>Source-Grounded Legal Research</span>
+              </div>
+              <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                Deterministic
+              </span>
+            </div>
+            <p className="text-xs text-zinc-600 dark:text-zinc-400 leading-relaxed">
+              Fast, deterministic retrieval powered strictly by in-repo Bangladesh statutes, Bangladesh Code catalogs, and UN treaties. Zero external AI hallucinations.
+            </p>
+            <p className="text-[11px] text-zinc-500 dark:text-zinc-500 mt-2 font-mono">
+              • Anti-substitution guards • Verified source citations • Disambiguation
+            </p>
+          </button>
+
+          {/* Option 2: General AI Assistant (Gemini) */}
+          <button
+            type="button"
+            id="engine-selector-general"
+            onClick={() => setAssistantEngine('general')}
+            className={`p-4 rounded-2xl border text-left transition-all ${
+              assistantEngine === 'general'
+                ? 'bg-amber-500/10 border-amber-500 text-zinc-900 dark:text-white shadow-xs ring-1 ring-amber-500'
+                : 'bg-zinc-50 dark:bg-zinc-950/70 border-zinc-200 dark:border-zinc-800 text-zinc-700 dark:text-zinc-300 hover:border-zinc-300 dark:hover:border-zinc-700'
+            }`}
+          >
+            <div className="flex items-center justify-between mb-1.5">
+              <div className="flex items-center space-x-2 font-bold text-sm">
+                <Sparkles className="w-4 h-4 text-amber-500" />
+                <span>General AI Assistant</span>
+              </div>
+              <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20">
+                Gemini 2.5
+              </span>
+            </div>
+            <p className="text-xs text-zinc-600 dark:text-zinc-400 leading-relaxed">
+              Google Gemini-powered conversational assistant for conceptual legal analogies, hypothetical scenario breakdowns, and broader academic inquiries.
+            </p>
+            <p className="text-[11px] text-zinc-500 dark:text-zinc-500 mt-2 font-mono">
+              • Conversational synthesis • Everyday analogies • Multi-step questions
+            </p>
+          </button>
         </div>
       </div>
 
@@ -400,9 +492,11 @@ I am an interactive, neutral educational legal research assistant. I can help yo
           </div>
 
           {/* Chat Messages Log Area */}
-          <div className="p-4 sm:p-6 rounded-3xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-sm min-h-[480px] max-h-[620px] overflow-y-auto space-y-6">
+          <div className="p-4 sm:p-6 rounded-3xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-sm min-h-[480px] max-h-[660px] overflow-y-auto space-y-6">
             {chatMessages.map((msg) => {
               const isUser = msg.role === 'user';
+              const det = msg.deterministicResponse;
+
               return (
                 <div
                   key={msg.id}
@@ -417,7 +511,7 @@ I am an interactive, neutral educational legal research assistant. I can help yo
 
                   {/* Message Bubble */}
                   <div
-                    className={`max-w-[88%] sm:max-w-[80%] rounded-3xl p-5 space-y-2 text-xs sm:text-sm leading-relaxed transition-all shadow-xs ${
+                    className={`max-w-[92%] sm:max-w-[85%] rounded-3xl p-5 space-y-3 text-xs sm:text-sm leading-relaxed transition-all shadow-xs ${
                       isUser
                         ? 'bg-amber-500 text-zinc-950 font-medium rounded-tr-none'
                         : 'bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 rounded-tl-none'
@@ -430,10 +524,100 @@ I am an interactive, neutral educational legal research assistant. I can help yo
                       </div>
                     )}
 
-                    {/* Message Body */}
-                    <div className="whitespace-pre-line font-sans space-y-2">
-                      {msg.content}
-                    </div>
+                    {/* Engine Identifier Badge for Assistant Responses */}
+                    {!isUser && (
+                      <div className="flex items-center justify-between gap-2 pb-2 border-b border-zinc-200 dark:border-zinc-800 text-[10px]">
+                        <span className="font-bold uppercase tracking-wider text-zinc-500">
+                          {msg.engine === 'deterministic'
+                            ? 'Source-Grounded Response'
+                            : 'General AI Assistant Response'}
+                        </span>
+                        {det && (
+                          <span className="px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-700 dark:text-amber-400 font-semibold font-mono">
+                            {det.executionTimeMs}ms • {det.detectedJurisdiction}
+                          </span>
+                        )}
+                      </div>
+                    )}
+
+                    {/* DETERMINISTIC RICH RESPONSE RENDERING */}
+                    {!isUser && det ? (
+                      <div className="space-y-4">
+                        {/* Headline & Summary */}
+                        <div className="space-y-1.5">
+                          <h3 className="text-sm sm:text-base font-bold text-zinc-900 dark:text-white">
+                            {det.headline}
+                          </h3>
+                          {det.summary && (
+                            <p className="text-xs text-zinc-600 dark:text-zinc-300 font-medium bg-amber-500/5 dark:bg-amber-500/10 p-3 rounded-xl border border-amber-500/20">
+                              {det.summary}
+                            </p>
+                          )}
+                        </div>
+
+                        {/* Structured Explanation Body */}
+                        <div className="whitespace-pre-line font-sans space-y-2 text-zinc-800 dark:text-zinc-200">
+                          {msg.content}
+                        </div>
+
+                        {/* Interactive Clarification Card (if ambiguous or clarification needed) */}
+                        {det.clarificationOptions && det.clarificationOptions.length > 0 && (
+                          <ClarificationCard
+                            originalQuery={det.query}
+                            clarificationPrompt={det.clarificationPrompt}
+                            clarificationOptions={det.clarificationOptions}
+                            onSelectOption={(scopedQuery) => handleSendMessage(scopedQuery)}
+                            isLoading={isLoading}
+                          />
+                        )}
+
+                        {/* Cross-Reference Mentions Box (e.g. Sec 300 citing Sec 302) */}
+                        {det.crossReferenceMentions && det.crossReferenceMentions.length > 0 && (
+                          <div className="p-3 rounded-2xl bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-900/40 text-xs space-y-1.5">
+                            <div className="flex items-center space-x-1.5 font-bold text-blue-900 dark:text-blue-300">
+                              <Info className="w-3.5 h-3.5" />
+                              <span>In-Repo Cross-Reference Notice:</span>
+                            </div>
+                            {det.crossReferenceMentions.map((cr, idx) => (
+                              <p key={idx} className="text-[11px] text-zinc-700 dark:text-zinc-300">
+                                <strong>{cr.referencingProvisionTitle}</strong> ({cr.referencingProvisionIdentifier}) references {cr.targetSectionQuery} in its penalty or procedural clause: <em>&ldquo;{cr.contextQuote}&rdquo;</em>
+                              </p>
+                            ))}
+                          </div>
+                        )}
+
+                        {/* Verified Citation Cards */}
+                        {det.sources && det.sources.length > 0 && (
+                          <div className="space-y-2 pt-2 border-t border-zinc-200 dark:border-zinc-800">
+                            <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-500 dark:text-zinc-400 block">
+                              Verified Legal Sources ({det.sources.length})
+                            </span>
+                            <div className="space-y-2">
+                              {det.sources.map((src) => (
+                                <CitationCard key={src.id} citation={src} />
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Coverage Limitations Warning if any */}
+                        {det.limitations && det.limitations.length > 0 && (
+                          <div className="p-3 rounded-xl bg-zinc-100 dark:bg-zinc-900 text-[11px] text-zinc-600 dark:text-zinc-400 space-y-1 border border-zinc-200 dark:border-zinc-800">
+                            <span className="font-bold text-zinc-700 dark:text-zinc-300">Statutory Scope & Limitations:</span>
+                            <ul className="list-disc list-inside space-y-0.5">
+                              {det.limitations.map((lim, idx) => (
+                                <li key={idx}>{lim}</li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                      </div>
+                    ) : (
+                      /* GENERAL AI / STANDARD MESSAGE BODY */
+                      <div className="whitespace-pre-line font-sans space-y-2">
+                        {msg.content}
+                      </div>
+                    )}
 
                     {/* Message Footer & Copy */}
                     <div
@@ -484,7 +668,11 @@ I am an interactive, neutral educational legal research assistant. I can help yo
                 </div>
                 <div className="p-4 rounded-2xl bg-zinc-100 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 text-xs text-zinc-500 flex items-center space-x-2">
                   <Sparkles className="w-4 h-4 text-amber-500 animate-spin" />
-                  <span>Synthesizing statutory provisions & legal analysis...</span>
+                  <span>
+                    {assistantEngine === 'deterministic'
+                      ? 'Executing deterministic legal retrieval & provision verification...'
+                      : 'Synthesizing statutory provisions & legal analysis with Gemini...'}
+                  </span>
                 </div>
               </div>
             )}
@@ -508,8 +696,10 @@ I am an interactive, neutral educational legal research assistant. I can help yo
                 }}
                 placeholder={
                   activeLawContext
-                    ? `Ask anything about ${activeLawContext.shortTitle}...`
-                    : 'Ask about any law, section, legal concept, or procedure (e.g. What is negligence?)...'
+                    ? `Ask about ${activeLawContext.shortTitle}...`
+                    : assistantEngine === 'deterministic'
+                    ? 'Search statutes, sections, or concepts (e.g. Penal Code 300, CrPC 54, Article 102)...'
+                    : 'Ask any legal question, scenario comparison, or conceptual inquiry...'
                 }
                 className="w-full pl-4 pr-12 py-3 text-xs sm:text-sm bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-2xl focus:outline-none focus:ring-2 focus:ring-amber-500/40 text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 resize-none font-medium"
               />
@@ -528,7 +718,12 @@ I am an interactive, neutral educational legal research assistant. I can help yo
 
             <div className="flex items-center justify-between text-[11px] text-zinc-500 dark:text-zinc-400 px-1">
               <span>Press <strong>Enter</strong> to send, <strong>Shift+Enter</strong> for new line</span>
-              <span>Educational Assistant • Powered by Nyayota</span>
+              <span>
+                Engine:{' '}
+                <strong>
+                  {assistantEngine === 'deterministic' ? 'Source-Grounded' : 'Gemini AI'}
+                </strong>
+              </span>
             </div>
           </div>
 
@@ -549,7 +744,7 @@ I am an interactive, neutral educational legal research assistant. I can help yo
                   }}
                   className="px-3 py-1.5 rounded-xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 hover:border-amber-500 hover:bg-amber-500/5 text-xs text-zinc-700 dark:text-zinc-300 transition-all text-left shadow-xs flex items-center space-x-1.5"
                 >
-                  <Sparkles className="w-3 h-3 text-amber-500 shrink-0" />
+                  <Scale className="w-3 h-3 text-amber-500 shrink-0" />
                   <span>{p.title}</span>
                 </button>
               ))}
@@ -707,7 +902,7 @@ I am an interactive, neutral educational legal research assistant. I can help yo
                 className="w-full py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-zinc-950 font-bold text-xs flex items-center justify-center space-x-1.5 transition-colors shadow-md shadow-amber-500/20"
               >
                 <Sparkles className="w-3.5 h-3.5" />
-                <span>Deep AI Analysis for {selectedGlossaryTerm.term}</span>
+                <span>Deep Analysis for {selectedGlossaryTerm.term}</span>
               </button>
             </div>
           )}
