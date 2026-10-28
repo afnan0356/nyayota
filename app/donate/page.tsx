@@ -29,37 +29,32 @@ export default function DonatePage() {
   const [selectedNetworkId, setSelectedNetworkId] = useState<CryptoNetworkConfig['id']>('bitcoin');
   const [copiedAddress, setCopiedAddress] = useState<string | null>(null);
   const [copyError, setCopyError] = useState<string | null>(null);
-  const [qrDataUrl, setQrDataUrl] = useState<string>('');
-  const [qrLoading, setQrLoading] = useState<boolean>(false);
+  const [qrSvg, setQrSvg] = useState<string>('');
 
   const activeNetwork =
     CRYPTO_NETWORKS.find((n) => n.id === selectedNetworkId) || CRYPTO_NETWORKS[0];
 
-  // Generate offline local QR code for the selected address
+  // Generate offline local vector SVG QR code for the selected address
   useEffect(() => {
     let isCurrent = true;
-    setQrLoading(true);
 
-    QRCode.toDataURL(activeNetwork.address, {
-      width: 256,
+    QRCode.toString(activeNetwork.address, {
+      type: 'svg',
       margin: 2,
+      width: 176,
       color: {
         dark: '#18181b', // zinc-900
         light: '#ffffff',
       },
       errorCorrectionLevel: 'M',
     })
-      .then((url) => {
+      .then((svg) => {
         if (isCurrent) {
-          setQrDataUrl(url);
-          setQrLoading(false);
+          setQrSvg(svg);
         }
       })
       .catch((err) => {
-        console.error('Failed to generate local QR code:', err);
-        if (isCurrent) {
-          setQrLoading(false);
-        }
+        console.error('Failed to generate local QR SVG:', err);
       });
 
     return () => {
@@ -162,15 +157,14 @@ export default function DonatePage() {
             {/* QR Code Container (4 cols) */}
             <div className="md:col-span-4 flex flex-col items-center justify-center p-4 rounded-2xl bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 space-y-2">
               <div className="p-2 bg-white rounded-xl shadow-xs border border-zinc-200">
-                {qrLoading || !qrDataUrl ? (
+                {!qrSvg ? (
                   <div className="w-44 h-44 flex items-center justify-center text-xs text-zinc-400">
                     Generating QR...
                   </div>
                 ) : (
-                  <img
-                    src={qrDataUrl}
-                    alt={`QR Code for ${activeNetwork.name} address`}
-                    className="w-44 h-44 block rounded"
+                  <div
+                    className="w-44 h-44 flex items-center justify-center [&>svg]:w-full [&>svg]:h-full"
+                    dangerouslySetInnerHTML={{ __html: qrSvg }}
                   />
                 )}
               </div>

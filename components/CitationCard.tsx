@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { ExternalLink, Copy, Check, Scale, BookOpen, Globe, FileText } from 'lucide-react';
+import { ExternalLink, Copy, Check, Scale, Globe } from 'lucide-react';
 import { DeterministicSourceCitation, SourceCompleteness } from '@/lib/nyayota-ai/types';
 
 interface CitationCardProps {
@@ -11,32 +11,27 @@ interface CitationCardProps {
 
 function getCompletenessBadge(completeness: SourceCompleteness) {
   switch (completeness) {
-    case 'curated-provision':
+    case 'curated-section-subset':
       return {
         label: 'Curated Provision',
         color: 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/20',
       };
-    case 'catalog-metadata':
+    case 'full-statutory-text':
+      return {
+        label: 'Full Statutory Text',
+        color: 'bg-teal-500/10 text-teal-700 dark:text-teal-400 border-teal-500/20',
+      };
+    case 'catalog-metadata-only':
       return {
         label: 'Catalog Metadata',
         color: 'bg-blue-500/10 text-blue-700 dark:text-blue-400 border-blue-500/20',
       };
-    case 'full-statute':
-      return {
-        label: 'Statute Record',
-        color: 'bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/20',
-      };
-    case 'international-treaty':
-      return {
-        label: 'UN Treaty Series',
-        color: 'bg-indigo-500/10 text-indigo-700 dark:text-indigo-400 border-indigo-500/20',
-      };
-    case 'glossary-term':
+    case 'conceptual-definition':
       return {
         label: 'Glossary Definition',
         color: 'bg-purple-500/10 text-purple-700 dark:text-purple-400 border-purple-500/20',
       };
-    case 'procedural-scenario':
+    case 'procedural-guide':
       return {
         label: 'Procedural Roadmap',
         color: 'bg-zinc-200 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 border-zinc-300 dark:border-zinc-700',
@@ -52,7 +47,7 @@ function getCompletenessBadge(completeness: SourceCompleteness) {
 /**
  * Validates that an official URL is genuine and safe to link
  */
-function isVerifiedOfficialUrl(url?: string): boolean {
+export function isVerifiedOfficialUrl(url?: string): boolean {
   if (!url || typeof url !== 'string') return false;
   try {
     const parsed = new URL(url);
@@ -72,7 +67,7 @@ function isVerifiedOfficialUrl(url?: string): boolean {
 
 export function CitationCard({ citation, className = '' }: CitationCardProps) {
   const [copied, setCopied] = useState(false);
-  const badge = getCompletenessBadge(citation.completeness);
+  const badge = getCompletenessBadge(citation.sourceCompleteness);
   const isOfficialVerified = isVerifiedOfficialUrl(citation.officialUrl);
 
   const formatCopyableCitation = () => {
@@ -81,8 +76,8 @@ export function CitationCard({ citation, className = '' }: CitationCardProps) {
     if (citation.identifier) {
       parts.push(citation.identifier);
     }
-    if (citation.actNumber) {
-      parts.push(citation.actNumber);
+    if (citation.officialGazetteRef) {
+      parts.push(citation.officialGazetteRef);
     }
     parts.push(`Jurisdiction: ${citation.jurisdiction}`);
     if (citation.officialUrl && isOfficialVerified) {
@@ -137,17 +132,19 @@ export function CitationCard({ citation, className = '' }: CitationCardProps) {
         </p>
       )}
 
-      {citation.quote && (
+      {citation.verbatimExcerpt && (
         <div className="p-2.5 rounded-xl bg-zinc-50 dark:bg-zinc-900 border border-zinc-200/80 dark:border-zinc-800/80 text-[11px] text-zinc-700 dark:text-zinc-300 font-serif italic">
-          &ldquo;{citation.quote}&rdquo;
+          &ldquo;{citation.verbatimExcerpt.slice(0, 240)}{citation.verbatimExcerpt.length > 240 ? '...' : ''}&rdquo;
         </div>
       )}
 
       <div className="flex flex-wrap items-center justify-between gap-2 pt-1 border-t border-zinc-100 dark:border-zinc-800/60 text-[11px]">
         <div className="text-zinc-500 dark:text-zinc-400">
           <span>Jurisdiction: <strong>{citation.jurisdiction}</strong></span>
-          {citation.actNumber && (
-            <span className="ml-2 font-mono text-zinc-400">({citation.actNumber})</span>
+          {citation.status && (
+            <span className="ml-2 px-1.5 py-0.5 rounded bg-zinc-100 dark:bg-zinc-800 text-[10px] text-zinc-500 font-medium">
+              {citation.status}
+            </span>
           )}
         </div>
 

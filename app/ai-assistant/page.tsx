@@ -580,7 +580,7 @@ Select between two research modes above:
                             </div>
                             {det.crossReferenceMentions.map((cr, idx) => (
                               <p key={idx} className="text-[11px] text-zinc-700 dark:text-zinc-300">
-                                <strong>{cr.referencingProvisionTitle}</strong> ({cr.referencingProvisionIdentifier}) references {cr.targetSectionQuery} in its penalty or procedural clause: <em>&ldquo;{cr.contextQuote}&rdquo;</em>
+                                <strong>{cr.referencingSectionTitle}</strong> ({cr.referencingSection}) in {cr.statuteTitle} references the queried section in its penalty or procedural clause: <em>&ldquo;{cr.context}&rdquo;</em>
                               </p>
                             ))}
                           </div>
@@ -593,8 +593,8 @@ Select between two research modes above:
                               Verified Legal Sources ({det.sources.length})
                             </span>
                             <div className="space-y-2">
-                              {det.sources.map((src) => (
-                                <CitationCard key={src.id} citation={src} />
+                              {det.sources.map((src, srcIdx) => (
+                                <CitationCard key={`${src.sourceId}-${src.identifier || srcIdx}`} citation={src} />
                               ))}
                             </div>
                           </div>

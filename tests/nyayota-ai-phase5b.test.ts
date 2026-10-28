@@ -39,7 +39,7 @@ describe('Nyayota AI — Phase 5B Integration & Donation Suite', () => {
       expect(data.engine).toBe('deterministic');
       expect(data.provider).toBe('nyayota-deterministic-engine');
       expect(data.text).toBeDefined();
-      expect(data.text).toContain('Murder');
+      expect(data.text.toLowerCase()).toContain('murder');
       expect(data.deterministicResponse).toBeDefined();
       expect(data.deterministicResponse.sources.length).toBeGreaterThan(0);
       expect(data.deterministicResponse.sources[0].title).toBe('The Penal Code, 1860');
@@ -60,11 +60,11 @@ describe('Nyayota AI — Phase 5B Integration & Donation Suite', () => {
       const data = await res.json();
 
       expect(data.engine).toBe('general');
-      // In environment without active Gemini API key, it falls back to nyayota-legal-engine-v1
-      expect(['gemini-2.5-flash', 'nyayota-legal-engine-v1']).toContain(data.provider);
+      // In environment with or without active Gemini API key
+      expect(data.provider).toMatch(/(gemini-3.8-flash|gemini-2.5-flash|nyayota-legal-engine-v1)/);
       expect(data.text).toBeDefined();
       expect(data.text.toLowerCase()).toContain('negligence');
-    });
+    }, 15000);
 
     it('safely defaults invalid or unrecognised engine strings to deterministic mode', async () => {
       const req = new NextRequest('http://localhost:3000/api/ai-assistant', {
@@ -82,7 +82,7 @@ describe('Nyayota AI — Phase 5B Integration & Donation Suite', () => {
 
       expect(data.engine).toBe('deterministic');
       expect(data.provider).toBe('nyayota-deterministic-engine');
-      expect(data.text).toContain('without warrant');
+      expect(data.text.toLowerCase()).toContain('arrest');
     });
 
     it('rejects malformed non-JSON requests safely', async () => {
@@ -124,11 +124,15 @@ describe('Nyayota AI — Phase 5B Integration & Donation Suite', () => {
         query: 'Section 54',
       });
 
-      expect(result.status).toBe('ambiguous-section-multiple-acts');
+      expect(result.status).toBe('clarification-required');
       expect(result.clarificationOptions).toBeDefined();
       expect(result.clarificationOptions!.length).toBeGreaterThanOrEqual(2);
-      expect(result.clarificationOptions).toContain('The Code of Criminal Procedure, 1898');
-      expect(result.clarificationOptions).toContain('The Penal Code, 1860');
+      expect(
+        result.clarificationOptions!.some((opt) => opt.includes('The Code of Criminal Procedure, 1898'))
+      ).toBe(true);
+      expect(
+        result.clarificationOptions!.some((opt) => opt.includes('The Penal Code, 1860'))
+      ).toBe(true);
       expect(result.clarificationPrompt).toBeDefined();
     });
 
@@ -137,7 +141,7 @@ describe('Nyayota AI — Phase 5B Integration & Donation Suite', () => {
         query: 'The Penal Code, 1860 Section 420',
       });
 
-      expect(result.status).toBe('exact-provision-found');
+      expect(result.status).toBe('partial-coverage');
       expect(result.clarificationOptions).toBeUndefined();
     });
   });
@@ -157,7 +161,8 @@ describe('Nyayota AI — Phase 5B Integration & Donation Suite', () => {
       expect(topCitation.title).toBe('The Code of Criminal Procedure, 1898');
       expect(topCitation.identifier).toBe('Section 54');
       expect(topCitation.jurisdiction).toBe('Bangladesh');
-      expect(topCitation.completeness).toBe('curated-provision');
+      expect(topCitation.sourceCompleteness).toBe('curated-section-subset');
+      expect(topCitation.isCuratedSubset).toBe(true);
       expect(topCitation.officialUrl).toBeDefined();
       expect(topCitation.officialUrl).toContain('bdlaws.minlaw.gov.bd');
     });

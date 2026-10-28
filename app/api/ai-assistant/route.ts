@@ -308,7 +308,7 @@ CRITICAL OPERATIONAL RULES:
 
         const response = await Promise.race([
           ai.models.generateContent({
-            model: 'gemini-2.5-flash',
+            model: 'gemini-3.8-flash',
             contents,
             config: {
               systemInstruction,
@@ -321,7 +321,7 @@ CRITICAL OPERATIONAL RULES:
         return NextResponse.json(
           {
             text: response.text,
-            provider: 'gemini-2.5-flash',
+            provider: 'gemini-3.8-flash',
             engine: 'general',
             timestamp: new Date().toISOString(),
           },

@@ -95,13 +95,14 @@ The following table reflects the actual implementation status of features verifi
 | **Global Full-Text Search** | Client-side search across statutes, categories, sections, Latin maxims, and keywords with recent search history caching. | `/components/GlobalSearch.tsx`, `/lib/legal-database-engine.ts` | **Implemented** |
 | **Comparative Law Matrix** | Side-by-side comparative analysis of two statutes or international conventions with section diffing and concept alignment. | `/app/compare`, `/lib/legal-data.ts` | **Implemented** |
 | **Legal Outcome Guide** | Practical citizen workflows covering arrest rights, bail, filing an FIR vs. GD, tenancy disputes, cheque dishonor, and labor claims. | `/app/legal-outcome-guide` | **Implemented** |
-| **AI Legal Explainer** | Structured educational statutory queries powered by Google's `@google/genai` (`gemini-3.7-flash`) with prompt isolation. | `/app/api/ai-assistant/route.ts`, `/app/ai-assistant` | **Implemented** |
+| **AI Legal Explainer** | Dual-engine assistant on `/ai-assistant` supporting both **Source-Grounded Legal Research** (deterministic) and **General AI** (Gemini 3.8 Flash). | `/app/api/ai-assistant/route.ts`, `/app/ai-assistant` | **Implemented** |
 | **Heuristic Fallback Engine** | Embedded offline legal reasoning engine providing educational analyses when no `GEMINI_API_KEY` is present. | `/app/api/ai-assistant/route.ts` | **Implemented** |
-| **Deterministic Nyayota AI Engine** | Source-grounded legal retrieval engine, 10-category intent classifier, IPC cross-jurisdiction disambiguation, and deterministic response generator. | `/lib/nyayota-ai/*`, `tests/*` | **Phase 2A, 3 & 4 Implemented (In-Development Core Engine)** |
+| **Deterministic Nyayota AI Engine** | Source-grounded legal retrieval engine, 10-category intent classifier, exact provision matching, anti-substitution guards, interactive clarification cards, and verified citation cards. | `/lib/nyayota-ai/*`, `/components/CitationCard.tsx`, `/components/ClarificationCard.tsx` | **Implemented (Integrated in UI)** |
 | **Bilingual Legal Glossary** | Jurisprudential dictionary containing English legal terms, Bengali definitions, and Latin doctrines (*mens rea*, *habeas corpus*, etc.). | `/app/glossary`, `/components/GlossaryModal.tsx` | **Implemented** |
 | **Standard Legal Citations** | One-click modal generating formatted citations in **Bluebook**, **OSCOLA**, **APA (7th)**, **MLA (9th)**, and **Chicago** standards. | `/components/CitationModal.tsx` | **Implemented** |
 | **Private In-Browser Bookmarks** | Client-side bookmark drawer for saving laws and individual sections directly in `localStorage` without telemetry or accounts. | `/components/BookmarkDrawer.tsx`, `/lib/bookmarks.ts` | **Implemented** |
 | **Source Transparency & Verification** | Modal displaying government source URLs, gazette references, official volumes, and SHA-256 verification hashes. | `/components/SourceVerificationModal.tsx` | **Implemented** |
+| **Voluntary Support & Crypto Donations** | Dedicated transparent donation portal with Bitcoin, Ethereum, and BNB Smart Chain networks, verified copy buttons, offline QR codes, and non-custodial safety reminders. | `/app/donate`, `/lib/donation-config.ts` | **Implemented** |
 | **Print & Export Formatter** | Clean, print-optimized document view with typographic styling for academic and professional reference. | `/components/PrintExportModal.tsx`, `/components/StatutoryPrintDocument.tsx` | **Implemented** |
 | **Theme & Accessibility** | Dual theme (Dark/Light mode) with persistent preference detection, keyboard navigation, and responsive mobile layout. | `/components/ThemeProvider.tsx`, `/app/globals.css` | **Implemented** |
 | **Research Workspace** | In-browser legal research scratchpad for attaching statutory provisions, drafting notes, and compiling references. | `/app/research` | **Implemented** |
@@ -122,7 +123,8 @@ The deployed web application can be accessed at **[https://nyayota.vercel.app](h
 | `/law/[id]` | Full statute reader (e.g. `/law/bd-penal-code-1860`, `/law/bd-constitution-1972`). | [nyayota.vercel.app/law/bd-penal-code-1860](https://nyayota.vercel.app/law/bd-penal-code-1860) |
 | `/compare` | Side-by-side statutory and international convention comparison tool. | [nyayota.vercel.app/compare](https://nyayota.vercel.app/compare) |
 | `/legal-outcome-guide` | Citizen step-by-step guidance on common legal situations and procedural remedies. | [nyayota.vercel.app/legal-outcome-guide](https://nyayota.vercel.app/legal-outcome-guide) |
-| `/ai-assistant` | AI-assisted statutory question answering and plain-language query interface. | [nyayota.vercel.app/ai-assistant](https://nyayota.vercel.app/ai-assistant) |
+| `/ai-assistant` | AI-assisted statutory research interface with dual-mode selector (Source-Grounded vs General AI). | [nyayota.vercel.app/ai-assistant](https://nyayota.vercel.app/ai-assistant) |
+| `/donate` | Voluntary open-source support page with Bitcoin, Ethereum, and BNB Smart Chain options. | [nyayota.vercel.app/donate](https://nyayota.vercel.app/donate) |
 | `/research` | Private client-side research workspace with notes and citation tools. | [nyayota.vercel.app/research](https://nyayota.vercel.app/research) |
 | `/categories` | Categorical legal taxonomy covering 12 distinct branches of law. | [nyayota.vercel.app/categories](https://nyayota.vercel.app/categories) |
 | `/glossary` | Searchable legal terminology and Latin maxims glossary with Bengali translations. | [nyayota.vercel.app/glossary](https://nyayota.vercel.app/glossary) |
@@ -482,6 +484,25 @@ To deploy your own fork to Vercel:
    - `GEMINI_API_KEY`: Your Google Gen AI API key.
    - `APP_URL`: Your custom domain (e.g. `https://your-domain.com`).
 3. Deploy. The default build command (`npm run build`) and output directory will be automatically configured.
+
+---
+
+## Voluntary Support & Cryptocurrency Donations
+
+Nyayota is an independent civic and educational legal research initiative. Voluntary contributions directly fund cloud server infrastructure, automated test suites, and continuous verification of codified legal records.
+
+Donations can be sent via peer-to-peer cryptocurrency transfers directly on the dedicated donation page at **[`/donate`](https://nyayota.vercel.app/donate)**:
+
+| Network | Supported Assets & Standard | Verified Maintainer Wallet Address |
+| :--- | :--- | :--- |
+| **Bitcoin Mainnet** | BTC (Native SegWit / Bech32) | `bc1qczt3r9yhwezgdnvdcl39d093u8ehtt37l44mj5` |
+| **Ethereum Mainnet** | ETH, USDT, USDC, DAI (ERC-20) | `0xD14b56A067Bd9B016415d32Ecc49dd846A06F91E` |
+| **BNB Smart Chain** | BNB, USDT, USDC (BEP-20) | `0xD14b56A067Bd9B016415d32Ecc49dd846A06F91E` |
+
+> **Transparency & Non-Custodial Safety Reminders:**
+> - **Voluntary Support:** Nyayota is not a registered charity or 501(c)(3) entity under any jurisdiction. Voluntary contributions are non-refundable gifts and are not tax-deductible.
+> - **Maintainer Verification:** Wallet addresses are maintainer-supplied configurations for direct blockchain transfers. Nyayota does not store personal financial data, track wallet identities, or use third-party payment processing intermediaries.
+> - **Security Notice:** Nyayota will never ask for your seed phrase, private keys, or wallet passwords. Never connect your wallet to untrusted websites.
 
 ---
 
