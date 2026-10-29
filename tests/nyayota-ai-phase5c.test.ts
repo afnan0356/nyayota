@@ -9,7 +9,7 @@
  * 5. Cryptocurrency donation native asset restrictions and exact addresses
  */
 
-import { describe, it, expect } from 'bun:test';
+import { describe, it, expect, beforeAll, afterAll } from 'bun:test';
 import { POST } from '@/app/api/ai-assistant/route';
 import { NextRequest } from 'next/server';
 import {
@@ -22,6 +22,13 @@ import { executeNyayotaAIPipeline } from '@/lib/nyayota-ai';
 import { isVerifiedOfficialUrl } from '@/components/CitationCard';
 
 describe('Nyayota AI — Phase 5C QA & Safety Suite', () => {
+  beforeAll(() => {
+    process.env.ENABLE_PUBLIC_AI_ASSISTANT = 'true';
+  });
+
+  afterAll(() => {
+    delete process.env.ENABLE_PUBLIC_AI_ASSISTANT;
+  });
 
   // ==========================================================================
   // Group 1: Engine Isolation & Fallback Attribution

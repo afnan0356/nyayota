@@ -5,7 +5,7 @@
  * and Cryptocurrency Donation Configuration & Safety.
  */
 
-import { describe, it, expect } from 'bun:test';
+import { describe, it, expect, beforeAll, afterAll } from 'bun:test';
 import { POST } from '@/app/api/ai-assistant/route';
 import { NextRequest } from 'next/server';
 import {
@@ -18,6 +18,14 @@ import { SUPPORT_DONATION_CONFIG } from '@/components/Footer';
 import { executeNyayotaAIPipeline } from '@/lib/nyayota-ai';
 
 describe('Nyayota AI — Phase 5B Integration & Donation Suite', () => {
+  beforeAll(() => {
+    process.env.ENABLE_PUBLIC_AI_ASSISTANT = 'true';
+  });
+
+  afterAll(() => {
+    delete process.env.ENABLE_PUBLIC_AI_ASSISTANT;
+  });
+
   // ==========================================================================
   // Group 1: Deterministic Engine Integration via API Route
   // ==========================================================================

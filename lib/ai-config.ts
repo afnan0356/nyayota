@@ -7,6 +7,20 @@
 
 export const AI_CONFIG = {
   /**
+   * Public AI Assistant Availability Flag (Server-Controlled).
+   * 
+   * Defaults to false in all deployed environments.
+   * When false:
+   * - /api/ai-assistant returns HTTP 503 Service Unavailable immediately.
+   * - Neither Gemini nor the deterministic pipeline executes.
+   * - No client query parameter, header, or payload can bypass this flag.
+   * - The underlying legal AI engine, retrieval engine, and tests remain intact for internal development.
+   */
+  get isPublicAssistantAvailable(): boolean {
+    return process.env.ENABLE_PUBLIC_AI_ASSISTANT === 'true';
+  },
+
+  /**
    * Gemini model identifier.
    * Default active model: 'gemini-3.8-flash' (verified active in Google GenAI environment)
    * or can be set via GEMINI_MODEL env var for runtime portability.
@@ -36,23 +50,23 @@ export const AI_CONFIG = {
    * Differentiated sliding-window rate limiting thresholds per client IP.
    */
   rateLimits: {
-    /**
-     * General AI mode (Gemini-backed):
-     * Lower limit to prevent upstream API quota exhaustion and token billing abuse.
-     */
     general: {
       windowMs: 60 * 1000, // 60 seconds
       maxRequests: 15,
     },
-    /**
-     * Deterministic Source-Grounded Legal Research mode:
-     * Higher limit since execution is local TypeScript computation with zero external API costs.
-     */
     deterministic: {
       windowMs: 60 * 1000, // 60 seconds
       maxRequests: 30,
     },
   },
-} as const;
+
+  /**
+   * Maintenance response payload for suspended public assistant.
+   */
+  maintenanceResponse: {
+    error: 'assistant_temporarily_unavailable',
+    message: 'The Nyayota Legal Assistant is under development. Please try again later.',
+  },
+};
 
 export type AssistantEngineType = 'deterministic' | 'general';
