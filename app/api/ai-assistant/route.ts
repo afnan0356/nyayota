@@ -1,6 +1,7 @@
 import { GoogleGenAI } from '@google/genai';
 import { NextRequest, NextResponse } from 'next/server';
 import { executeNyayotaAIPipeline } from '@/lib/nyayota-ai';
+import { AI_CONFIG, AssistantEngineType } from '@/lib/ai-config';
 
 export interface ChatMessage {
   role: 'user' | 'assistant' | 'system';
@@ -9,66 +10,96 @@ export interface ChatMessage {
 
 // ---------------------------------------------------------------------------
 // Rate Limiting Architecture & Serverless Deployment Note:
-// In-memory sliding-window rate limiter (20 requests per 60 seconds per client IP).
-// Note: In serverless environments (such as Vercel), each cold-started function instance
-// maintains its own in-memory state. While a multi-instance production environment
-// at scale would use an external distributed low-latency store (e.g. Upstash Redis),
-// this per-instance sliding-window limiter prevents single-container flooding and
+// Differentiated in-memory sliding-window rate limiter:
+// - General AI Mode (Gemini): 15 requests per 60 seconds (prevents API quota exhaustion)
+// - Deterministic Mode (Nyayota): 30 requests per 60 seconds (local TypeScript execution)
+//
+// Architectural Limitations & Low-Budget Production Hardening:
+// In serverless environments (such as Vercel), each ephemeral function container
+// maintains its own in-memory state. Under high horizontal concurrency, separate
+// container instances do not share memory.
+//
+// Production Mitigations:
+// 1. Zero-Cost / Low-Budget Layer: Cloudflare WAF Free Tier (Edge rate limiting
+//    rules enforced before requests reach Vercel origin).
+// 2. Shared State Layer: Upstash Redis (Serverless Redis free tier with 10k daily
+//    commands, providing global atomic token-bucket synchronization across all containers).
+//
+// This per-instance sliding-window limiter prevents single-container flooding and
 // runaway token exhaustion without requiring paid external infrastructure.
 // ---------------------------------------------------------------------------
 interface RateLimitRecord {
   timestamps: number[];
 }
 const rateLimitMap = new Map<string, RateLimitRecord>();
-const RATE_LIMIT_WINDOW_MS = 60 * 1000; // 60 seconds
-const MAX_REQUESTS_PER_WINDOW = 20;
 
-function checkRateLimit(clientIp: string): { allowed: boolean; remaining: number } {
+function checkDifferentiatedRateLimit(
+  clientIp: string,
+  engine: AssistantEngineType
+): { allowed: boolean; remaining: number; limit: number } {
+  const config = engine === 'general' ? AI_CONFIG.rateLimits.general : AI_CONFIG.rateLimits.deterministic;
   const now = Date.now();
-  const record = rateLimitMap.get(clientIp) || { timestamps: [] };
+  const rateLimitKey = `${engine}:${clientIp}`;
+  const record = rateLimitMap.get(rateLimitKey) || { timestamps: [] };
 
   // Retain only timestamps within the sliding window
-  const activeTimestamps = record.timestamps.filter((ts) => now - ts < RATE_LIMIT_WINDOW_MS);
+  const activeTimestamps = record.timestamps.filter((ts) => now - ts < config.windowMs);
 
-  if (activeTimestamps.length >= MAX_REQUESTS_PER_WINDOW) {
-    rateLimitMap.set(clientIp, { timestamps: activeTimestamps });
-    return { allowed: false, remaining: 0 };
+  if (activeTimestamps.length >= config.maxRequests) {
+    rateLimitMap.set(rateLimitKey, { timestamps: activeTimestamps });
+    return { allowed: false, remaining: 0, limit: config.maxRequests };
   }
 
   activeTimestamps.push(now);
-  rateLimitMap.set(clientIp, { timestamps: activeTimestamps });
+  rateLimitMap.set(rateLimitKey, { timestamps: activeTimestamps });
 
   // Periodically clean stale entries to prevent memory buildup in warm containers
-  if (rateLimitMap.size > 1500) {
+  if (rateLimitMap.size > 2000) {
     for (const [key, val] of rateLimitMap.entries()) {
-      if (val.timestamps.every((t) => now - t >= RATE_LIMIT_WINDOW_MS)) {
+      if (val.timestamps.every((t) => now - t >= 60000)) {
         rateLimitMap.delete(key);
       }
     }
   }
 
-  return { allowed: true, remaining: MAX_REQUESTS_PER_WINDOW - activeTimestamps.length };
+  return {
+    allowed: true,
+    remaining: config.maxRequests - activeTimestamps.length,
+    limit: config.maxRequests,
+  };
 }
 
 // Safely extract client IP respecting edge proxies without blind header trust
 function getClientIp(req: NextRequest): string {
+  const sanitizeIp = (raw: string | null | undefined): string | null => {
+    if (!raw) return null;
+    let ip = raw.split(',')[0].trim();
+    // Strip IPv4 port if present
+    if (/^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}:\d+$/.test(ip)) {
+      ip = ip.split(':')[0];
+    }
+    // Strip IPv6 square brackets if present
+    if (ip.startsWith('[') && ip.includes(']')) {
+      ip = ip.replace(/[\[\]]/g, '').split(':')[0];
+    }
+    // Verify safe IP characters
+    if (/^[0-9a-fA-F:.]+$/.test(ip) && ip.length <= 45) {
+      return ip;
+    }
+    return null;
+  };
+
   // 1. Vercel Edge / Serverless trusted header
-  const vercelIp = req.headers.get('x-vercel-forwarded-for');
-  if (vercelIp) {
-    const candidate = vercelIp.split(',')[0].trim();
-    if (candidate) return candidate;
-  }
+  const vercelIp = sanitizeIp(req.headers.get('x-vercel-forwarded-for'));
+  if (vercelIp) return vercelIp;
 
   // 2. Standard X-Real-IP
-  const realIp = req.headers.get('x-real-ip');
-  if (realIp && realIp.trim()) return realIp.trim();
+  const realIp = sanitizeIp(req.headers.get('x-real-ip'));
+  if (realIp) return realIp;
 
   // 3. X-Forwarded-For: take first IP in proxy chain, sanitize
-  const forwarded = req.headers.get('x-forwarded-for');
-  if (forwarded) {
-    const candidate = forwarded.split(',')[0].trim();
-    if (candidate) return candidate;
-  }
+  const forwarded = sanitizeIp(req.headers.get('x-forwarded-for'));
+  if (forwarded) return forwarded;
 
   return '127.0.0.1';
 }
@@ -98,28 +129,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // 3. Client IP extraction and sliding-window rate limiting
-    const clientIp = getClientIp(req);
-    const rateLimit = checkRateLimit(clientIp);
-    if (!rateLimit.allowed) {
-      return NextResponse.json(
-        {
-          error: 'Rate limit exceeded. Please wait a moment before sending additional legal inquiries.',
-          retryAfterSeconds: 60,
-        },
-        {
-          status: 429,
-          headers: {
-            ...SECURITY_HEADERS,
-            'Retry-After': '60',
-            'X-RateLimit-Limit': String(MAX_REQUESTS_PER_WINDOW),
-            'X-RateLimit-Remaining': '0',
-          },
-        }
-      );
-    }
-
-    // 4. Safe body parsing
+    // 3. Safe body parsing
     let body;
     try {
       body = await req.json();
@@ -181,11 +191,34 @@ export async function POST(req: NextRequest) {
       body.assistantMode === 'general' ||
       body.engine === 'gemini';
 
-    const selectedEngine: 'deterministic' | 'general' = isExplicitGeneral
+    const selectedEngine: AssistantEngineType = isExplicitGeneral
       ? 'general'
       : isExplicitDeterministic
       ? 'deterministic'
       : 'deterministic'; // Default to deterministic source-grounded research for Nyayota
+
+    // Enforce differentiated rate limits per engine mode
+    const clientIp = getClientIp(req);
+    const rateLimit = checkDifferentiatedRateLimit(clientIp, selectedEngine);
+    if (!rateLimit.allowed) {
+      return NextResponse.json(
+        {
+          error: selectedEngine === 'general'
+            ? 'General AI assistant rate limit exceeded (15 requests/min). Please wait a moment before sending additional queries, or switch to Source-Grounded Legal Research.'
+            : 'Legal research rate limit exceeded (30 requests/min). Please wait a moment before sending additional inquiries.',
+          retryAfterSeconds: 60,
+        },
+        {
+          status: 429,
+          headers: {
+            ...SECURITY_HEADERS,
+            'Retry-After': '60',
+            'X-RateLimit-Limit': String(rateLimit.limit),
+            'X-RateLimit-Remaining': '0',
+          },
+        }
+      );
+    }
 
     // -------------------------------------------------------------------------
     // Deterministic Source-Grounded Legal Pipeline (Zero External AI dependency)
@@ -210,7 +243,7 @@ export async function POST(req: NextRequest) {
           {
             headers: {
               ...SECURITY_HEADERS,
-              'X-RateLimit-Limit': String(MAX_REQUESTS_PER_WINDOW),
+              'X-RateLimit-Limit': String(rateLimit.limit),
               'X-RateLimit-Remaining': String(rateLimit.remaining),
             },
           }
@@ -301,18 +334,23 @@ CRITICAL OPERATIONAL RULES:
           parts: [{ text: userPrompt }]
         });
 
-        // Upstream 12-second timeout race to prevent hanging requests
+        // Upstream generation timeout race to prevent hanging requests
         const timeoutPromise = new Promise<never>((_, reject) =>
-          setTimeout(() => reject(new Error('AI upstream generation request timed out after 12 seconds')), 12000)
+          setTimeout(
+            () => reject(new Error(`AI upstream generation request timed out after ${AI_CONFIG.timeoutMs / 1000} seconds`)),
+            AI_CONFIG.timeoutMs
+          )
         );
 
         const response = await Promise.race([
           ai.models.generateContent({
-            model: 'gemini-3.8-flash',
+            model: AI_CONFIG.model,
             contents,
             config: {
               systemInstruction,
-              temperature: 0.25,
+              temperature: AI_CONFIG.generationConfig.temperature,
+              topK: AI_CONFIG.generationConfig.topK,
+              topP: AI_CONFIG.generationConfig.topP,
             },
           }),
           timeoutPromise,
@@ -321,14 +359,14 @@ CRITICAL OPERATIONAL RULES:
         return NextResponse.json(
           {
             text: response.text,
-            provider: 'gemini-3.8-flash',
+            provider: AI_CONFIG.model,
             engine: 'general',
             timestamp: new Date().toISOString(),
           },
           {
             headers: {
               ...SECURITY_HEADERS,
-              'X-RateLimit-Limit': String(MAX_REQUESTS_PER_WINDOW),
+              'X-RateLimit-Limit': String(rateLimit.limit),
               'X-RateLimit-Remaining': String(rateLimit.remaining),
             },
           }
@@ -352,7 +390,7 @@ CRITICAL OPERATIONAL RULES:
       {
         headers: {
           ...SECURITY_HEADERS,
-          'X-RateLimit-Limit': String(MAX_REQUESTS_PER_WINDOW),
+          'X-RateLimit-Limit': String(rateLimit.limit),
           'X-RateLimit-Remaining': String(rateLimit.remaining),
         },
       }

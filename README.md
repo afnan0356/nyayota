@@ -284,9 +284,10 @@ Nyayota is architected to keep all credentials securely on the server side. **Ne
 ```text
 nyayota/
 ├── .env.example                     # Sample template for environment variables
-├── .eslintrc.json                   # ESLint configuration rules
-├── .gitignore                       # Git ignore list (node_modules, .env*, .next)
-├── eslint.config.mjs                # Modern flat ESLint configuration
+├── .gitignore                       # Git ignore list (node_modules, .env*, .next, .aistudio)
+├── CONTRIBUTING.md                  # Contribution standards & statutory curation rules
+├── SECURITY.md                      # Security disclosure policy & vulnerability contact
+├── eslint.config.mjs                # Modern flat ESLint configuration (ESLint 9)
 ├── metadata.json                    # Application metadata & platform capabilities
 ├── next.config.ts                   # Next.js compiler, image, and route configuration
 ├── package.json                     # Package dependencies, scripts, and engine specs
@@ -300,7 +301,7 @@ nyayota/
 │   │
 │   ├── about/                       # Platform background, mission, and editorial standards
 │   ├── accessibility/               # WCAG compliance statement & accessibility guide
-│   ├── ai-assistant/                # Interactive AI Legal Explainer interface
+│   ├── ai-assistant/                # Dual-engine assistant (Deterministic + General AI)
 │   ├── bangladesh-laws/             # Filterable chronological Bangladesh Code catalog
 │   ├── categories/                  # 12 primary legal subject matter category indexes
 │   ├── category/[slug]/             # Category-specific filtered law listings
@@ -309,6 +310,7 @@ nyayota/
 │   ├── contact/                     # Platform feedback and editorial inquiries
 │   ├── disclaimer/                  # Legal terms of use and non-representation disclosure
 │   ├── discover/                    # Exploratory thematic statute discovery
+│   ├── donate/                      # Non-custodial cryptocurrency donation page
 │   ├── glossary/                    # Searchable bilingual legal terms dictionary
 │   ├── international-laws/          # Multilateral treaties and UN conventions catalog
 │   ├── knowledge-paths/             # Guided legal learning modules
@@ -322,11 +324,13 @@ nyayota/
 │   │
 │   └── api/
 │       └── ai-assistant/
-│           └── route.ts             # POST handler: Gemini 3.7 Flash API + offline engine
+│           └── route.ts             # POST handler: Differentiated rate limiting, Gemini Flash + deterministic pipeline
 │
 ├── components/                      # Reusable React UI Components
 │   ├── BookmarkDrawer.tsx           # Slide-out drawer for saved client-side bookmarks
+│   ├── CitationCard.tsx             # Interactive source cards for verified statutory citations
 │   ├── CitationModal.tsx            # Formatter for Bluebook, OSCOLA, APA, MLA, Chicago
+│   ├── ClarificationCard.tsx        # Disambiguation selection cards for multi-act sections
 │   ├── Footer.tsx                   # Global footer with navigation links & disclaimers
 │   ├── GlobalSearch.tsx             # Modal search dialog with keyboard shortcut (Cmd/Ctrl+K)
 │   ├── GlossaryModal.tsx            # Quick modal popover for legal terms & Latin maxims
@@ -341,12 +345,14 @@ nyayota/
 │   └── ThemeProvider.tsx            # Client-side Dark/Light theme state provider
 │
 ├── lib/                             # Core Business Logic, Data Schemas & Catalogs
+│   ├── ai-config.ts                 # Centralized Gemini model config, timeouts, and rate limits
 │   ├── architecture.ts              # Universal data models for jurisdictions and acts
 │   ├── bdcode-architecture.ts       # Bangladesh Code volumes (I–XXXVIII) and legislative eras
 │   ├── bdcode-catalog.ts            # Central registry aggregating all Bangladesh laws
 │   ├── bdcode-importer.ts           # Statutory ingestion helpers and validation utilities
 │   ├── bdcode-search.ts             # Fuzzy and keyword search engine for Bangladesh acts
 │   ├── bookmarks.ts                 # LocalStorage persistence helpers for saved sections
+│   ├── donation-config.ts           # Verified cryptocurrency wallet addresses and networks
 │   ├── international-law-architecture.ts # UN & multilateral treaty schemas
 │   ├── international-law-data.ts    # Database of international conventions (UDHR, VCLT, ICCPR)
 │   ├── legal-data.ts                # Master enriched statutory records and category mappings
@@ -356,14 +362,28 @@ nyayota/
 │   ├── search-history.ts            # Recent search terms persistence helpers
 │   ├── utils.ts                     # Utility functions (cn helper combining clsx + twMerge)
 │   │
-│   └── bdcode-data/                 # Modularized Bangladesh Statutory Datasets
-│       ├── constitutional-criminal.ts   # Constitution, Penal Code, CrPC, Children Act, etc.
-│       ├── civil-family-property.ts     # CPC, Contract Act, Muslim Family Laws, Property Act
-│       ├── commercial-banking-tax.ts    # Companies Act, NI Act, Banking, Customs, Tax
-│       └── environment-admin-local-cyber.ts # Cyber Security, Environment, RTI, Labor Act
+│   ├── bdcode-data/                 # Modularized Bangladesh Statutory Datasets
+│   │   ├── constitutional-criminal.ts   # Constitution, Penal Code, CrPC, Children Act, etc.
+│   │   ├── civil-family-property.ts     # CPC, Contract Act, Muslim Family Laws, Property Act
+│   │   ├── commercial-banking-tax.ts    # Companies Act, NI Act, Banking, Customs, Tax
+│   │   └── environment-admin-local-cyber.ts # Cyber Security, Environment, RTI, Labor Act
+│   │
+│   └── nyayota-ai/                  # Deterministic Legal Research Engine
+│       ├── types.ts                 # Strongly typed intent, routing, and citation types
+│       ├── intent-classifier.ts     # 10-category deterministic intent classification
+│       ├── query-router.ts          # Safe routing paths & anti-hallucination barriers
+│       ├── retrieval-engine.ts      # Exact provision lookup & disambiguation matching
+│       ├── response-generator.ts    # Source-grounded legal explanation generator
+│       ├── service.ts               # Resilient end-to-end integration boundary
+│       └── index.ts                 # Public module barrel export
 │
-├── hooks/                           # Custom React Hooks
-│   └── useSearchHistory.ts          # Hook for retrieving and clearing local search history
+├── tests/                           # Automated Verification & Evaluation Suites
+│   ├── nyayota-ai-retrieval.test.ts # Retrieval precision and section matching tests
+│   ├── nyayota-ai-router.test.ts    # Intent classification and routing barrier tests
+│   ├── nyayota-ai-generator.test.ts # Source-grounded explanation generation tests
+│   ├── nyayota-ai-service.test.ts   # Service pipeline integration & timeout tests
+│   ├── nyayota-ai-evaluation.test.ts# 50-query golden benchmark evaluation suite
+│   └── nyayota-ai-phase5c.test.ts   # Edge security, donation safety & QA tests
 │
 └── public/                          # Static assets and repository media
     └── images/
@@ -375,9 +395,9 @@ nyayota/
 
 ## Legal Content, Integrity & Verification
 
-Because legal information directly impacts citizens' rights, procedures, and understanding of the law, Nyayota enforces strict documentation and transparency standards.
+Because legal information directly impacts citizens' rights, procedures, and understanding of the law, Nyayota enforces strict documentation, transparency, and architectural distinctions between computational integrity and legal authenticity.
 
-### Primary Sources & Authentication
+### Primary Sources & Statutory Grounding
 
 All statutory records included in Nyayota are grounded in authentic primary sources published by competent legislative bodies:
 
@@ -389,9 +409,26 @@ All statutory records included in Nyayota are grounded in authentic primary sour
    - **Primary Depositary:** Office of Legal Affairs, United Nations (*United Nations Treaty Collection — UNTS*).
    - **Treaty Series Reference:** Certified depositary texts published in the *United Nations Treaty Series (U.N.T.S.)*.
 
-### Editorial Boundaries & Translation Integrity
+### Cryptographic File Integrity vs. Statutory Legal Authenticity
 
-To preserve legal accuracy, Nyayota explicitly differentiates between levels of content:
+To prevent misunderstanding regarding our verification systems:
+
+| Verification Layer | Nature & Mechanism | What It Proves | What It Does NOT Prove |
+| :--- | :--- | :--- | :--- |
+| **`checksumSha256`** | Cryptographic hash (SHA-256) of local JSON/TypeScript baseline dataset strings. | **Local Data Integrity:** Proves that local repository data files have not suffered accidental software corruption, unintended line deletions, or unauthorized tampering during deployment. | **Does NOT prove statutory legal authenticity.** Only official government gazettes carry statutory force of law. |
+| **`lastVerifiedDate`** | ISO timestamp recording maintainer review against the government portal. | **Editorial Recency:** Confirms when maintainers last cross-referenced the record against `bdlaws.minlaw.gov.bd`. | **Does NOT guarantee real-time reflection** of newly passed emergency ordinances or ungazetted amendments. |
+| **`officialGazetteCitation`** | Formal legislative enactment citation (e.g. Act XLV of 1860). | **Historical Pedigree:** Identifies the formal parent Act and historical volume in *The Bangladesh Code*. | Must be read in conjunction with subsequent amending Acts listed in `lastAmendmentAct`. |
+
+### Curated Educational Corpus vs. Complete Statute Books
+
+Nyayota is designed as a **curated educational research platform**, not an exhaustive replacement for the full archival government statute books:
+- High-impact statutes (such as the Penal Code 1860, Code of Criminal Procedure 1898, Code of Civil Procedure 1908, Contract Act 1872, and Constitution of Bangladesh 1972) are indexed with their foundational, frequently cited sections, landmark doctrines, and procedural workflows.
+- Nyayota does **not** claim 100% complete digital transcription of every procedural subsection or repealed schedule.
+- When a user queries a valid statute for a section that is not yet digitized in Nyayota's curated subset, the deterministic engine explicitly clarifies that the section is *outside the curated database* and provides an authenticated direct link to the full official statute on `bdlaws.minlaw.gov.bd`.
+
+### Editorial Boundaries & Content Layers
+
+Nyayota strictly separates authoritative law from educational commentary:
 
 ```text
 [Authentic Primary Source Text] ──> Exact statutory language enacted by the legislature
@@ -400,22 +437,12 @@ To preserve legal accuracy, Nyayota explicitly differentiates between levels of 
              │
              ├──> [Editorial Summaries]   ──> Curated plain-language breakdowns ("Explain like I'm 15")
              │
-             └──> [AI Interpretations]    ──> Machine-generated educational explanations
+             └──> [AI Explanations]       ──> Machine-generated educational explanations
 ```
 
 - **Official Statutory Text:** Exact verbatim transcriptions of codified sections, preserving section numbers, statutory headings, and original provisions.
-- **Plain-Language Explanations:** Non-authoritative educational paraphrasing clearly delineated from the official statutory text to assist non-lawyers.
+- **Plain-Language Explanations:** Non-authoritative educational paraphrasing clearly delineated from official statutory text.
 - **Translations:** Official Bengali titles (*দণ্ডবিধি*, *ফৌজদারি কার্যবিধি*) and provisions are drawn directly from official government gazettes or Ministry of Law publications.
-
-### Cryptographic Content Integrity
-
-Each major law in the repository includes metadata fields verifying its source authenticity:
-- `checksumSha256`: Cryptographic hash of the baseline statutory text to detect accidental drift or corruption during repository updates.
-- `lastVerifiedDate`: ISO timestamp recording when the record was last cross-referenced against the official government portal.
-- `officialGazetteCitation`: Exact gazette publication date and enactment number.
-- `integrityStatus`: Indicates whether the statute is `fully-verified`, `provisional`, or `curated-subset`.
-
-Readers and maintainers can inspect these details at any time by clicking the **Source & Gazette Verification** button on any statute detail page.
 
 ---
 
@@ -423,19 +450,30 @@ Readers and maintainers can inspect these details at any time by clicking the **
 
 ### Zero Telemetry & Client-Side Privacy
 
-- **No Remote User Database:** Nyayota does not operate a user database.
+- **No Remote User Database:** Nyayota does not operate a user database or store user profiles.
 - **Local Storage:** Research notes, bookmarks, dark/light theme preferences, and search queries reside exclusively within the user's browser `window.localStorage`.
 - **Zero Third-Party Ad Trackers:** The platform does not incorporate commercial tracking beacons or behavioral advertising scripts.
 
-### Responsible AI Implementation
+### Centralized AI Configuration & Model Architecture
 
-The AI Legal Explainer feature is designed with the following safeguards:
+All external AI integrations are centralized within `lib/ai-config.ts`:
+- **Configured Model:** Default model is set to `gemini-3.8-flash` via `@google/genai` (standard Google GenAI model in AI Studio runtime), with support for runtime override via the `GEMINI_MODEL` environment variable.
+- **Execution Separation:**
+  1. **Source-Grounded Legal Research Mode:** Powered entirely by Nyayota's deterministic TypeScript retrieval pipeline (`lib/nyayota-ai/`). Executes with zero external API calls, zero token consumption, deterministic citations, and anti-hallucination barriers.
+  2. **General AI Assistant Mode:** Powered by Google Gemini via server-side `@google/genai` SDK for conceptual legal explanations and comparative inquiries.
 
-1. **Server-Side API Key Isolation:** Calls to the Gemini API are executed strictly within the Next.js server runtime (`/app/api/ai-assistant/route.ts`). The `GEMINI_API_KEY` is never transmitted to the client browser.
-2. **Strict System Instructions:** The prompt forces the model into an educational, objective persona. It is instructed to reject requests for strategic litigation advice, refuse guarantees of court rulings, and mandate consultations with licensed advocates.
-3. **Statutory Context Injection:** When a user queries from a specific law page, the exact statutory title, category, and section text are injected into the prompt context to prevent hallucination.
-4. **Offline Deterministic Fallback:** In the absence of an API key, an internal heuristic rule engine provides educational statutory breakdowns without failing or exposing errors to the user.
-5. **No Confidential Data Submission:** Users are explicitly advised on-screen not to input sensitive personal data, active case numbers, confidential documents, or personally identifiable information into the assistant.
+### Differentiated Rate Limiting & Abuse Protection
+
+The assistant API route (`app/api/ai-assistant/route.ts`) implements multi-layered defensive safeguards:
+- **Strict Content-Type Check:** Rejects non-JSON payloads with HTTP 415.
+- **Size Bounds:** Capped at 32 KB payload size, 1,500 characters per query, and 8,000 characters total conversation history.
+- **Timeout Protection:** External upstream calls race against a 12-second timeout to prevent hanging serverless invocations.
+- **Differentiated Sliding-Window Rate Limiter:**
+  - *General AI Mode:* 15 requests per 60 seconds per IP (protects upstream API quota).
+  - *Deterministic Legal Mode:* 30 requests per 60 seconds per IP (allows high-throughput civic research).
+  - *Sanitized IP Extraction:* Handles edge proxies (`x-vercel-forwarded-for`, `x-real-ip`, `x-forwarded-for`), strips IPv4/IPv6 ports, and validates against malicious injection.
+- **Serverless Architectural Consideration:** In-memory sliding windows operate per serverless container instance. For high-volume production deployments, zero-cost edge rate limiting via Cloudflare WAF or serverless token-bucket synchronization via Upstash Redis (free tier) is recommended.
+- **Security Policy:** For vulnerability reporting, see our [`SECURITY.md`](SECURITY.md) (contact: `nyayota.contact@gmail.com`).
 
 ---
 
@@ -510,7 +548,9 @@ Donations can be sent via peer-to-peer cryptocurrency transfers directly on the 
 
 Contributions to Nyayota are welcomed, particularly in verifying statutory accuracy, expanding codified sections, improving accessibility, and adding bilingual translations.
 
-### How to Contribute
+For full contribution standards, data verification criteria, and environment rules, see our dedicated **[`CONTRIBUTING.md`](CONTRIBUTING.md)** guide.
+
+### Quick Contribution Steps
 
 1. **Fork the Repository:** Create a fork on GitHub at `https://github.com/afnan0356/nyayota`.
 2. **Create a Feature Branch:**
@@ -525,11 +565,12 @@ Contributions to Nyayota are welcomed, particularly in verifying statutory accur
 4. **Validate Your Changes:**
    Run the test suite, linter, and production build before submitting:
    ```bash
-   npm test        # or bun test
-   npm run lint
-   npm run build
+   npm test        # or bun test (119 automated tests)
+   npm run lint    # ESLint flat config
+   npm run build   # Next.js production compilation
    ```
 5. **Submit a Pull Request:** Provide a descriptive pull request title detailing the exact statutes or components modified, along with primary source links.
+6. **Security Reports:** For security concerns or vulnerability disclosures, follow the instructions in **[`SECURITY.md`](SECURITY.md)** rather than opening public GitHub issues.
 
 ---
 

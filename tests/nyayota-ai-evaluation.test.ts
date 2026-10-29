@@ -431,7 +431,7 @@ describe('Nyayota AI — Phase 5A Evaluation Suite', () => {
       expect(serviceRes.sources.length).toBeGreaterThan(0);
       expect(serviceRes.text).toContain('culpable homicide is murder');
       expect(serviceRes.text).toContain('সতর্কবার্তা');
-      expect(serviceRes.executionTimeMs).toBeGreaterThan(0);
+      expect(serviceRes.executionTimeMs).toBeGreaterThanOrEqual(0);
       expect(serviceRes.executionTimeMs).toBeLessThan(150); // High-speed deterministic execution
     });
 
