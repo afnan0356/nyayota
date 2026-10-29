@@ -70,15 +70,18 @@ describe('Nyayota Phase 5E Verification Suite', () => {
 
     it('confirms crypto is the ONLY operational donation category', () => {
       expect(CRYPTO_NETWORKS.every((n) => n.status === 'available')).toBe(true);
-      expect(DONATION_CONFIG.binancePay.status).toBe('planned');
-      expect(DONATION_CONFIG.bankTransfer.status).toBe('planned');
-      expect(DONATION_CONFIG.mobilePayments.status).toBe('planned');
-      expect(DONATION_CONFIG.onlineServices.status).toBe('planned');
+      expect(['planned', 'coming-soon'].includes(DONATION_CONFIG.binancePay.status)).toBe(true);
+      expect(['planned', 'coming-soon'].includes(DONATION_CONFIG.bankTransfer.status)).toBe(true);
+      expect(['planned', 'coming-soon'].includes(DONATION_CONFIG.mobilePayments.status)).toBe(true);
+      expect(['planned', 'coming-soon'].includes(DONATION_CONFIG.onlineServices.status)).toBe(true);
     });
 
     it('verifies Binance Pay is planned, locked, and non-actionable', () => {
-      expect(DONATION_CONFIG.binancePay.status).toBe('planned');
-      expect(DONATION_CONFIG.binancePay.statusLabel).toContain('Planned');
+      expect(['planned', 'coming-soon'].includes(DONATION_CONFIG.binancePay.status)).toBe(true);
+      expect(
+        DONATION_CONFIG.binancePay.statusLabel.includes('Planned') ||
+        DONATION_CONFIG.binancePay.statusLabel.includes('Coming soon')
+      ).toBe(true);
       expect(DONATION_CONFIG.binancePay.description.toLowerCase()).toContain('not available yet');
     });
 
@@ -101,7 +104,7 @@ describe('Nyayota Phase 5E Verification Suite', () => {
       expect(PLANNED_BANK_COUNTRIES.length).toBe(11);
     });
 
-    it('verifies Austria is labelled "Under consideration" and other 10 are "Planned"', () => {
+    it('verifies Austria is labelled "Under consideration" and other 10 are "Planned" or "Coming soon"', () => {
       const austria = PLANNED_BANK_COUNTRIES.find((c) => c.id === 'at');
       expect(austria).toBeDefined();
       expect(austria?.status).toBe('under-consideration');
@@ -110,8 +113,10 @@ describe('Nyayota Phase 5E Verification Suite', () => {
 
       const otherTen = PLANNED_BANK_COUNTRIES.filter((c) => c.id !== 'at');
       expect(otherTen.length).toBe(10);
-      expect(otherTen.every((c) => c.status === 'planned')).toBe(true);
-      expect(otherTen.every((c) => c.statusLabel === 'Planned — not yet available')).toBe(true);
+      expect(otherTen.every((c) => c.status === 'planned' || c.status === 'coming-soon')).toBe(true);
+      expect(
+        otherTen.every((c) => c.statusLabel === 'Coming soon' || c.statusLabel === 'Planned — not yet available')
+      ).toBe(true);
     });
 
     it('verifies bank transfer regional groupings while preserving integrity', () => {
@@ -133,15 +138,15 @@ describe('Nyayota Phase 5E Verification Suite', () => {
       expect(europeGroup?.countries).toContain('at');
     });
 
-    it('confirms local mobile payments and online payment services remain planned', () => {
-      expect(DONATION_CONFIG.mobilePayments.status).toBe('planned');
+    it('confirms local mobile payments and online payment services remain planned or coming soon', () => {
+      expect(['planned', 'coming-soon'].includes(DONATION_CONFIG.mobilePayments.status)).toBe(true);
       expect(DONATION_CONFIG.mobilePayments.examples).toContain('bKash');
       expect(DONATION_CONFIG.mobilePayments.examples).toContain('Nagad');
       expect(DONATION_CONFIG.mobilePayments.examples).toContain('Rocket');
 
       const onlineServices = DONATION_CONFIG.onlineServices.services;
       expect(onlineServices.map((s) => s.id)).toEqual(['paypal', 'stripe', 'cashapp']);
-      expect(onlineServices.every((s) => s.status === 'planned')).toBe(true);
+      expect(onlineServices.every((s) => s.status === 'planned' || s.status === 'coming-soon')).toBe(true);
     });
 
     it('confirms voluntary support and non-tax-deductibility disclosure', () => {

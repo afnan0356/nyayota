@@ -12,7 +12,9 @@ import {
   ShieldCheck,
   Building2,
   GraduationCap,
-  FileCheck
+  FileCheck,
+  Phone,
+  Lock
 } from 'lucide-react';
 
 export default function ContactPage() {
@@ -315,6 +317,28 @@ ${formData.message.trim()}`;
                   </div>
                   <p className="text-[11px] text-zinc-500">
                     If you detect a gazette amendment or section typo, cite the gazette number and section in your message for immediate verification.
+                  </p>
+                </div>
+              </div>
+
+              {/* Phone Support (Planned / Non-operational) */}
+              <div
+                id="contact-phone-support-card"
+                className="p-3.5 rounded-xl bg-zinc-50 dark:bg-zinc-950/40 border border-zinc-200 dark:border-zinc-800/80 flex items-start space-x-3 opacity-80"
+              >
+                <div className="w-8 h-8 rounded-lg bg-zinc-200 dark:bg-zinc-800 text-zinc-400 flex items-center justify-center shrink-0">
+                  <Phone className="w-4 h-4" />
+                </div>
+                <div className="space-y-0.5 flex-1">
+                  <div className="flex items-center space-x-2">
+                    <strong className="text-zinc-700 dark:text-zinc-300 block">Phone Support</strong>
+                    <span className="inline-flex items-center space-x-1 text-[9px] px-1.5 py-0.2 rounded bg-zinc-200 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 font-semibold border border-zinc-300 dark:border-zinc-700">
+                      <Lock className="w-2.5 h-2.5" />
+                      <span>Coming soon</span>
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-zinc-500 leading-relaxed">
+                    Phone support is planned for a future update. No phone contact number is currently available.
                   </p>
                 </div>
               </div>
