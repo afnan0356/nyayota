@@ -152,8 +152,9 @@ export function CitationCard({ citation, className = '' }: CitationCardProps) {
           <button
             type="button"
             onClick={handleCopy}
-            className="inline-flex items-center space-x-1 px-2.5 py-1 rounded-lg bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 text-zinc-700 dark:text-zinc-300 font-medium transition-colors"
+            className="inline-flex items-center space-x-1 px-2.5 py-1 rounded-lg bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 text-zinc-700 dark:text-zinc-300 font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-amber-500/50"
             title="Copy plain citation string"
+            aria-label={`Copy citation for ${citation.title}${citation.identifier ? ` ${citation.identifier}` : ''}`}
           >
             {copied ? (
               <>
@@ -173,8 +174,9 @@ export function CitationCard({ citation, className = '' }: CitationCardProps) {
               href={citation.officialUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center space-x-1 px-2.5 py-1 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 text-amber-700 dark:text-amber-400 font-medium border border-amber-500/20 transition-colors"
+              className="inline-flex items-center space-x-1 px-2.5 py-1 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 text-amber-700 dark:text-amber-400 font-medium border border-amber-500/20 transition-colors focus:outline-none focus:ring-2 focus:ring-amber-500/50"
               title="Open verified government/treaty source in new tab"
+              aria-label={`Open verified official source for ${citation.title} in new tab`}
             >
               <span>Official Source</span>
               <ExternalLink className="w-3 h-3" />

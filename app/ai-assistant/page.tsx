@@ -47,6 +47,7 @@ interface ChatMessageItem {
   timestamp: string;
   lawContextTitle?: string;
   engine?: 'deterministic' | 'general';
+  provider?: string;
   deterministicResponse?: NyayotaAIServiceResponse;
 }
 
@@ -78,10 +79,11 @@ function AIAssistantContent() {
       id: 'welcome-msg',
       role: 'assistant',
       engine: 'deterministic',
+      provider: 'nyayota-deterministic-engine',
       content: `### Welcome to Nyayota AI Legal Knowledge Assistant ⚖️
 
 Select between two research modes above:
-1. **Source-Grounded Legal Research (Deterministic):** Fast, traceable legal answers grounded exclusively in verified Bangladesh statutes and UN treaties stored in this repository. Zero external AI hallucinations.
+1. **Source-Grounded Legal Research (Deterministic):** Uses deterministic retrieval from Nyayota's indexed legal sources. Results remain limited by source coverage, data accuracy, and the completeness of the indexed corpus.
 2. **General AI Assistant (Gemini):** Broad conversational legal explainer for conceptual analogies, hypothetical fact scenarios, and cross-disciplinary legal context.
 
 *Educational Information Only — Not Legal Advice. Nyayota is designed for educational exploration, academic research, and public legal literacy.*`,
@@ -180,6 +182,7 @@ Select between two research modes above:
         content: data.text || 'Unable to analyze the legal query at this moment. Please check your query.',
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
         engine: data.engine || assistantEngine,
+        provider: data.provider,
         deterministicResponse: data.deterministicResponse,
       };
 
@@ -211,6 +214,7 @@ Select between two research modes above:
         id: `welcome-${Date.now()}`,
         role: 'assistant',
         engine: assistantEngine,
+        provider: assistantEngine === 'deterministic' ? 'nyayota-deterministic-engine' : undefined,
         content: `### New Legal Research Session Started ⚖️\n\nCurrent Engine: **${
           assistantEngine === 'deterministic'
             ? 'Source-Grounded Legal Research (Deterministic)'
@@ -309,7 +313,7 @@ Select between two research modes above:
               </span>
             </div>
             <p className="text-xs text-zinc-600 dark:text-zinc-400 leading-relaxed">
-              Fast, deterministic retrieval powered strictly by in-repo Bangladesh statutes, Bangladesh Code catalogs, and UN treaties. Zero external AI hallucinations.
+              Uses deterministic retrieval from Nyayota&apos;s indexed legal sources. Results remain limited by source coverage, data accuracy, and the completeness of the indexed corpus.
             </p>
             <p className="text-[11px] text-zinc-500 dark:text-zinc-500 mt-2 font-mono">
               • Anti-substitution guards • Verified source citations • Disambiguation
@@ -527,11 +531,20 @@ Select between two research modes above:
                     {/* Engine Identifier Badge for Assistant Responses */}
                     {!isUser && (
                       <div className="flex items-center justify-between gap-2 pb-2 border-b border-zinc-200 dark:border-zinc-800 text-[10px]">
-                        <span className="font-bold uppercase tracking-wider text-zinc-500">
-                          {msg.engine === 'deterministic'
-                            ? 'Source-Grounded Response'
-                            : 'General AI Assistant Response'}
-                        </span>
+                        <div className="flex items-center space-x-2">
+                          <span className="font-bold uppercase tracking-wider text-zinc-500">
+                            {msg.engine === 'deterministic'
+                              ? 'Source-Grounded Response'
+                              : msg.provider === 'nyayota-legal-engine-v1'
+                              ? 'General AI Mode • Heuristic Fallback Analysis'
+                              : 'General AI Assistant (Gemini)'}
+                          </span>
+                          {msg.provider === 'nyayota-legal-engine-v1' && (
+                            <span className="px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-600 dark:text-amber-400 font-semibold text-[9px] border border-amber-500/20">
+                              Offline Fallback
+                            </span>
+                          )}
+                        </div>
                         {det && (
                           <span className="px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-700 dark:text-amber-400 font-semibold font-mono">
                             {det.executionTimeMs}ms • {det.detectedJurisdiction}

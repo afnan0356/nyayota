@@ -225,9 +225,13 @@ export async function executeNyayotaAIPipeline(
 
   // 2. Incorporate Contextual Hints if query doesn't specify an Act but lawContext exists
   let effectiveQuery = cleanQuery;
-  if (request.lawContext?.title && !/(act|code|penal|crpc|cpc|constitution|দণ্ডবিধি|কার্যবিধি|সংবিধান)/i.test(cleanQuery)) {
+  if (
+    typeof request.lawContext?.title === 'string' &&
+    request.lawContext.title.trim().length > 0 &&
+    !/(act|code|penal|crpc|cpc|constitution|দণ্ডবিধি|কার্যবিধি|সংবিধান)/i.test(cleanQuery)
+  ) {
     // If user queried only a section (e.g. "Section 300" while viewing The Penal Code)
-    effectiveQuery = `${cleanQuery} (${request.lawContext.title})`;
+    effectiveQuery = `${cleanQuery} (${request.lawContext.title.trim()})`;
   }
 
   // 3. Configure Pipeline Options

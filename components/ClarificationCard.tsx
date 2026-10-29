@@ -64,7 +64,8 @@ export function ClarificationCard({
                 disabled={isLoading}
                 id={`clarification-option-btn-${idx}`}
                 onClick={() => onSelectOption(scopedQuery)}
-                className="p-3 rounded-xl bg-white dark:bg-zinc-900 hover:bg-amber-500/15 dark:hover:bg-amber-500/15 border border-zinc-200 dark:border-zinc-800 hover:border-amber-500/60 text-left transition-all group flex items-center justify-between shadow-xs disabled:opacity-50"
+                aria-label={`Research ${option}`}
+                className="p-3 rounded-xl bg-white dark:bg-zinc-900 hover:bg-amber-500/15 dark:hover:bg-amber-500/15 border border-zinc-200 dark:border-zinc-800 hover:border-amber-500/60 text-left transition-all group flex items-center justify-between shadow-xs disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-amber-500"
               >
                 <div className="flex items-center space-x-2">
                   <Scale className="w-4 h-4 text-amber-500 shrink-0 group-hover:scale-110 transition-transform" />

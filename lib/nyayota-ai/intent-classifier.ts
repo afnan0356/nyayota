@@ -86,8 +86,8 @@ const GREETING_REGEX = /^(hello|hi|hey|greetings|good morning|good afternoon|goo
 // Nyayota Platform Help & Support Patterns
 const NYAYOTA_HELP_REGEX = /\b(nyayota|what is nyayota|how to use nyayota|how does this site work|report an? (error|bug|mistake)|contact email|support email|who built nyayota|how to cite|how to bookmark|what languages|supported languages|contact us|contact team)\b|ন্যায়তা কি|ন্যায়তা কিভাবে ব্যবহার করব|ভুল রিপোর্ট|যোগাযোগ|ইমেইল|ভাষা সমর্থন|সাইট কিভাবে কাজ করে/i;
 
-// Out of Scope (Coding, Weather, General Trivia, Food)
-const OUT_OF_SCOPE_REGEX = /\b(python|javascript|typescript|react|html|css|sql query|write code|write a function|weather|temperature|forecast|recipe|biryani|messi|ronaldo|world cup|capital of france|who is the president of|solve the equation|quantum physics|calculate|movie review)\b|আবহাওয়া|রান্নার রেসিপি|কোডিং|প্রোগ্রামিং|জাভাস্ক্রিপ্ট/i;
+// Out of Scope (Coding, Weather, General Trivia, Food, Culinary)
+const OUT_OF_SCOPE_REGEX = /\b(python|javascript|typescript|react|html|css|sql query|write code|write a function|weather|temperature|forecast|recipe|bake|baking|cookie|cookies|chocolate|cooking|food|biryani|messi|ronaldo|world cup|capital of france|who is the president of|solve the equation|quantum physics|calculate|movie review)\b|আবহাওয়া|রান্নার রেসিপি|কোডিং|প্রোগ্রামিং|জাভাস্ক্রিপ্ট/i;
 
 // Direct Legal Provision Reference (Section / Article / Order / Rule)
 const SECTION_OR_ARTICLE_EXTRACT_REGEX = /(?:^|[\s,.:;?!])(?:section|sec\.?|s\.|article|art\.?|order|rule|ধারা|অনুচ্ছেদ|অর্ডার|বিধি)\s*(\d+[a-z]?)(?:$|[\s,.:;?!])/i;

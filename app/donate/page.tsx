@@ -8,13 +8,12 @@ import {
   Check,
   AlertTriangle,
   ShieldCheck,
-  ExternalLink,
   QrCode,
   Info,
-  Scale,
   ArrowLeft,
   Lock,
-  Wallet
+  Wallet,
+  Coins
 } from 'lucide-react';
 import QRCode from 'qrcode';
 import {
@@ -84,7 +83,8 @@ export default function DonatePage() {
       <div>
         <Link
           href="/"
-          className="inline-flex items-center space-x-1.5 text-xs font-semibold text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors"
+          className="inline-flex items-center space-x-1.5 text-xs font-semibold text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors focus:outline-none focus:ring-2 focus:ring-amber-500/50 rounded-lg px-1.5 py-0.5"
+          aria-label="Back to home page"
         >
           <ArrowLeft className="w-3.5 h-3.5" />
           <span>Back to Home</span>
@@ -109,19 +109,25 @@ export default function DonatePage() {
       <div className="rounded-3xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-sm p-6 sm:p-8 space-y-8">
         {/* Network Selector Tabs */}
         <div className="space-y-3">
-          <label className="text-xs font-bold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
-            1. Select Cryptocurrency Network
+          <label id="network-selector-label" className="text-xs font-bold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
+            1. Select Cryptocurrency Network & Native Asset
           </label>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div
+            role="radiogroup"
+            aria-labelledby="network-selector-label"
+            className="grid grid-cols-1 sm:grid-cols-3 gap-3"
+          >
             {CRYPTO_NETWORKS.map((network) => {
               const isSelected = network.id === selectedNetworkId;
               return (
                 <button
                   key={network.id}
                   type="button"
+                  role="radio"
+                  aria-checked={isSelected}
                   id={`crypto-network-tab-${network.id}`}
                   onClick={() => setSelectedNetworkId(network.id)}
-                  className={`p-4 rounded-2xl border text-left transition-all ${
+                  className={`p-4 rounded-2xl border text-left transition-all focus:outline-none focus:ring-2 focus:ring-amber-500 ${
                     isSelected
                       ? 'bg-amber-500/10 border-amber-500 text-zinc-900 dark:text-white shadow-xs ring-1 ring-amber-500'
                       : 'bg-zinc-50 dark:bg-zinc-950 border-zinc-200 dark:border-zinc-800 text-zinc-700 dark:text-zinc-300 hover:border-zinc-300 dark:hover:border-zinc-700'
@@ -130,7 +136,7 @@ export default function DonatePage() {
                   <div className="flex items-center justify-between mb-1">
                     <span className="font-bold text-sm">{network.name}</span>
                     <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-zinc-200 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 font-semibold">
-                      {network.ticker}
+                      {network.nativeAsset}
                     </span>
                   </div>
                   <p className="text-xs text-zinc-500 dark:text-zinc-400">
@@ -144,12 +150,12 @@ export default function DonatePage() {
 
         {/* Selected Network Address & QR Code */}
         <div className="space-y-4 pt-2">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-wrap items-center justify-between gap-2">
             <label className="text-xs font-bold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
               2. Transfer Address for {activeNetwork.name}
             </label>
-            <span className="text-xs font-medium text-amber-600 dark:text-amber-400">
-              Network: {activeNetwork.networkName}
+            <span className="text-xs font-semibold px-2.5 py-0.5 rounded-md bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-500/20 font-mono">
+              Network: {activeNetwork.networkName} • Recommended: {activeNetwork.recommendedAssets}
             </span>
           </div>
 
@@ -170,8 +176,11 @@ export default function DonatePage() {
               </div>
               <div className="flex items-center space-x-1 text-[11px] text-zinc-500">
                 <QrCode className="w-3.5 h-3.5" />
-                <span>Scan with compatible wallet</span>
+                <span>Raw Address QR Code</span>
               </div>
+              <p className="text-[10px] text-zinc-400 dark:text-zinc-500 text-center leading-tight max-w-[200px]">
+                Encodes receiving address string only. Does not auto-configure network ID.
+              </p>
             </div>
 
             {/* Address & Copy Action (8 cols) */}
@@ -198,7 +207,8 @@ export default function DonatePage() {
                     type="button"
                     id={`crypto-copy-btn-${activeNetwork.id}`}
                     onClick={() => handleCopy(activeNetwork.address)}
-                    className="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-zinc-950 font-bold text-xs inline-flex items-center space-x-2 transition-all shadow-xs"
+                    className="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-zinc-950 font-bold text-xs inline-flex items-center space-x-2 transition-all shadow-xs focus:outline-none focus:ring-2 focus:ring-amber-500/50"
+                    aria-label={`Copy ${activeNetwork.name} address to clipboard`}
                   >
                     {copiedAddress === activeNetwork.address ? (
                       <>
