@@ -77,8 +77,8 @@ export function routeConversationalQuery(
       const ref = detected.resolvedContext;
 
       if (ref && ref.isResolved) {
-        if (ref.referenceType === 'simplification') {
-          // Simplification of prior answer does not require fresh retrieval
+        if (ref.referenceType === 'simplification' || ref.referenceType === 'jurisdiction_scope') {
+          // Simplification or jurisdiction scope explanation does not require fresh statutory retrieval
           shouldRetrieve = false;
         } else {
           // Follow-up on punishment, exception, age condition, or section comparison
@@ -107,7 +107,15 @@ export function routeConversationalQuery(
       clarificationReason = detected.reason;
 
       // Build natural, context-appropriate clarification question
-      if (detected.resolvedContext && detected.resolvedContext.referenceType === 'punishment') {
+      if (detected.resolvedContext?.isAmbiguousMultiReference && detected.resolvedContext.competingReferences) {
+        const refs = detected.resolvedContext.competingReferences;
+        const refNames = refs.map((r) => r.sectionOrArticle || r.actTitle).filter(Boolean);
+        clarificationPrompt =
+          language === 'bn'
+            ? `আপনি পূর্বে ${refNames.join(' এবং ')} নিয়ে আলোচনা করেছেন। আপনি কোনটির বিষয়ে বিস্তারিত জানতে চাচ্ছেন?`
+            : `You recently discussed both ${refNames.join(' and ')}. Which provision would you like to explore?`;
+        clarificationOptions = refNames.map((n) => `Explore ${n}`);
+      } else if (detected.resolvedContext && detected.resolvedContext.referenceType === 'punishment') {
         clarificationPrompt =
           language === 'bn'
             ? 'আপনি কোন অপরাধ বা আইনের শাস্তির কথা জানতে চাচ্ছেন? যেমন: দণ্ডবিধি ধারা ৩০২ (হত্যা) বা ধারা ৩৮০ (চুরি)।'

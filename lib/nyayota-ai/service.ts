@@ -279,7 +279,15 @@ export async function executeNyayotaAIPipeline(
         : convDecision.intent === 'ambiguous_request'
         ? 'clarification_needed'
         : 'legal_concept',
-      detectedJurisdiction: 'Bangladesh',
+      detectedJurisdiction: (convContext.activeJurisdiction === 'International'
+        ? 'International'
+        : convContext.activeJurisdiction === 'India'
+        ? 'India'
+        : convContext.activeJurisdiction === 'unknown'
+        ? 'unknown'
+        : convContext.activeJurisdiction === 'Other' || convContext.activeJurisdiction === 'United Kingdom' || convContext.activeJurisdiction === 'United States'
+        ? 'unclear'
+        : 'Bangladesh') as DetectedJurisdiction,
       sources: [],
       limitations: [],
       clarificationPrompt: convResponse.clarificationPrompt,

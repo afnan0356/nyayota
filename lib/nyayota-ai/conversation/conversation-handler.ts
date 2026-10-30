@@ -249,6 +249,42 @@ To explore specific codified provisions in Bangladesh, you can query enactments 
     }
 
     case 'legal_follow_up': {
+      if (decision.resolvedContext?.referenceType === 'jurisdiction_scope') {
+        return {
+          headline: 'Jurisdictional Scope & International Application',
+          headlineBn: 'আইনের ভৌগোলিক এখতিয়ার ও আন্তর্জাতিক প্রয়োগ',
+          summary: 'Territorial jurisdiction of Bangladesh law and international treaty mechanisms.',
+          summaryBn: 'বাংলাদেশ আইনের ভৌগোলিক এখতিয়ার ও আন্তর্জাতিক চুক্তির প্রয়োগসীমা।',
+          text: `### Territorial Jurisdiction & International Application
+
+1. **Territorial Jurisdiction (সীমানাভিত্তিক এখতিয়ার):**
+   Statutes codified by the Parliament of Bangladesh (such as *The Penal Code, 1860* and *The Code of Criminal Procedure, 1898*) generally apply within the sovereign territory, territorial waters, and airspace of Bangladesh.
+
+2. **Extraterritorial Jurisdiction (বিদেশে অবস্থানরত নাগরিক):**
+   Under Sections 3 and 4 of the Penal Code, Bangladeshi citizens committing offenses outside Bangladesh may still be tried under Bangladesh law upon their return or through extradition treaties.
+
+3. **International Treaties & Conventions:**
+   Multilateral instruments (such as the *UDHR*, *ICCPR*, and *CEDAW*) establish universal human rights norms. In Bangladesh jurisprudence, international treaties require domestic enabling legislation passed by Parliament to become directly enforceable in municipal courts.
+
+4. **Foreign Domestic Laws:**
+   Nyayota currently indexes Bangladesh statutory law and selected international human rights treaties. For foreign domestic statutes (e.g. UK, US, Indian, or Canadian local laws), Nyayota does not maintain official statutory gazettes.`,
+          textBn: `### আইনের ভৌগোলিক এখতিয়ার ও আন্তর্জাতিক প্রয়োগ
+
+১. **আঞ্চলিক বা অভ্যন্তরীণ এখতিয়ার:**
+   বাংলাদেশ জাতীয় সংসদ কর্তৃক প্রণীত আইনসমূহ (যেমন: *দণ্ডবিধি, ১৮৬০* এবং *ফৌজদারি কার্যবিধি, ১৮৯৮*) মূলত বাংলাদেশের ভৌগোলিক সীমানা, জলসীমা ও আকাশসীমার মধ্যে কার্যকর।
+
+২. **বিদেশে অপরাধের বিচার (অতিরিক্ত এখতিয়ার):**
+   দণ্ডবিধির ৩ ও ৪ ধারা অনুযায়ী, কোনো বাংলাদেশি নাগরিক বিদেশে অবস্থানকালে কোনো অপরাধ সংঘটন করলে দেশে ফেরত আসার পর বা প্রত্যর্পণ চুক্তির আওতায় বাংলাদেশে তার বিচার করা যেতে পারে।
+
+৩. **আন্তর্জাতিক চুক্তি ও সনদ:**
+   আন্তর্জাতিক মানবাধিকার সনদসমূহ (যেমন: UDHR, ICCPR) বৈশ্বিক মানদণ্ড নির্ধারণ করে। তবে বাংলাদেশের প্রচলিত আদালতে তা কার্যকর করতে জাতীয় সংসদ কর্তৃক স্থানীয় আইন প্রণয়ন করা আবশ্যক।
+
+৪. **বিদেশি স্থানীয় আইন:**
+   ন্যায়তা বর্তমানে বাংলাদেশের সংবিধিবদ্ধ আইন এবং প্রধান আন্তর্জাতিক সনদসমূহ সূচিত করে। অন্যান্য দেশের অভ্যন্তরীণ স্থানীয় আইনের জন্য ন্যায়তায় আনুষ্ঠানিক সরকারি গেজেট সংরক্ষিত নেই।`,
+          disclaimer: EDUCATIONAL_DISCLAIMER_EN,
+        };
+      }
+
       // Simplification of prior turn
       const prevSummary = context.lastResponseSummary || 'the previous statutory explanation';
       return {

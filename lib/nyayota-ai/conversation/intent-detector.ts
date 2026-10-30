@@ -145,14 +145,15 @@ export function detectConversationalIntent(
       };
     }
 
-    // If query has follow-up form or ambiguous standalone wording but NO prior context exists
-    matchedPatterns.push('ambiguous_missing_antecedent');
+    // If query has follow-up form or ambiguous standalone wording but NO prior context exists OR ambiguous comparison
+    const ambiguityTag = resolved.isAmbiguousMultiReference ? 'ambiguous_multi_reference' : 'ambiguous_missing_antecedent';
+    matchedPatterns.push(ambiguityTag);
     return {
       intent: 'ambiguous_request',
       confidence: 0.9,
       resolvedContext: resolved,
       matchedPatterns,
-      reason: 'Query is an elliptical follow-up or underspecified question, but no prior context exists to anchor it.',
+      reason: resolved.resolutionNote || 'Query is an elliptical follow-up or underspecified question, but no clear antecedent exists.',
     };
   }
 

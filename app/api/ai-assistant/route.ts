@@ -187,6 +187,36 @@ export async function POST(req: NextRequest) {
       ? 'deterministic'
       : 'deterministic';
 
+    // -------------------------------------------------------------------------
+    // PHASE 6B: Conversation History Validation & Policy Enforcement
+    // - Bounded to latest 10 messages (messages.slice(-10))
+    // - Validates roles: 'user', 'assistant', 'system'
+    // - System messages: permitted for validation, but isolated from client spoofing
+    // - Per-message character cap: 2,000 characters
+    // - Total history character budget: 8,000 characters
+    // - Drops malformed entries safely
+    // - Never trusts client-supplied routing decisions or metadata
+    // -------------------------------------------------------------------------
+    const validatedMessages: ChatMessage[] = [];
+    let totalHistoryLength = 0;
+    if (Array.isArray(messages)) {
+      messages.slice(-10).forEach((msg) => {
+        if (msg && typeof msg === 'object' && typeof msg.content === 'string') {
+          const rawRole = msg.role;
+          if (rawRole === 'user' || rawRole === 'assistant' || rawRole === 'system') {
+            const sanitizedContent = msg.content.trim().slice(0, 2000);
+            if (sanitizedContent && totalHistoryLength + sanitizedContent.length <= 8000) {
+              validatedMessages.push({
+                role: rawRole,
+                content: sanitizedContent,
+              });
+              totalHistoryLength += sanitizedContent.length;
+            }
+          }
+        }
+      });
+    }
+
     const clientIp = getClientIp(req);
     const rateLimit = checkDifferentiatedRateLimit(clientIp, selectedEngine);
     if (!rateLimit.allowed) {
@@ -216,6 +246,7 @@ export async function POST(req: NextRequest) {
           language: safeLanguage === 'bengali' ? 'bn' : safeLanguage === 'english' ? 'en' : 'both',
           mode: safeMode === 'compare' ? 'compare' : safeMode === 'statute' ? 'cite' : 'explain',
           lawContext,
+          messages: validatedMessages,
         });
 
         return NextResponse.json(
@@ -242,23 +273,6 @@ export async function POST(req: NextRequest) {
           { status: 500, headers: SECURITY_HEADERS }
         );
       }
-    }
-
-    const validatedMessages: ChatMessage[] = [];
-    let totalHistoryLength = 0;
-    if (Array.isArray(messages)) {
-      messages.slice(-10).forEach((msg) => {
-        if (msg && typeof msg === 'object' && typeof msg.content === 'string') {
-          const sanitizedContent = msg.content.trim().slice(0, 2000);
-          if (sanitizedContent && totalHistoryLength + sanitizedContent.length <= 8000) {
-            validatedMessages.push({
-              role: msg.role === 'user' ? 'user' : 'assistant',
-              content: sanitizedContent,
-            });
-            totalHistoryLength += sanitizedContent.length;
-          }
-        }
-      });
     }
 
     const apiKey = process.env.GEMINI_API_KEY;

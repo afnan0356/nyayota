@@ -37,6 +37,20 @@ export type ResponseMode =
 export type LanguageDetected = 'en' | 'bn' | 'banglish';
 
 /**
+ * Supported legal jurisdictions in conversational tracking.
+ * Nyayota currently indexes Bangladesh statutes and International treaties/declarations,
+ * with architecture designed to support progressive multi-jurisdiction expansion.
+ */
+export type LegalJurisdiction =
+  | 'Bangladesh'
+  | 'International'
+  | 'India'
+  | 'United Kingdom'
+  | 'United States'
+  | 'Other'
+  | 'unknown';
+
+/**
  * Single turn in conversational history
  */
 export interface ConversationMessage {
@@ -46,12 +60,42 @@ export interface ConversationMessage {
   identifiedAct?: string;
   identifiedSection?: string;
   identifiedTopic?: string;
+  identifiedJurisdiction?: LegalJurisdiction;
   retrievedSources?: Array<{
     title: string;
     identifier?: string;
     sourceId: string;
     url?: string;
   }>;
+}
+
+/**
+ * Structured legal reference tracked in conversation context
+ */
+export interface TrackedLegalReference {
+  /** Title of the Act, Code, or Treaty */
+  actTitle?: string;
+
+  /** Internal statutory ID if matched to an in-repo record */
+  actId?: string;
+
+  /** Section, Article, or Rule number (e.g. "Section 302", "Article 102") */
+  sectionOrArticle?: string;
+
+  /** Extracted topic or doctrine (e.g. "murder", "bail", "writ") */
+  topic?: string;
+
+  /** Legal jurisdiction */
+  jurisdiction: LegalJurisdiction;
+
+  /** Zero-based turn index in the bounded messages array where this reference appeared */
+  turnIndex: number;
+
+  /** Role of this reference in the conversation */
+  role: 'primary' | 'compared' | 'mentioned';
+
+  /** Verified sources cited by assistant for this reference */
+  citedSources?: DeterministicSourceCitation[];
 }
 
 /**
@@ -69,15 +113,31 @@ export interface ConversationContext {
     id?: string;
     title: string;
     shortTitle?: string;
+    jurisdiction?: LegalJurisdiction;
   };
 
   /** Previously identified Section, Article, or Rule (e.g. "Section 302") */
   activeSection?: string;
 
-  /** Established legal jurisdiction (default "Bangladesh") */
-  activeJurisdiction?: 'Bangladesh' | 'International' | 'India' | 'unknown';
+  /** Established legal jurisdiction */
+  activeJurisdiction: LegalJurisdiction;
 
-  /** Sources cited in the immediately preceding assistant response */
+  /** Primary active legal reference */
+  activeReference?: TrackedLegalReference;
+
+  /** Secondary reference if a comparison was previously requested */
+  comparedReference?: TrackedLegalReference;
+
+  /** All legal references discovered across the conversation history */
+  legalReferences: TrackedLegalReference[];
+
+  /** Whether the conversation is currently in an active comparison between multiple provisions */
+  isMultiReferenceComparison?: boolean;
+
+  /** References requiring clarification if an ambiguous pronoun was used */
+  ambiguousReferences?: TrackedLegalReference[];
+
+  /** Sources cited in the immediately preceding assistant response (strictly validated) */
   lastRetrievedSources?: DeterministicSourceCitation[];
 
   /** Summary or key content of last assistant message */
@@ -104,18 +164,25 @@ export interface ResolvedContext {
   resolvedSection?: string;
 
   /** Target jurisdiction */
-  resolvedJurisdiction?: string;
+  resolvedJurisdiction?: LegalJurisdiction;
 
   /** Type of reference detected */
   referenceType:
-    | 'pronoun'          // "it", "that", "this law", "ঐ আইন"
-    | 'punishment'       // "what about punishment?", "its punishment", "শাস্তি কি?"
-    | 'exception'        // "are there exceptions?", "what exceptions?", "ব্যতিক্রম"
-    | 'simplification'   // "explain simply", "in plain English", "সহজ করে বলুন"
-    | 'age_condition'    // "if under 18", "minor", "শিশু হলে কি হবে"
-    | 'comparison'       // "compare with previous", "আগের ধারার সাথে তুলনা"
-    | 'continuation'     // general follow-up continuation
+    | 'pronoun'            // "it", "that", "this law", "ঐ আইন"
+    | 'punishment'         // "what about punishment?", "its punishment", "এর শাস্তি কী?"
+    | 'exception'          // "are there exceptions?", "what exceptions?", "ব্যতিক্রম"
+    | 'simplification'     // "explain simply", "in plain English", "সহজ করে বলুন"
+    | 'age_condition'      // "if under 18", "minor", "শিশু হলে কি হবে"
+    | 'comparison'         // "compare with previous", "আগের ধারার সাথে তুলনা"
+    | 'jurisdiction_scope' // "does this apply internationally?", "what about other countries?"
+    | 'continuation'       // general follow-up continuation
     | 'none';
+
+  /** Whether an ambiguous reference between multiple compared provisions was detected */
+  isAmbiguousMultiReference?: boolean;
+
+  /** Competing references that caused the ambiguity */
+  competingReferences?: TrackedLegalReference[];
 
   /** Synthesized effective search query combining resolved context */
   synthesizedQuery?: string;
