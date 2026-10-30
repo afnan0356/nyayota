@@ -10,3 +10,4 @@ export * from './intent-classifier';
 export * from './query-router';
 export * from './response-generator';
 export * from './service';
+export * from './conversation';

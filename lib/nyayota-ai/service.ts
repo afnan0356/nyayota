@@ -25,6 +25,12 @@ import {
 } from './types';
 import { routeQuery, RoutingOptions } from './query-router';
 import { generateResponseFromRoute } from './response-generator';
+import {
+  buildConversationContext,
+  routeConversationalQuery,
+  handleConversationalTurn,
+  RoutingDecision,
+} from './conversation';
 
 // ============================================================================
 // Service Contracts & Payload Definitions
@@ -143,6 +149,9 @@ export interface NyayotaAIServiceResponse {
 
   /** Validation errors or warnings if any occurred */
   validationErrors?: string[];
+
+  /** Structured conversational routing decision (Phase 6A) */
+  conversationalRouting?: RoutingDecision;
 }
 
 // ============================================================================
@@ -223,9 +232,71 @@ export async function executeNyayotaAIPipeline(
     return fallbackResponse;
   }
 
-  // 2. Incorporate Contextual Hints if query doesn't specify an Act but lawContext exists
-  let effectiveQuery = cleanQuery;
+  // 2. Build Bounded Conversation Context & Conversational Routing (Phase 6A)
+  const convContext = buildConversationContext(request.messages, request.lawContext);
+  const convDecision = routeConversationalQuery(cleanQuery, convContext);
+
+  // If Conversational Routing determines legal retrieval should NOT be executed
+  // (e.g. casual greeting, pleasantry, platform question, broad general legal philosophy, or out of scope)
+  if (!convDecision.shouldRetrieve) {
+    const convResponse = handleConversationalTurn(convDecision, convContext);
+    const targetLanguage = request.language || (request.mode === 'bangla' ? 'bn' : 'both');
+
+    let primaryText = convResponse.text;
+    if (targetLanguage === 'bn' && convResponse.textBn) {
+      primaryText = convResponse.textBn;
+    } else if (targetLanguage === 'both' && convResponse.textBn) {
+      primaryText = `${convResponse.text}\n\n---\n\n${convResponse.textBn}`;
+    }
+
+    if (convResponse.disclaimer) {
+      primaryText += `\n\n---\n*${convResponse.disclaimer}*`;
+    }
+
+    const executionTimeMs = Date.now() - startTime;
+
+    return {
+      success: true,
+      query: cleanQuery,
+      normalizedQuery: convDecision.normalizedQuery,
+      text: primaryText,
+      textBn: convResponse.textBn,
+      headline: convResponse.headline,
+      headlineBn: convResponse.headlineBn,
+      summary: convResponse.summary,
+      summaryBn: convResponse.summaryBn,
+      status: convDecision.responseMode === 'clarification'
+        ? 'clarification-required'
+        : convDecision.responseMode === 'out_of_scope'
+        ? 'out-of-scope'
+        : 'conversational',
+      detectedIntent: convDecision.intent === 'casual_conversation'
+        ? 'greeting'
+        : convDecision.intent === 'platform_question'
+        ? 'nyayota_help'
+        : convDecision.intent === 'out_of_scope'
+        ? 'out_of_scope'
+        : convDecision.intent === 'ambiguous_request'
+        ? 'clarification_needed'
+        : 'legal_concept',
+      detectedJurisdiction: 'Bangladesh',
+      sources: [],
+      limitations: [],
+      clarificationPrompt: convResponse.clarificationPrompt,
+      clarificationOptions: convResponse.clarificationOptions,
+      disclaimer: convResponse.disclaimer,
+      disclaimerBn: targetLanguage === 'bn' || targetLanguage === 'both' ? 'সতর্কবার্তা: ন্যায়তা শিক্ষামূলক আইনি গবেষণার জন্য।' : undefined,
+      generatedAt: new Date().toISOString(),
+      executionTimeMs,
+      validationErrors: validationErrors.length > 0 ? validationErrors : undefined,
+      conversationalRouting: convDecision,
+    };
+  }
+
+  // 3. If Retrieval IS Required (legal_research or context-resolved legal_follow_up)
+  let effectiveQuery = convDecision.effectiveRetrievalQuery || cleanQuery;
   if (
+    effectiveQuery === cleanQuery &&
     typeof request.lawContext?.title === 'string' &&
     request.lawContext.title.trim().length > 0 &&
     !/(act|code|penal|crpc|cpc|constitution|দণ্ডবিধি|কার্যবিধি|সংবিধান)/i.test(cleanQuery)
@@ -234,7 +305,7 @@ export async function executeNyayotaAIPipeline(
     effectiveQuery = `${cleanQuery} (${request.lawContext.title.trim()})`;
   }
 
-  // 3. Configure Pipeline Options
+  // 4. Configure Pipeline Options
   const targetLanguage = request.language || (request.mode === 'bangla' ? 'bn' : 'both');
   const routingOptions: RoutingOptions = {
     limit: request.options?.limit || 8,
@@ -243,10 +314,10 @@ export async function executeNyayotaAIPipeline(
     includeCatalogRecords: request.options?.includeCatalogRecords ?? true,
   };
 
-  // 4. Execute Intent Classification & Deterministic Routing
+  // 5. Execute Intent Classification & Deterministic Routing
   const route = await routeQuery(effectiveQuery, routingOptions);
 
-  // 5. Generate Source-Grounded Deterministic Response
+  // 6. Generate Source-Grounded Deterministic Response
   const genResponse: DeterministicLegalResponse = generateResponseFromRoute(route, startTime);
 
   // 6. Format Markdown text payload suitable for direct rendering
@@ -294,5 +365,6 @@ export async function executeNyayotaAIPipeline(
     generatedAt: genResponse.generatedAt,
     executionTimeMs,
     validationErrors: validationErrors.length > 0 ? validationErrors : undefined,
+    conversationalRouting: convDecision,
   };
 }
