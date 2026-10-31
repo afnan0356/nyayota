@@ -417,6 +417,7 @@ export async function executeNyayotaAIPipeline(
       targetLanguage,
       retrievalResponse: route.retrievalResponse,
       sources: genResponse.sources,
+      deterministicResponse: genResponse,
       apiKey: request.apiKey,
       genAiClient: request.genAiClient,
     });

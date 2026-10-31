@@ -17,7 +17,7 @@ import {
   ResponseMode,
   ConversationContext,
 } from './types';
-import { detectConversationalLanguage, normalizeConversationalText } from './language-detector';
+import { detectConversationalLanguage, normalizeConversationalText, BENGALI_DIGITS } from './language-detector';
 import { detectConversationalIntent } from './intent-detector';
 
 export interface RouteConversationOptions {
@@ -84,7 +84,8 @@ export function routeConversationalQuery(
           // Follow-up on punishment, exception, age condition, or section comparison
           // requires targeted retrieval of the referenced statute/section
           shouldRetrieve = true;
-          effectiveRetrievalQuery = ref.synthesizedQuery || rawQuery;
+          const queryCandidate = ref.synthesizedQuery || rawQuery;
+          effectiveRetrievalQuery = queryCandidate.replace(/[০-৯]/g, (digit) => BENGALI_DIGITS[digit] || digit);
         }
       } else {
         // Fallback: If not cleanly resolved, request clarification
@@ -157,7 +158,8 @@ export function routeConversationalQuery(
       responseMode = 'legal_retrieval';
       shouldRetrieve = true;
       requiresClarification = false;
-      effectiveRetrievalQuery = rawQuery;
+      // Normalize Bengali numerals to standard Arabic digits so downstream statutory retrieval engines can index/match sections
+      effectiveRetrievalQuery = rawQuery.replace(/[০-৯]/g, (digit) => BENGALI_DIGITS[digit] || digit);
       break;
     }
   }
