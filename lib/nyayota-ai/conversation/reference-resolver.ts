@@ -28,7 +28,9 @@ const EXCEPTION_REGEX = /\b(exception|exceptions|is there an exception|are there
 const SIMPLIFICATION_REGEX = /\b(explain that again|explain again|explain more simply|explain that more simply|in simple words|in plain english|simpler language|make it simple|can you simplify|sohoj kore|shohoj|sohoj bhashay)\b|সহজ ভাষায় বলুন|সহজ করে বলুন|আবার বলুন|সহজ ভাষায় ব্যাখ্যা|সহজ বাংলায়/i;
 const AGE_CONDITION_REGEX = /\b(under 18|minor|child|juvenile|below 18|eighteen|age of consent|শিশু|নাবালক|১৮ বছরের নিচে|১৮ বছর)/i;
 const COMPARISON_REGEX = /\b(compare|comparison|difference between|compare with the previous|compare with section|compare with article|আগের ধারার সাথে তুলনা|তুলনা|পার্থক্য)/i;
-const JURISDICTION_SCOPE_REGEX = /\b(does this apply internationally|apply internationally|international law|other country|another country|in another country|foreign country|what about other countries|does this apply in|outside bangladesh|in the us|in the uk|in india)\b|আন্তর্জাতিকভাবে কি প্রযোজ্য|অন্য দেশে|বিদেশে কি প্রযোজ্য|যুক্তরাষ্ট্রে কি|যুক্তরাজ্যে কি/i;
+const JURISDICTION_SCOPE_REGEX = /\b(does this apply internationally|apply internationally|international law|other country|another country|in another country|foreign country|what about other countries|does this apply in|outside bangladesh|in the us|in the uk|in india|under uk law|under us law|under indian law|uk law|us law|british law)\b|আন্তর্জাতিকভাবে কি প্রযোজ্য|অন্য দেশে|বিদেশে কি প্রযোজ্য|যুক্তরাষ্ট্রে কি|যুক্তরাজ্যে কি/i;
+const EXAMPLE_ANALOGY_REGEX = /\b(give me an example|give an example|can you provide an example|practical example|real world example|analogy|relatable analogy|hypothetical scenario|for instance)\b|উদাহরণ|উদাহরণ দিন|দৃষ্টান্ত|সহজ উপমা/i;
+const TOPIC_CHANGE_REGEX = /\b(let's talk about|let us talk about|talk about|different topic|change topic|switch topic|switch topics|on another note|now tell me about|forget that|instead of that|instead)\b|অন্য প্রসঙ্গে|অন্য বিষয়ে|পরিবর্তে/i;
 
 /**
  * Resolves references in a query using the conversation context.
@@ -43,6 +45,8 @@ export function resolveContextualReference(
   const hasPunishment = PUNISHMENT_REGEX.test(norm);
   const hasException = EXCEPTION_REGEX.test(norm);
   const hasSimplification = SIMPLIFICATION_REGEX.test(norm);
+  const hasExampleAnalogy = EXAMPLE_ANALOGY_REGEX.test(norm);
+  const hasTopicChange = TOPIC_CHANGE_REGEX.test(norm);
   const hasAgeCondition = AGE_CONDITION_REGEX.test(norm);
   const hasComparison = COMPARISON_REGEX.test(norm);
   const hasJurisdictionScope = JURISDICTION_SCOPE_REGEX.test(norm);
@@ -52,6 +56,8 @@ export function resolveContextualReference(
     hasPunishment ||
     hasException ||
     hasSimplification ||
+    hasExampleAnalogy ||
+    hasTopicChange ||
     hasAgeCondition ||
     hasComparison ||
     hasJurisdictionScope ||
@@ -64,7 +70,7 @@ export function resolveContextualReference(
 
   // If query is an independent, complete query that explicitly specifies its own provision
   const containsExplicitProvision =
-    /(?:section|sec\.?|s\.|ধারা|article|art\.?|অনুচ্ছেদ)\s*\d+/i.test(norm);
+    /(?:section|sec\.?|s\.|ধারা|article|art\.?|অনুচ্ছেদ)\s*\d+|\d+\s*(?:ধারা|ধারার|অনুচ্ছেদ|অনুচ্ছেদের)/i.test(norm);
   const containsExplicitStatute =
     /(penal code|crpc|cpc|constitution|labor act|evidence act|contract act|দণ্ডবিধি|কার্যবিধি|সংবিধান)/i.test(norm);
 
@@ -76,7 +82,7 @@ export function resolveContextualReference(
   const hasAnyContext = hasContextAct || hasContextSection || hasContextTopic;
 
   // Standalone complete legal query (e.g. "Section 302 of Penal Code" or standalone "Section 302 er shasti ki?" in fresh session)
-  if (containsExplicitProvision && !hasComparison && !hasPronoun && !hasSimplification && (!hasAnyContext || containsExplicitStatute)) {
+  if (containsExplicitProvision && !hasComparison && !hasPronoun && !hasSimplification && !hasTopicChange && (!hasAnyContext || containsExplicitStatute)) {
     return {
       isResolved: true,
       referenceType: 'none',
@@ -87,7 +93,9 @@ export function resolveContextualReference(
 
   // Determine reference type
   let referenceType: ResolvedContext['referenceType'] = 'none';
-  if (hasJurisdictionScope) referenceType = 'jurisdiction_scope';
+  if (hasTopicChange) referenceType = 'topic_change';
+  else if (hasJurisdictionScope) referenceType = 'jurisdiction_scope';
+  else if (hasExampleAnalogy) referenceType = 'example_analogy';
   else if (hasSimplification) referenceType = 'simplification';
   else if (hasPunishment) referenceType = 'punishment';
   else if (hasException) referenceType = 'exception';
@@ -141,6 +149,11 @@ export function resolveContextualReference(
       synthesizedQuery = `${actTitle} ${section} exceptions defenses ব্যতিক্রম`.trim();
     } else if (referenceType === 'simplification') {
       synthesizedQuery = `${actTitle} ${section} plain language explanation সহজ ব্যাখ্যা`.trim();
+    } else if (referenceType === 'example_analogy') {
+      synthesizedQuery = `${actTitle} ${section} example analogy practical scenario`.trim();
+    } else if (referenceType === 'topic_change') {
+      const cleanTopic = query.replace(TOPIC_CHANGE_REGEX, '').trim();
+      synthesizedQuery = cleanTopic || query;
     } else if (referenceType === 'age_condition') {
       synthesizedQuery = `${actTitle} ${section} minor under 18 child provisions নাবালক শিশু`.trim();
     } else if (referenceType === 'jurisdiction_scope') {

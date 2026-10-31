@@ -134,6 +134,36 @@ We maintain strict fidelity to official gazetted texts. If you detect an amendme
     case 'general_explanation': {
       const q = decision.normalizedQuery;
 
+      if (q.includes('negligence') || q.includes('অবহেলা') || q.includes('duty of care')) {
+        return {
+          headline: 'Legal Explanation: Negligence & The Duty of Care',
+          headlineBn: 'অবহেলা এবং আইনি সতর্কতা (Negligence & Duty of Care)',
+          summary: 'Fundamental tort and legal standard of care.',
+          summaryBn: 'টর্ট আইন ও সতর্কতামূলক দায়িত্বের ধারণা।',
+          text: `### Legal Explanation: Negligence & The Duty of Care
+
+**Core Definition:**
+*Negligence* is the failure to exercise the standard of care that a reasonably prudent person would have exercised in a similar situation, resulting in unintended injury or loss to another party.
+
+#### The 4 Essential Legal Pillars of Negligence:
+1. **Duty of Care:** The defendant owed a legal obligation to protect the plaintiff from foreseeable harm.
+2. **Breach of Duty:** The defendant failed to meet the required standard of care.
+3. **Causation:** The breach directly caused the claimant's injury (*causa causans*).
+4. **Damages:** Measurable physical, financial, or property harm was suffered.`,
+          textBn: `### অবহেলা এবং আইনি সতর্কতা (Negligence & Duty of Care)
+
+**আইনি সংজ্ঞা:**
+*অবহেলা (Negligence)* হলো সাধারণ বিচক্ষণ ব্যক্তির ন্যায় যুক্তিসঙ্গত সতর্কতা অবলম্বনে ব্যর্থ হওয়া, যার ফলে অপর কোনো ব্যক্তির ক্ষতি বা হানি ঘটে।
+
+#### অবহেলার ৪টি মূল উপাদান:
+১. **সতর্কতামূলক দায়িত্ব (Duty of Care):** বাদীর প্রতি বিবাদীর সতর্কতা অবলম্বনের আইনি দায় থাকা।
+২. **দায়িত্ব লঙ্ঘন (Breach of Duty):** নির্ধারিত সতর্কতার মান বজায় রাখতে ব্যর্থ হওয়া।
+৩. **কার্যকারণ (Causation):** দায়িত্ব লঙ্ঘনের সরাসরি ফলস্বরূপ ক্ষতি ঘটা।
+৪. **প্রকৃত ক্ষতি (Damages):** শারীরিক, আর্থিক বা সম্পত্তির পরিমাপযোগ্য ক্ষতি হওয়া।`,
+          disclaimer: EDUCATIONAL_DISCLAIMER_EN,
+        };
+      }
+
       if (q.includes('civil and criminal') || q.includes('দেওয়ানি ও ফৌজদারি')) {
         return {
           headline: 'Difference Between Civil Law and Criminal Law',

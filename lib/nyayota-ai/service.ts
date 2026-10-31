@@ -29,6 +29,7 @@ import {
   buildConversationContext,
   routeConversationalQuery,
   handleConversationalTurn,
+  generateNaturalConversationalResponse,
   RoutingDecision,
 } from './conversation';
 
@@ -67,6 +68,15 @@ export interface NyayotaAIServiceRequest {
 
   /** Active statutory context if originating from statute view */
   lawContext?: ServiceLawContext;
+
+  /** Whether to use natural language generation via Gemini (Phase 6C) */
+  generateNaturalResponse?: boolean;
+
+  /** API Key for upstream GenAI */
+  apiKey?: string;
+
+  /** Optional custom or mocked GenAI client for testing */
+  genAiClient?: any;
 
   /** Optional fine-tuning options for retrieval */
   options?: {
@@ -152,6 +162,12 @@ export interface NyayotaAIServiceResponse {
 
   /** Structured conversational routing decision (Phase 6A) */
   conversationalRouting?: RoutingDecision;
+
+  /** Generation method if natural conversational generation was requested (Phase 6C) */
+  generationMethod?: 'gemini-grounded' | 'gemini-conversational' | 'deterministic-fallback';
+
+  /** Model or engine provider identifier */
+  provider?: string;
 }
 
 // ============================================================================
@@ -239,8 +255,72 @@ export async function executeNyayotaAIPipeline(
   // If Conversational Routing determines legal retrieval should NOT be executed
   // (e.g. casual greeting, pleasantry, platform question, broad general legal philosophy, or out of scope)
   if (!convDecision.shouldRetrieve) {
-    const convResponse = handleConversationalTurn(convDecision, convContext);
     const targetLanguage = request.language || (request.mode === 'bangla' ? 'bn' : 'both');
+
+    if (request.generateNaturalResponse && (request.apiKey || request.genAiClient || process.env.GEMINI_API_KEY)) {
+      const naturalOutput = await generateNaturalConversationalResponse({
+        query: cleanQuery,
+        context: convContext,
+        decision: convDecision,
+        targetLanguage,
+        sources: [],
+        apiKey: request.apiKey,
+        genAiClient: request.genAiClient,
+      });
+
+      let primaryText = naturalOutput.text;
+      if (naturalOutput.disclaimer && !primaryText.includes(naturalOutput.disclaimer)) {
+        primaryText += `\n\n---\n*${naturalOutput.disclaimer}*`;
+      }
+
+      return {
+        success: true,
+        query: cleanQuery,
+        normalizedQuery: convDecision.normalizedQuery,
+        text: primaryText,
+        textBn: naturalOutput.textBn,
+        headline: naturalOutput.headline,
+        headlineBn: naturalOutput.headlineBn,
+        summary: naturalOutput.summary,
+        summaryBn: naturalOutput.summaryBn,
+        status: convDecision.responseMode === 'clarification'
+          ? 'clarification-required'
+          : convDecision.responseMode === 'out_of_scope'
+          ? 'out-of-scope'
+          : 'conversational',
+        detectedIntent: convDecision.intent === 'casual_conversation'
+          ? 'greeting'
+          : convDecision.intent === 'platform_question'
+          ? 'nyayota_help'
+          : convDecision.intent === 'out_of_scope'
+          ? 'out_of_scope'
+          : convDecision.intent === 'ambiguous_request'
+          ? 'clarification_needed'
+          : 'legal_concept',
+        detectedJurisdiction: (convContext.activeJurisdiction === 'International'
+          ? 'International'
+          : convContext.activeJurisdiction === 'India'
+          ? 'India'
+          : convContext.activeJurisdiction === 'unknown'
+          ? 'unknown'
+          : convContext.activeJurisdiction === 'Other' || convContext.activeJurisdiction === 'United Kingdom' || convContext.activeJurisdiction === 'United States'
+          ? 'unclear'
+          : 'Bangladesh') as DetectedJurisdiction,
+        sources: [],
+        limitations: [],
+        clarificationPrompt: convDecision.responseMode === 'clarification' ? naturalOutput.text : undefined,
+        disclaimer: naturalOutput.disclaimer,
+        disclaimerBn: naturalOutput.disclaimerBn,
+        generatedAt: new Date().toISOString(),
+        executionTimeMs: Date.now() - startTime,
+        validationErrors: validationErrors.length > 0 ? validationErrors : undefined,
+        conversationalRouting: convDecision,
+        generationMethod: naturalOutput.generationMethod,
+        provider: naturalOutput.provider,
+      };
+    }
+
+    const convResponse = handleConversationalTurn(convDecision, convContext);
 
     let primaryText = convResponse.text;
     if (targetLanguage === 'bn' && convResponse.textBn) {
@@ -328,7 +408,64 @@ export async function executeNyayotaAIPipeline(
   // 6. Generate Source-Grounded Deterministic Response
   const genResponse: DeterministicLegalResponse = generateResponseFromRoute(route, startTime);
 
-  // 6. Format Markdown text payload suitable for direct rendering
+  // 7. If Natural Conversational Generation with Gemini is requested
+  if (request.generateNaturalResponse && (request.apiKey || request.genAiClient || process.env.GEMINI_API_KEY)) {
+    const naturalOutput = await generateNaturalConversationalResponse({
+      query: cleanQuery,
+      context: convContext,
+      decision: convDecision,
+      targetLanguage,
+      retrievalResponse: route.retrievalResponse,
+      sources: genResponse.sources,
+      apiKey: request.apiKey,
+      genAiClient: request.genAiClient,
+    });
+
+    let primaryText = naturalOutput.text;
+    if (naturalOutput.generationMethod === 'deterministic-fallback' && genResponse.structuredExplanation) {
+      primaryText = genResponse.structuredExplanation;
+      if (targetLanguage === 'bn' && genResponse.structuredExplanationBn) {
+        primaryText = genResponse.structuredExplanationBn;
+      } else if (targetLanguage === 'both' && genResponse.structuredExplanationBn) {
+        primaryText = `${genResponse.structuredExplanation}\n\n---\n\n${genResponse.structuredExplanationBn}`;
+      }
+    }
+
+    if (naturalOutput.disclaimer && !primaryText.includes(naturalOutput.disclaimer)) {
+      primaryText += `\n\n---\n*${naturalOutput.disclaimer}*`;
+    }
+
+    return {
+      success: true,
+      query: cleanQuery,
+      normalizedQuery: route.normalizedQuery,
+      text: primaryText,
+      textBn: naturalOutput.textBn,
+      headline: naturalOutput.headline,
+      headlineBn: naturalOutput.headlineBn,
+      summary: naturalOutput.summary,
+      summaryBn: naturalOutput.summaryBn,
+      status: genResponse.status,
+      detectedIntent: genResponse.detectedIntent,
+      detectedJurisdiction: genResponse.detectedJurisdiction,
+      sources: genResponse.sources,
+      limitations: genResponse.limitations,
+      limitationsBn: genResponse.limitationsBn,
+      clarificationPrompt: genResponse.clarificationPrompt,
+      clarificationOptions: genResponse.clarificationOptions,
+      crossReferenceMentions: route.retrievalResponse?.crossReferenceMentions,
+      disclaimer: naturalOutput.disclaimer,
+      disclaimerBn: naturalOutput.disclaimerBn,
+      generatedAt: genResponse.generatedAt,
+      executionTimeMs: Date.now() - startTime,
+      validationErrors: validationErrors.length > 0 ? validationErrors : undefined,
+      conversationalRouting: convDecision,
+      generationMethod: naturalOutput.generationMethod,
+      provider: naturalOutput.provider,
+    };
+  }
+
+  // 8. Format Deterministic Markdown text payload suitable for direct rendering
   let primaryText = genResponse.structuredExplanation;
   if (targetLanguage === 'bn' && genResponse.structuredExplanationBn) {
     primaryText = genResponse.structuredExplanationBn;

@@ -1,4 +1,3 @@
-import { GoogleGenAI } from '@google/genai';
 import { NextRequest, NextResponse } from 'next/server';
 import { executeNyayotaAIPipeline } from '@/lib/nyayota-ai';
 import { AI_CONFIG, AssistantEngineType } from '@/lib/ai-config';
@@ -277,118 +276,65 @@ export async function POST(req: NextRequest) {
 
     const apiKey = process.env.GEMINI_API_KEY;
 
-    const systemInstruction = `You are the Nyayota AI Legal Knowledge Assistant, a specialized educational legal research system for citizens, students, and legal researchers.
-Your mission is to make codified statutes, legal concepts, court procedures, and terminology understandable, neutral, accurate, and accessible.
+    try {
+      const pipelineResult = await executeNyayotaAIPipeline({
+        query: trimmedQuery,
+        language: safeLanguage === 'bengali' ? 'bn' : safeLanguage === 'english' ? 'en' : 'both',
+        mode: safeMode === 'compare' ? 'compare' : safeMode === 'statute' ? 'cite' : 'explain',
+        lawContext: lawContext
+          ? {
+              title: lawContext.title,
+              category: lawContext.category,
+              jurisdiction: lawContext.jurisdiction,
+              sectionNumber: lawContext.sectionNumber,
+              sectionTitle: lawContext.sectionTitle,
+              sectionContent: lawContext.sectionContent,
+            }
+          : undefined,
+        messages: validatedMessages,
+        generateNaturalResponse: true,
+        apiKey,
+      });
 
-CRITICAL OPERATIONAL RULES:
-1. EDUCATIONAL USE ONLY: You provide educational legal knowledge and statutory analysis. You are NOT a lawyer and do NOT give formal legal representation or legal advice.
-2. NEVER GUARANTEE OUTCOMES: Never claim certainty about court rulings or guarantee specific judicial decisions. Explain possible legal consequences, standards, and factors.
-3. CLEAR DISCLAIMERS: Always remind users that this is educational legal information.
-4. JURISDICTION AWARENESS: Default to Bangladesh codified law and International Law (UDHR, ICCPR, treaties) unless another jurisdiction is specified. Provide clear English and Bengali (বাংলা) terminology where appropriate.
-5. PLAIN LANGUAGE: Explain difficult Latin maxims, archaic statutory wording, or legal jargon in crystal-clear, structured terms with a relatable everyday analogy.
-6. STRUCTURED RESPONSES: Use clear Markdown headings (###), bullet points, bold key terms, and statutory section citations (e.g., Section 300, Penal Code 1860; Article 102, Constitution).`;
-
-    let userPrompt = '';
-    if (lawContext && typeof lawContext === 'object') {
-      const safeTitle = typeof lawContext.title === 'string' ? lawContext.title.slice(0, 150) : 'N/A';
-      const safeJurisdiction = typeof lawContext.jurisdiction === 'string' ? lawContext.jurisdiction.slice(0, 60) : 'N/A';
-      const safeCategory = typeof lawContext.category === 'string' ? lawContext.category.slice(0, 60) : 'N/A';
-      userPrompt += `[ACTIVE STATUTE CONTEXT]\nTitle: ${safeTitle}\nJurisdiction: ${safeJurisdiction}\nCategory: ${safeCategory}\n`;
-      if (lawContext.sectionNumber) {
-        const safeSecNum = String(lawContext.sectionNumber).slice(0, 30);
-        const safeSecTitle = typeof lawContext.sectionTitle === 'string' ? lawContext.sectionTitle.slice(0, 150) : '';
-        const safeSecContent = typeof lawContext.sectionContent === 'string' ? lawContext.sectionContent.slice(0, 600) : '';
-        userPrompt += `Selected Section: ${safeSecNum} - ${safeSecTitle}\nContent Excerpt: ${safeSecContent}\n`;
-      }
-      userPrompt += '\n';
-    }
-
-    userPrompt += `User Inquiry: ${trimmedQuery}\nMode: ${safeMode}\nTarget Language: ${safeLanguage}`;
-
-    if (apiKey) {
-      try {
-        const ai = new GoogleGenAI({
-          apiKey,
-          httpOptions: {
-            headers: {
-              'User-Agent': 'nyayota-legal-platform',
-            },
-          },
-        });
-
-        const contents: any[] = [];
-        if (validatedMessages.length > 0) {
-          validatedMessages.slice(-6).forEach((msg) => {
-            contents.push({
-              role: msg.role === 'user' ? 'user' : 'model',
-              parts: [{ text: msg.content }]
-            });
-          });
-        }
-        contents.push({
-          role: 'user',
-          parts: [{ text: userPrompt }]
-        });
-
-        const timeoutPromise = new Promise<never>((_, reject) =>
-          setTimeout(
-            () => reject(new Error(`AI upstream generation request timed out after ${AI_CONFIG.timeoutMs / 1000} seconds`)),
-            AI_CONFIG.timeoutMs
-          )
-        );
-
-        const response = await Promise.race([
-          ai.models.generateContent({
-            model: AI_CONFIG.model,
-            contents,
-            config: {
-              systemInstruction,
-              temperature: AI_CONFIG.generationConfig.temperature,
-              topK: AI_CONFIG.generationConfig.topK,
-              topP: AI_CONFIG.generationConfig.topP,
-            },
-          }),
-          timeoutPromise,
-        ]);
-
-        return NextResponse.json(
-          {
-            text: response.text,
-            provider: AI_CONFIG.model,
-            engine: 'general',
-            timestamp: new Date().toISOString(),
-          },
-          {
-            headers: {
-              ...SECURITY_HEADERS,
-              'X-RateLimit-Limit': String(rateLimit.limit),
-              'X-RateLimit-Remaining': String(rateLimit.remaining),
-            },
-          }
-        );
-      } catch (geminiError: unknown) {
-        const errorMsg = geminiError instanceof Error ? geminiError.message : 'Unknown upstream error';
-        console.error('Upstream AI generation request encountered an issue:', errorMsg);
-      }
-    }
-
-    // High precision fallback educational analysis if API key is missing, timed out, or offline
-    const fallbackResponse = generateLocalLegalAnalysis(trimmedQuery, safeMode, safeLanguage, lawContext);
-    return NextResponse.json(
-      {
-        text: fallbackResponse,
-        provider: 'nyayota-legal-engine-v1',
-        engine: 'general',
-        timestamp: new Date().toISOString(),
-      },
-      {
-        headers: {
-          ...SECURITY_HEADERS,
-          'X-RateLimit-Limit': String(rateLimit.limit),
-          'X-RateLimit-Remaining': String(rateLimit.remaining),
+      return NextResponse.json(
+        {
+          text: pipelineResult.text,
+          provider: pipelineResult.provider || AI_CONFIG.model,
+          engine: 'general',
+          generationMethod: pipelineResult.generationMethod,
+          timestamp: new Date().toISOString(),
+          deterministicResponse: pipelineResult,
         },
-      }
-    );
+        {
+          headers: {
+            ...SECURITY_HEADERS,
+            'X-RateLimit-Limit': String(rateLimit.limit),
+            'X-RateLimit-Remaining': String(rateLimit.remaining),
+          },
+        }
+      );
+    } catch (pipelineError: unknown) {
+      const errorMsg = pipelineError instanceof Error ? pipelineError.message : 'Unknown pipeline error';
+      console.error('General conversational legal pipeline encountered an issue:', errorMsg);
+
+      // High precision fallback educational analysis if pipeline errors
+      const fallbackResponse = generateLocalLegalAnalysis(trimmedQuery, safeMode, safeLanguage, lawContext);
+      return NextResponse.json(
+        {
+          text: fallbackResponse,
+          provider: 'nyayota-legal-engine-v1',
+          engine: 'general',
+          timestamp: new Date().toISOString(),
+        },
+        {
+          headers: {
+            ...SECURITY_HEADERS,
+            'X-RateLimit-Limit': String(rateLimit.limit),
+            'X-RateLimit-Remaining': String(rateLimit.remaining),
+          },
+        }
+      );
+    }
   } catch (error: unknown) {
     const errorMsg = error instanceof Error ? error.message : 'Internal error';
     console.error('AI assistant route encountered an error:', errorMsg);

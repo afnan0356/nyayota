@@ -5,7 +5,8 @@
  * intent categorization, reference resolution, and explicit routing decisions.
  */
 
-import { DeterministicSourceCitation, IntentCategory } from '../types';
+import type { DeterministicSourceCitation, IntentCategory } from '../types';
+export type { DeterministicSourceCitation, IntentCategory };
 
 /**
  * 7 Core Intent Categories for Conversational AI
@@ -172,9 +173,11 @@ export interface ResolvedContext {
     | 'punishment'         // "what about punishment?", "its punishment", "এর শাস্তি কী?"
     | 'exception'          // "are there exceptions?", "what exceptions?", "ব্যতিক্রম"
     | 'simplification'     // "explain simply", "in plain English", "সহজ করে বলুন"
+    | 'example_analogy'    // "give an example", "can you provide an analogy", "উদাহরণ দিন"
     | 'age_condition'      // "if under 18", "minor", "শিশু হলে কি হবে"
     | 'comparison'         // "compare with previous", "আগের ধারার সাথে তুলনা"
     | 'jurisdiction_scope' // "does this apply internationally?", "what about other countries?"
+    | 'topic_change'       // "let's talk about bail instead", "different topic"
     | 'continuation'       // general follow-up continuation
     | 'none';
 
