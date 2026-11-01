@@ -81,8 +81,9 @@ export function resolveContextualReference(
   const hasContextTopic = Boolean(context.currentTopic || activeRef?.topic);
   const hasAnyContext = hasContextAct || hasContextSection || hasContextTopic;
 
-  // Standalone complete legal query (e.g. "Section 302 of Penal Code" or standalone "Section 302 er shasti ki?" in fresh session)
-  if (containsExplicitProvision && !hasComparison && !hasPronoun && !hasSimplification && !hasTopicChange && (!hasAnyContext || containsExplicitStatute)) {
+  // Standalone complete legal query (e.g. "Section 302 of Penal Code" or "দণ্ডবিধির ধারা ৩০২ এর বিধান কী?")
+  const isSelfContainedStatuteQuery = containsExplicitProvision && containsExplicitStatute;
+  if (containsExplicitProvision && !hasComparison && !hasSimplification && !hasTopicChange && (isSelfContainedStatuteQuery || (!hasPronoun && !hasAnyContext))) {
     return {
       isResolved: true,
       referenceType: 'none',

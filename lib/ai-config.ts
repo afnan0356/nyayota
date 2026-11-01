@@ -28,6 +28,12 @@ export const AI_CONFIG = {
   model: process.env.GEMINI_MODEL || 'gemini-3.8-flash',
 
   /**
+   * Fallback model identifier for secondary retry if configured or primary model is unavailable.
+   * Can be configured via GEMINI_FALLBACK_MODEL env var.
+   */
+  fallbackModel: process.env.GEMINI_FALLBACK_MODEL || 'gemini-2.5-flash',
+
+  /**
    * Model family display label for UI transparency.
    */
   displayName: 'Google Gemini Flash',

@@ -78,10 +78,14 @@ export function buildSystemInstruction(
   if (sources.length > 0) {
     sourcesContext = sources
       .map((s, idx) => {
-        const title = s.title || 'Statute';
-        const sec = s.identifier || '';
-        const excerpt = s.verbatimExcerpt || '';
-        const jur = s.jurisdiction || jurisdiction;
+        // Sanitize attribute strings to prevent XML tag breakout
+        const title = (s.title || 'Statute').replace(/<\/?[^>]+(>|$)/g, '').replace(/"/g, "'");
+        const sec = (s.identifier || '').replace(/<\/?[^>]+(>|$)/g, '').replace(/"/g, "'");
+        const excerpt = (s.verbatimExcerpt || '')
+          .replace(/<\/statutory_record>/gi, '')
+          .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
+          .replace(/<\/?script[^>]*>/gi, '');
+        const jur = (s.jurisdiction || jurisdiction).replace(/<\/?[^>]+(>|$)/g, '').replace(/"/g, "'");
         return `<statutory_record index="${idx + 1}" statute="${title}" section="${sec}" jurisdiction="${jur}">\nExcerpt: "${excerpt}"\n</statutory_record>`;
       })
       .join('\n\n');
@@ -172,9 +176,12 @@ export function formatGeminiContents(
 ): Array<{ role: 'user' | 'model'; parts: Array<{ text: string }> }> {
   const contents: Array<{ role: 'user' | 'model'; parts: Array<{ text: string }> }> = [];
 
-  // Filter dialogue turns (user/assistant only)
-  const dialogueTurns = context.messages.filter((m) => m.role === 'user' || m.role === 'assistant');
-  const trimmedQuery = query.trim();
+  // Filter dialogue turns (user/assistant only, non-empty text)
+  const rawMessages = context && Array.isArray(context.messages) ? context.messages : [];
+  const dialogueTurns = rawMessages.filter(
+    (m) => m && (m.role === 'user' || m.role === 'assistant') && typeof m.content === 'string' && m.content.trim().length > 0
+  );
+  const trimmedQuery = (query || '').trim();
 
   // Check whether the final message in context is already identical to the current query
   const lastTurn = dialogueTurns[dialogueTurns.length - 1];
@@ -189,14 +196,14 @@ export function formatGeminiContents(
   historySlice.forEach((m) => {
     contents.push({
       role: m.role === 'user' ? 'user' : 'model',
-      parts: [{ text: m.content }],
+      parts: [{ text: m.content.trim() }],
     });
   });
 
   // Append current user inquiry exactly once
   contents.push({
     role: 'user',
-    parts: [{ text: trimmedQuery }],
+    parts: [{ text: trimmedQuery.length > 0 ? trimmedQuery : 'Legal research inquiry' }],
   });
 
   return contents;
@@ -247,16 +254,37 @@ export async function generateNaturalConversationalResponse(
         )
       );
 
-      const responsePromise = ai.models.generateContent({
-        model,
-        contents,
-        config: {
-          systemInstruction,
-        },
-      });
+      let activeModel = model;
+      let rawGeneratedText: string | undefined;
 
-      const response = await Promise.race([responsePromise, timeoutPromise]);
-      const rawGeneratedText = (response as any).text;
+      try {
+        const responsePromise = ai.models.generateContent({
+          model: activeModel,
+          contents,
+          config: {
+            systemInstruction,
+          },
+        });
+        const response = await Promise.race([responsePromise, timeoutPromise]);
+        rawGeneratedText = (response as any).text;
+      } catch (primaryModelError: unknown) {
+        // If primary model encounters an error and alternative fallback model is configured and different
+        const fallbackModel = AI_CONFIG.fallbackModel;
+        if (!genAiClient && fallbackModel && fallbackModel !== activeModel) {
+          activeModel = fallbackModel;
+          const fallbackPromise = ai.models.generateContent({
+            model: activeModel,
+            contents,
+            config: {
+              systemInstruction,
+            },
+          });
+          const response = await Promise.race([fallbackPromise, timeoutPromise]);
+          rawGeneratedText = (response as any).text;
+        } else {
+          throw primaryModelError;
+        }
+      }
 
       if (typeof rawGeneratedText === 'string' && rawGeneratedText.trim().length > 0) {
         const executionTimeMs = Date.now() - startTime;
@@ -273,7 +301,7 @@ export async function generateNaturalConversationalResponse(
           summaryBn: isGrounded
             ? 'যাচাইকৃত সংবিধিবদ্ধ আইনের ভিত্তিতে তথ্যসূত্র-নির্ভর আলোচনা।'
             : 'শিক্ষামূলক আইনি তথ্য ও সহায়তা।',
-          provider: model,
+          provider: activeModel,
           generationMethod: isGrounded ? 'gemini-grounded' : 'gemini-conversational',
           groundedSources: sources,
           disclaimer: EDUCATIONAL_DISCLAIMER_EN,
