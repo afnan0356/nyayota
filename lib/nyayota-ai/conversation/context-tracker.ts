@@ -55,6 +55,20 @@ const KNOWN_STATUTES: KnownStatuteEntry[] = [
   { id: 'us-constitution-1787', title: 'Constitution of the United States', jurisdiction: 'United States', aliases: ['us constitution', 'united states constitution', 'american constitution'] },
 ];
 
+interface CompiledStatuteEntry {
+  id: string;
+  title: string;
+  jurisdiction: LegalJurisdiction;
+  lowerAliases: string[];
+}
+
+const COMPILED_STATUTES: CompiledStatuteEntry[] = KNOWN_STATUTES.map((s) => ({
+  id: s.id,
+  title: s.title,
+  jurisdiction: s.jurisdiction,
+  lowerAliases: s.aliases.map((a) => a.toLowerCase()),
+}));
+
 const SECTION_REGEX = /(?:section|sec\.?|s\.|ধারা)\s*(\d+[a-z]?)/i;
 const ARTICLE_REGEX = /(?:article|art\.?|অনুচ্ছেদ)\s*(\d+[a-z]?)/i;
 
@@ -72,9 +86,9 @@ export function extractLegalEntities(text: string): {
   const norm = normalizeConversationalText(text);
 
   let matchedAct: { id: string; title: string; jurisdiction: LegalJurisdiction } | undefined;
-  for (const statute of KNOWN_STATUTES) {
-    for (const alias of statute.aliases) {
-      if (norm.includes(alias.toLowerCase())) {
+  for (const statute of COMPILED_STATUTES) {
+    for (const alias of statute.lowerAliases) {
+      if (norm.includes(alias)) {
         matchedAct = { id: statute.id, title: statute.title, jurisdiction: statute.jurisdiction };
         break;
       }

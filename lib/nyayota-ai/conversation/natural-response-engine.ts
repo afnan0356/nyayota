@@ -63,6 +63,36 @@ const EDUCATIONAL_DISCLAIMER_BN =
   'সতর্কবার্তা: ন্যায়তা শুধুমাত্র শিক্ষামূলক আইনি গবেষণার তথ্য প্রদান করে এবং এটি আনুষ্ঠানিক আইনি প্রতিনিধিত্ব বা পরামর্শ নয়।';
 
 /**
+ * Server-side cache for GoogleGenAI SDK instances keyed by API key hash/value.
+ * Avoids repeated client reconstruction on every conversational turn.
+ */
+const genAiClientCache = new Map<string, GoogleGenAI>();
+
+export function getOrCreateGenAiClient(apiKey: string): GoogleGenAI {
+  let client = genAiClientCache.get(apiKey);
+  if (!client) {
+    if (genAiClientCache.size >= 10) {
+      const oldestKey = genAiClientCache.keys().next().value;
+      if (oldestKey) genAiClientCache.delete(oldestKey);
+    }
+    client = new GoogleGenAI({
+      apiKey,
+      httpOptions: {
+        headers: {
+          'User-Agent': 'aistudio-build',
+        },
+      },
+    });
+    genAiClientCache.set(apiKey, client);
+  }
+  return client;
+}
+
+export function clearGenAiClientCache(): void {
+  genAiClientCache.clear();
+}
+
+/**
  * Builds the strict, source-grounded system instruction for Gemini.
  */
 export function buildSystemInstruction(
@@ -235,14 +265,7 @@ export async function generateNaturalConversationalResponse(
 
   if (canUseGemini) {
     try {
-      const ai = genAiClient || new GoogleGenAI({
-        apiKey: apiKey!,
-        httpOptions: {
-          headers: {
-            'User-Agent': 'aistudio-build',
-          },
-        },
-      });
+      const ai = genAiClient || getOrCreateGenAiClient(apiKey!);
 
       const systemInstruction = buildSystemInstruction(context, decision, sources, targetLanguage);
       const contents = formatGeminiContents(query, context);

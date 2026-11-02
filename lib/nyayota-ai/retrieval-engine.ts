@@ -229,6 +229,33 @@ export interface ParsedLegalTokens {
   cleanRemainingTokens: string[];
 }
 
+interface CompiledActMeta {
+  lawId: string;
+  canonicalTitle: string;
+  asciiPatterns: RegExp[];
+  nonAsciiAliases: string[];
+}
+
+const COMPILED_ACT_REGISTRY: CompiledActMeta[] = KNOWN_ACT_REGISTRY.map((act) => {
+  const asciiPatterns: RegExp[] = [];
+  const nonAsciiAliases: string[] = [];
+
+  for (const alias of act.aliases) {
+    if (/[^\x00-\x7F]/.test(alias)) {
+      nonAsciiAliases.push(alias);
+    } else {
+      asciiPatterns.push(new RegExp(`\\b${alias.replace(/\./g, '\\.')}\\b`, 'i'));
+    }
+  }
+
+  return {
+    lawId: act.lawId,
+    canonicalTitle: act.canonicalTitle,
+    asciiPatterns,
+    nonAsciiAliases,
+  };
+});
+
 /**
  * Extracts statutory provision tokens (Section, Article, Order/Rule)
  * and detects known Act aliases from the normalized query.
@@ -238,14 +265,19 @@ export function extractLegalTokens(query: string): ParsedLegalTokens {
   let detectedActId: string | undefined;
   let detectedActTitle: string | undefined;
 
-  // 1. Detect explicit Act references
-  for (const act of KNOWN_ACT_REGISTRY) {
-    for (const alias of act.aliases) {
-      const isNonAscii = /[^\x00-\x7F]/.test(alias);
-      const isMatch = isNonAscii
-        ? normalized.includes(alias)
-        : new RegExp(`\\b${alias.replace(/\./g, '\\.')}\\b`, 'i').test(normalized);
-      if (isMatch) {
+  // 1. Detect explicit Act references using precompiled matchers
+  for (const act of COMPILED_ACT_REGISTRY) {
+    for (const nonAscii of act.nonAsciiAliases) {
+      if (normalized.includes(nonAscii)) {
+        detectedActId = act.lawId;
+        detectedActTitle = act.canonicalTitle;
+        break;
+      }
+    }
+    if (detectedActId) break;
+
+    for (const pattern of act.asciiPatterns) {
+      if (pattern.test(normalized)) {
         detectedActId = act.lawId;
         detectedActTitle = act.canonicalTitle;
         break;
@@ -352,12 +384,174 @@ export function normalizeSectionIdentifier(raw: string): string {
 }
 
 // ============================================================================
-// 4. MULTI-DATASET SEARCH & SCORING IMPLEMENTATION
+// 4. PRE-INDEXED LEGAL DATASETS (MODULE-LEVEL STATIC OPTIMIZATIONS)
 // ============================================================================
 
-/**
- * Searches across curated LAWS_DATABASE provisions and metadata
- */
+export const EXISTING_LAW_IDS: ReadonlySet<string> = new Set(LAWS_DATABASE.map((l) => l.id));
+
+interface IndexedLawSection {
+  number: string;
+  normSec: string;
+  title: string;
+  titleLower: string;
+  titleBn?: string;
+  titleBnLower?: string;
+  content: string;
+  contentLower: string;
+  contentBn?: string;
+  simpleExplanation?: string;
+  explainLower: string;
+  punishmentOrRemedy?: string;
+  penaltyLower: string;
+}
+
+interface IndexedLawItem {
+  raw: LawItem;
+  id: string;
+  jurisdiction: string;
+  title: string;
+  titleLower: string;
+  titleBn: string;
+  titleBnLower: string;
+  shortTitleLower: string;
+  overview: string;
+  overviewLower: string;
+  actNumber?: string;
+  actNumberLower: string;
+  totalStatutorySectionsCount?: number;
+  sections: IndexedLawSection[];
+  exactSectionMap: Map<string, IndexedLawSection>;
+}
+
+const INDEXED_LAWS_DB: IndexedLawItem[] = LAWS_DATABASE.map((law) => {
+  const sections: IndexedLawSection[] = (law.sections || []).map((sec) => ({
+    number: sec.number,
+    normSec: normalizeSectionIdentifier(sec.number),
+    title: sec.title,
+    titleLower: sec.title.toLowerCase(),
+    titleBn: sec.titleBn,
+    titleBnLower: sec.titleBn ? sec.titleBn.toLowerCase() : undefined,
+    content: sec.content,
+    contentLower: sec.content.toLowerCase(),
+    contentBn: sec.contentBn,
+    simpleExplanation: sec.simpleExplanation,
+    explainLower: (sec.simpleExplanation || '').toLowerCase(),
+    punishmentOrRemedy: sec.punishmentOrRemedy,
+    penaltyLower: (sec.punishmentOrRemedy || '').toLowerCase(),
+  }));
+
+  const exactSectionMap = new Map<string, IndexedLawSection>();
+  for (const s of sections) {
+    if (!exactSectionMap.has(s.normSec)) {
+      exactSectionMap.set(s.normSec, s);
+    }
+  }
+
+  return {
+    raw: law,
+    id: law.id,
+    jurisdiction: law.jurisdiction,
+    title: law.title,
+    titleLower: law.title.toLowerCase(),
+    titleBn: law.titleBn,
+    titleBnLower: law.titleBn.toLowerCase(),
+    shortTitleLower: (law.shortTitle || '').toLowerCase(),
+    overview: law.overview,
+    overviewLower: law.overview.toLowerCase(),
+    actNumber: law.actNumber,
+    actNumberLower: (law.actNumber || '').toLowerCase(),
+    totalStatutorySectionsCount: law.totalStatutorySectionsCount,
+    sections,
+    exactSectionMap,
+  };
+});
+
+interface IndexedCatalogSection {
+  number: string;
+  title: string;
+  titleBn?: string;
+  content: string;
+  contentBn?: string;
+  simpleExplanation?: string;
+  penalty?: string;
+  normSec: string;
+}
+
+interface IndexedCatalogRecord {
+  raw: BangladeshLawRecord;
+  id: string;
+  title: string;
+  titleLower: string;
+  titleBn?: string;
+  titleBnLower: string;
+  shortTitleLower: string;
+  actNumber: string;
+  actNumberLower: string;
+  keywordsLower: string[];
+  sections: IndexedCatalogSection[];
+}
+
+const INDEXED_CATALOG: IndexedCatalogRecord[] = BANGLADESH_CODE_CATALOG
+  .filter((record) => !EXISTING_LAW_IDS.has(record.id))
+  .map((record) => ({
+    raw: record,
+    id: record.id,
+    title: record.title,
+    titleLower: record.title.toLowerCase(),
+    titleBn: record.titleBn,
+    titleBnLower: (record.titleBn || '').toLowerCase(),
+    shortTitleLower: (record.shortTitle || '').toLowerCase(),
+    actNumber: record.actNumber,
+    actNumberLower: (record.actNumber || '').toLowerCase(),
+    keywordsLower: (record.keywords || []).map((k) => k.toLowerCase()),
+    sections: (record.sections || []).map((s) => ({
+      number: s.number,
+      title: s.title,
+      titleBn: s.titleBn,
+      content: s.content,
+      contentBn: s.contentBn,
+      simpleExplanation: s.simpleExplanation,
+      penalty: s.penalty,
+      normSec: normalizeSectionIdentifier(s.number),
+    })),
+  }));
+
+interface IndexedGlossaryItem {
+  raw: GlossaryTerm;
+  termLower: string;
+  termBnLower: string;
+  defLower: string;
+}
+
+const INDEXED_GLOSSARY: IndexedGlossaryItem[] = GLOSSARY_TERMS.map((item) => ({
+  raw: item,
+  termLower: item.term.toLowerCase(),
+  termBnLower: (item.termBn || '').toLowerCase(),
+  defLower: item.definition.toLowerCase(),
+}));
+
+interface IndexedScenarioItem {
+  raw: LegalOutcomeScenario;
+  id: string;
+  titleLower: string;
+  titleBnLower: string;
+  summaryLower: string;
+  legalAreaLower: string;
+}
+
+const INDEXED_SCENARIOS: IndexedScenarioItem[] = LEGAL_OUTCOME_SCENARIOS_DATA.map((scenario) => ({
+  raw: scenario,
+  id: scenario.id,
+  titleLower: scenario.topicTitle.toLowerCase(),
+  titleBnLower: scenario.topicTitleBn.toLowerCase(),
+  summaryLower: scenario.scenarioSummary.toLowerCase(),
+  legalAreaLower: scenario.legalArea.toLowerCase(),
+}));
+
+// ============================================================================
+// 5. MULTI-DATASET SEARCH & SCORING IMPLEMENTATION
+// ============================================================================
+
 interface LawsDbSearchResult {
   results: LegalRetrievalResult[];
   sectionExceeds?: {
@@ -377,22 +571,25 @@ function searchLawsDatabase(
   const results: LegalRetrievalResult[] = [];
   let sectionExceeds: { sectionNumber: string; statuteTitle: string; totalStatutorySections: number } | undefined;
 
-  for (const law of LAWS_DATABASE) {
+  // Hoist query-level regex and normalized section tokens before statute loops
+  let queryNormSec: string | undefined;
+  let secRefRegex: RegExp | undefined;
+
+  if (parsedTokens.sectionNumber) {
+    queryNormSec = normalizeSectionIdentifier(parsedTokens.sectionNumber);
+    secRefRegex = new RegExp(`\\b(?:section|sec|ধারা)?\\s*${queryNormSec}\\b`, 'i');
+  }
+
+  for (const law of INDEXED_LAWS_DB) {
     if (targetJurisdiction && targetJurisdiction !== 'All' && law.jurisdiction !== targetJurisdiction) {
       continue;
     }
 
-    const lawTitleLower = law.title.toLowerCase();
-    const lawTitleBnLower = law.titleBn.toLowerCase();
-    const shortTitleLower = (law.shortTitle || '').toLowerCase();
-    const overviewLower = law.overview.toLowerCase();
-    const actNumberLower = (law.actNumber || '').toLowerCase();
     const isTargetAct = parsedTokens.detectedActId === law.id;
 
     // Check if queried section exceeds total codified sections of this statute
-    if (isTargetAct && parsedTokens.sectionNumber && law.totalStatutorySectionsCount) {
-      const qSecNorm = normalizeSectionIdentifier(parsedTokens.sectionNumber);
-      const qNum = parseInt(qSecNorm, 10);
+    if (isTargetAct && parsedTokens.sectionNumber && law.totalStatutorySectionsCount && queryNormSec) {
+      const qNum = parseInt(queryNormSec, 10);
       if (!isNaN(qNum) && qNum > law.totalStatutorySectionsCount) {
         sectionExceeds = {
           sectionNumber: parsedTokens.sectionNumber,
@@ -403,93 +600,110 @@ function searchLawsDatabase(
     }
 
     // --- A. Section-Level Provision Matching ---
-    if (law.sections && law.sections.length > 0) {
-      for (const sec of law.sections) {
-        const secNumLower = sec.number.toLowerCase();
-        const secTitleLower = sec.title.toLowerCase();
-        const secContentLower = sec.content.toLowerCase();
-        const secExplainLower = (sec.simpleExplanation || '').toLowerCase();
-        const secPenaltyLower = (sec.punishmentOrRemedy || '').toLowerCase();
+    if (law.sections.length > 0) {
+      if (parsedTokens.sectionNumber && queryNormSec) {
+        // FAST-PATH: If target Act is explicitly known and this is a different Act,
+        // it cannot match the section or produce target cross-references.
+        if (parsedTokens.detectedActId && !isTargetAct) {
+          // Skip section evaluation entirely for non-target statutes
+        } else {
+          for (const sec of law.sections) {
+            if (queryNormSec === sec.normSec) {
+              const score = isTargetAct ? 100 : 88;
+              const matchReason: MatchReasonType = isTargetAct
+                ? 'exact-act-and-section'
+                : 'exact-section-candidate';
 
-        const matchReasons: MatchReasonType[] = [];
-        let score = 0;
-
-        // 1. Exact Section Match with Identified Act
-        if (parsedTokens.sectionNumber) {
-          const queryNormSec = normalizeSectionIdentifier(parsedTokens.sectionNumber);
-          const secNormSec = normalizeSectionIdentifier(sec.number);
-
-          if (queryNormSec === secNormSec) {
-            if (isTargetAct) {
-              score = 100;
-              matchReasons.push('exact-act-and-section');
-            } else if (!parsedTokens.detectedActId) {
-              score = 88; // Candidate section without explicit Act
-              matchReasons.push('exact-section-candidate');
-            } else {
-              // Target Act was explicitly specified and this is a different Act
-              continue;
-            }
-          } else {
-            // Queried section does not match this provision's section number.
-            // Check if this section references the queried section in its penalty or text (e.g. Sec 300 citing Sec 302)
-            const secRefRegex = new RegExp(`\\b(?:section|sec|ধারা)?\\s*${queryNormSec}\\b`, 'i');
-            if (secRefRegex.test(secPenaltyLower) || secRefRegex.test(secContentLower) || secRefRegex.test(secExplainLower)) {
-              if (isTargetAct || !parsedTokens.detectedActId) {
-                crossReferenceMentions.push({
-                  statuteId: law.id,
-                  statuteTitle: law.title,
-                  referencingSection: sec.number,
-                  referencingSectionTitle: sec.title,
-                  context: sec.punishmentOrRemedy || sec.content,
-                  note: `${sec.number} (${sec.title}) cross-references ${parsedTokens.sectionNumber} in its penalty or procedural clause.`,
-                });
+              results.push({
+                id: `${law.id}:${sec.number}`,
+                recordType: law.jurisdiction === 'International' ? 'treaty-provision' : 'statutory-provision',
+                sourceId: law.id,
+                displayTitle: law.title,
+                displayTitleBn: law.titleBn,
+                identifier: sec.number,
+                identifierBn: sec.titleBn ? `${sec.titleBn} (${sec.number})` : undefined,
+                matchingText: sec.content,
+                matchingTextBn: sec.contentBn,
+                explanation: sec.simpleExplanation,
+                penaltyOrRemedy: sec.punishmentOrRemedy,
+                relevanceScore: score,
+                matchReasons: [matchReason],
+                internalDestination: `/law/${law.id}?section=${encodeURIComponent(sec.number)}`,
+                officialSourceUrl: law.raw.sourceVerificationUrl,
+                officialGazetteRef: law.raw.officialGazetteRef,
+                sourceCompleteness: law.raw.isCuratedSubset ? 'curated-section-subset' : 'full-statutory-text',
+                jurisdiction: law.jurisdiction,
+                status: law.raw.status,
+                repealNote: law.raw.repealNote,
+              });
+            } else if (secRefRegex) {
+              // Queried section does not match this provision's section number.
+              // Check if this section references the queried section in its penalty or text
+              if (
+                secRefRegex.test(sec.penaltyLower) ||
+                secRefRegex.test(sec.contentLower) ||
+                secRefRegex.test(sec.explainLower)
+              ) {
+                if (isTargetAct || !parsedTokens.detectedActId) {
+                  crossReferenceMentions.push({
+                    statuteId: law.id,
+                    statuteTitle: law.title,
+                    referencingSection: sec.number,
+                    referencingSectionTitle: sec.title,
+                    context: sec.punishmentOrRemedy || sec.content,
+                    note: `${sec.number} (${sec.title}) cross-references ${parsedTokens.sectionNumber} in its penalty or procedural clause.`,
+                  });
+                }
               }
             }
-            // CRITICAL PROVISION ACCURACY GUARANTEE:
-            // When a specific section is queried, a provision with a different section number
-            // must NEVER be scored or returned as a matching provision!
-            continue;
           }
-        } else {
-          // General topic queries without specific section number
-          if (secTitleLower.includes(normalized) || (sec.titleBn && sec.titleBn.toLowerCase().includes(normalized))) {
+        }
+      } else {
+        // General topic queries without specific section number
+        for (const sec of law.sections) {
+          const matchReasons: MatchReasonType[] = [];
+          let score = 0;
+
+          if (
+            sec.titleLower.includes(normalized) ||
+            (sec.titleBnLower && sec.titleBnLower.includes(normalized))
+          ) {
             score = Math.max(score, isTargetAct ? 85 : 70);
             matchReasons.push('section-title-match');
           }
 
-          if (secContentLower.includes(normalized)) {
+          if (sec.contentLower.includes(normalized)) {
             score = Math.max(score, isTargetAct ? 65 : 45);
             matchReasons.push('statutory-content-match');
-          } else if (secExplainLower.includes(normalized)) {
+          } else if (sec.explainLower.includes(normalized)) {
             score = Math.max(score, isTargetAct ? 60 : 40);
             matchReasons.push('explanation-match');
           }
-        }
 
-        if (score > 0) {
-          results.push({
-            id: `${law.id}:${sec.number}`,
-            recordType: law.jurisdiction === 'International' ? 'treaty-provision' : 'statutory-provision',
-            sourceId: law.id,
-            displayTitle: law.title,
-            displayTitleBn: law.titleBn,
-            identifier: sec.number,
-            identifierBn: sec.titleBn ? `${sec.titleBn} (${sec.number})` : undefined,
-            matchingText: sec.content,
-            matchingTextBn: sec.contentBn,
-            explanation: sec.simpleExplanation,
-            penaltyOrRemedy: sec.punishmentOrRemedy,
-            relevanceScore: score,
-            matchReasons,
-            internalDestination: `/law/${law.id}?section=${encodeURIComponent(sec.number)}`,
-            officialSourceUrl: law.sourceVerificationUrl,
-            officialGazetteRef: law.officialGazetteRef,
-            sourceCompleteness: law.isCuratedSubset ? 'curated-section-subset' : 'full-statutory-text',
-            jurisdiction: law.jurisdiction,
-            status: law.status,
-            repealNote: law.repealNote,
-          });
+          if (score > 0) {
+            results.push({
+              id: `${law.id}:${sec.number}`,
+              recordType: law.jurisdiction === 'International' ? 'treaty-provision' : 'statutory-provision',
+              sourceId: law.id,
+              displayTitle: law.title,
+              displayTitleBn: law.titleBn,
+              identifier: sec.number,
+              identifierBn: sec.titleBn ? `${sec.titleBn} (${sec.number})` : undefined,
+              matchingText: sec.content,
+              matchingTextBn: sec.contentBn,
+              explanation: sec.simpleExplanation,
+              penaltyOrRemedy: sec.punishmentOrRemedy,
+              relevanceScore: score,
+              matchReasons,
+              internalDestination: `/law/${law.id}?section=${encodeURIComponent(sec.number)}`,
+              officialSourceUrl: law.raw.sourceVerificationUrl,
+              officialGazetteRef: law.raw.officialGazetteRef,
+              sourceCompleteness: law.raw.isCuratedSubset ? 'curated-section-subset' : 'full-statutory-text',
+              jurisdiction: law.jurisdiction,
+              status: law.raw.status,
+              repealNote: law.raw.repealNote,
+            });
+          }
         }
       }
     }
@@ -501,13 +715,13 @@ function searchLawsDatabase(
     if (isTargetAct) {
       actScore = parsedTokens.sectionNumber ? 75 : 90;
       actReasons.push('exact-act-title');
-    } else if (lawTitleLower.includes(normalized) || lawTitleBnLower.includes(normalized)) {
+    } else if (law.titleLower.includes(normalized) || law.titleBnLower.includes(normalized)) {
       actScore = 80;
       actReasons.push('exact-act-title');
-    } else if (shortTitleLower.includes(normalized) || actNumberLower.includes(normalized)) {
+    } else if (law.shortTitleLower.includes(normalized) || law.actNumberLower.includes(normalized)) {
       actScore = 75;
       actReasons.push('act-abbreviation');
-    } else if (overviewLower.includes(normalized)) {
+    } else if (law.overviewLower.includes(normalized)) {
       actScore = 40;
       actReasons.push('token-overlap');
     }
@@ -521,17 +735,17 @@ function searchLawsDatabase(
         displayTitleBn: law.titleBn,
         identifier: law.actNumber,
         matchingText: law.overview,
-        matchingTextBn: law.overviewBn,
-        explanation: law.simpleSummary || law.overview,
+        matchingTextBn: law.raw.overviewBn,
+        explanation: law.raw.simpleSummary || law.overview,
         relevanceScore: actScore,
         matchReasons: actReasons,
         internalDestination: `/law/${law.id}`,
-        officialSourceUrl: law.sourceVerificationUrl,
-        officialGazetteRef: law.officialGazetteRef,
-        sourceCompleteness: law.isCuratedSubset ? 'curated-section-subset' : 'full-statutory-text',
+        officialSourceUrl: law.raw.sourceVerificationUrl,
+        officialGazetteRef: law.raw.officialGazetteRef,
+        sourceCompleteness: law.raw.isCuratedSubset ? 'curated-section-subset' : 'full-statutory-text',
         jurisdiction: law.jurisdiction,
-        status: law.status,
-        repealNote: law.repealNote,
+        status: law.raw.status,
+        repealNote: law.raw.repealNote,
       });
     }
   }
@@ -540,93 +754,85 @@ function searchLawsDatabase(
 }
 
 /**
- * Searches Bangladesh Code Catalog records to support statutes not in LAWS_DATABASE
+ * Searches pre-indexed Bangladesh Code Catalog records
  */
 function searchBangladeshCodeCatalog(
   normalized: string,
-  parsedTokens: ParsedLegalTokens,
-  existingLawIds: Set<string>
+  parsedTokens: ParsedLegalTokens
 ): LegalRetrievalResult[] {
   const results: LegalRetrievalResult[] = [];
+  const queryNormSec = parsedTokens.sectionNumber
+    ? normalizeSectionIdentifier(parsedTokens.sectionNumber)
+    : undefined;
 
-  for (const record of BANGLADESH_CODE_CATALOG) {
-    // Avoid duplicate representations if the Act is already indexed in LAWS_DATABASE
-    if (existingLawIds.has(record.id)) continue;
-
-    const titleLower = record.title.toLowerCase();
-    const titleBnLower = record.titleBn.toLowerCase();
-    const shortTitleLower = record.shortTitle.toLowerCase();
-    const actNumLower = record.actNumber.toLowerCase();
-    const keywords = (record.keywords || []).map((k) => k.toLowerCase());
-
+  for (const item of INDEXED_CATALOG) {
     let recordScore = 0;
     const reasons: MatchReasonType[] = [];
 
-    if (titleLower.includes(normalized) || titleBnLower.includes(normalized)) {
+    if (item.titleLower.includes(normalized) || (item.titleBnLower && item.titleBnLower.includes(normalized))) {
       recordScore = 80;
       reasons.push('exact-act-title');
-    } else if (shortTitleLower.includes(normalized) || actNumLower.includes(normalized)) {
+    } else if (item.shortTitleLower.includes(normalized) || item.actNumberLower.includes(normalized)) {
       recordScore = 75;
       reasons.push('act-abbreviation');
-    } else if (keywords.some((kw) => kw.includes(normalized))) {
+    } else if (item.keywordsLower.some((kw) => kw.includes(normalized))) {
       recordScore = 55;
       reasons.push('keyword-match');
     }
 
     if (recordScore > 0) {
       results.push({
-        id: `${record.id}:catalog`,
+        id: `${item.id}:catalog`,
         recordType: 'statute-metadata',
-        sourceId: record.id,
-        displayTitle: record.title,
-        displayTitleBn: record.titleBn,
-        identifier: record.actNumber,
-        matchingText: record.overview,
-        matchingTextBn: record.overviewBn,
-        explanation: record.overview,
+        sourceId: item.id,
+        displayTitle: item.title,
+        displayTitleBn: item.titleBn,
+        identifier: item.actNumber,
+        matchingText: item.raw.overview,
+        matchingTextBn: item.raw.overviewBn,
+        explanation: item.raw.overview,
         relevanceScore: recordScore,
         matchReasons: reasons,
-        internalDestination: `/law/${record.id}`,
-        officialSourceUrl: record.sourceUrl,
-        officialGazetteRef: record.officialGazetteCitation,
+        internalDestination: `/law/${item.id}`,
+        officialSourceUrl: item.raw.sourceUrl,
+        officialGazetteRef: item.raw.officialGazetteCitation,
         sourceCompleteness: 'catalog-metadata-only',
-        jurisdiction: record.jurisdiction,
-        status: record.status,
+        jurisdiction: item.raw.jurisdiction,
+        status: item.raw.status,
       });
     }
 
     // Check catalog sections if present
-    if (record.sections && record.sections.length > 0) {
-      for (const sec of record.sections) {
-        if (parsedTokens.sectionNumber) {
-          if (parsedTokens.detectedActId && parsedTokens.detectedActId !== record.id) {
-            continue;
-          }
-          const qSecNorm = normalizeSectionIdentifier(parsedTokens.sectionNumber);
-          const secNorm = normalizeSectionIdentifier(sec.number);
-          if (qSecNorm === secNorm) {
-            results.push({
-              id: `${record.id}:${sec.number}`,
-              recordType: 'statutory-provision',
-              sourceId: record.id,
-              displayTitle: record.title,
-              displayTitleBn: record.titleBn,
-              identifier: sec.number,
-              identifierBn: sec.titleBn,
-              matchingText: sec.content,
-              matchingTextBn: sec.contentBn,
-              explanation: sec.simpleExplanation,
-              penaltyOrRemedy: sec.penalty,
-              relevanceScore: parsedTokens.detectedActId === record.id ? 98 : 86,
-              matchReasons: parsedTokens.detectedActId === record.id ? ['exact-act-and-section'] : ['exact-section-candidate'],
-              internalDestination: `/law/${record.id}?section=${encodeURIComponent(sec.number)}`,
-              officialSourceUrl: record.sourceUrl,
-              officialGazetteRef: record.officialGazetteCitation,
-              sourceCompleteness: 'curated-section-subset',
-              jurisdiction: record.jurisdiction,
-              status: record.status,
-            });
-          }
+    if (queryNormSec && item.sections.length > 0) {
+      if (parsedTokens.detectedActId && parsedTokens.detectedActId !== item.id) {
+        continue;
+      }
+      for (const sec of item.sections) {
+        if (queryNormSec === sec.normSec) {
+          results.push({
+            id: `${item.id}:${sec.number}`,
+            recordType: 'statutory-provision',
+            sourceId: item.id,
+            displayTitle: item.title,
+            displayTitleBn: item.titleBn,
+            identifier: sec.number,
+            identifierBn: sec.titleBn,
+            matchingText: sec.content,
+            matchingTextBn: sec.contentBn,
+            explanation: sec.simpleExplanation,
+            penaltyOrRemedy: sec.penalty,
+            relevanceScore: parsedTokens.detectedActId === item.id ? 98 : 86,
+            matchReasons:
+              parsedTokens.detectedActId === item.id
+                ? ['exact-act-and-section']
+                : ['exact-section-candidate'],
+            internalDestination: `/law/${item.id}?section=${encodeURIComponent(sec.number)}`,
+            officialSourceUrl: item.raw.sourceUrl,
+            officialGazetteRef: item.raw.officialGazetteCitation,
+            sourceCompleteness: 'curated-section-subset',
+            jurisdiction: item.raw.jurisdiction,
+            status: item.raw.status,
+          });
         }
       }
     }
@@ -641,44 +847,40 @@ function searchBangladeshCodeCatalog(
 function searchGlossary(normalized: string): LegalRetrievalResult[] {
   const results: LegalRetrievalResult[] = [];
 
-  for (const item of GLOSSARY_TERMS) {
-    const termLower = item.term.toLowerCase();
-    const termBnLower = (item.termBn || '').toLowerCase();
-    const defLower = item.definition.toLowerCase();
-
+  for (const item of INDEXED_GLOSSARY) {
     let score = 0;
     const reasons: MatchReasonType[] = [];
 
-    if (termLower === normalized || (termBnLower && termBnLower === normalized)) {
+    if (item.termLower === normalized || (item.termBnLower && item.termBnLower === normalized)) {
       score = 90;
       reasons.push('glossary-exact');
     } else if (
-      normalized.includes(termLower) ||
-      termLower.includes(normalized) ||
-      (termBnLower && normalized.includes(termBnLower))
+      normalized.includes(item.termLower) ||
+      item.termLower.includes(normalized) ||
+      (item.termBnLower && normalized.includes(item.termBnLower))
     ) {
       score = 80;
       reasons.push('glossary-exact');
-    } else if (defLower.includes(normalized)) {
+    } else if (item.defLower.includes(normalized)) {
       score = 45;
       reasons.push('statutory-content-match');
     }
 
     if (score > 0) {
       results.push({
-        id: `glossary:${item.term}`,
+        id: `glossary:${item.raw.term}`,
         recordType: 'glossary-term',
         sourceId: 'NYAYOTA_GLOSSARY',
-        displayTitle: item.term,
-        displayTitleBn: item.termBn,
-        identifier: `Term (${item.category})`,
-        matchingText: item.definition,
-        explanation: item.simpleExplanation,
+        displayTitle: item.raw.term,
+        displayTitleBn: item.raw.termBn,
+        identifier: `Term (${item.raw.category})`,
+        matchingText: item.raw.definition,
+        explanation: item.raw.simpleExplanation,
         relevanceScore: score,
         matchReasons: reasons,
-        internalDestination: `/glossary?term=${encodeURIComponent(item.term)}`,
+        internalDestination: `/glossary?term=${encodeURIComponent(item.raw.term)}`,
         sourceCompleteness: 'conceptual-definition',
-        jurisdiction: item.jurisdiction || 'Universal',
+        jurisdiction: item.raw.jurisdiction || 'Universal',
       });
     }
   }
@@ -692,29 +894,24 @@ function searchGlossary(normalized: string): LegalRetrievalResult[] {
 function searchOutcomeScenarios(normalized: string): LegalRetrievalResult[] {
   const results: LegalRetrievalResult[] = [];
 
-  for (const scenario of LEGAL_OUTCOME_SCENARIOS_DATA) {
-    const titleLower = scenario.topicTitle.toLowerCase();
-    const titleBnLower = scenario.topicTitleBn.toLowerCase();
-    const summaryLower = scenario.scenarioSummary.toLowerCase();
-    const legalAreaLower = scenario.legalArea.toLowerCase();
-
+  for (const item of INDEXED_SCENARIOS) {
     let score = 0;
     const reasons: MatchReasonType[] = [];
 
-    const isExactTitle = titleLower === normalized || (titleBnLower && titleBnLower === normalized);
+    const isExactTitle = item.titleLower === normalized || (item.titleBnLower && item.titleBnLower === normalized);
     const isContained =
-      normalized.includes(titleLower) ||
-      titleLower.includes(normalized) ||
-      (titleBnLower && normalized.includes(titleBnLower));
+      normalized.includes(item.titleLower) ||
+      item.titleLower.includes(normalized) ||
+      (item.titleBnLower && normalized.includes(item.titleBnLower));
 
     const isKeywordHit =
-      (normalized.includes('cheque') && scenario.id === 'scenario-cheque-dishonor-ni-act') ||
-      (normalized.includes('arrest') && scenario.id === 'scenario-unlawful-arrest') ||
-      (normalized.includes('gd') && scenario.id === 'scenario-unlawful-arrest') ||
-      (normalized.includes('theft') && scenario.id === 'scenario-theft-fraud') ||
-      (normalized.includes('contract') && scenario.id === 'scenario-commercial-contract-breach') ||
-      (normalized.includes('injunction') && scenario.id === 'scenario-temporary-injunction-property') ||
-      (normalized.includes('cyber') && scenario.id === 'scenario-cyber-extortion');
+      (normalized.includes('cheque') && item.id === 'scenario-cheque-dishonor-ni-act') ||
+      (normalized.includes('arrest') && item.id === 'scenario-unlawful-arrest') ||
+      (normalized.includes('gd') && item.id === 'scenario-unlawful-arrest') ||
+      (normalized.includes('theft') && item.id === 'scenario-theft-fraud') ||
+      (normalized.includes('contract') && item.id === 'scenario-commercial-contract-breach') ||
+      (normalized.includes('injunction') && item.id === 'scenario-temporary-injunction-property') ||
+      (normalized.includes('cyber') && item.id === 'scenario-cyber-extortion');
 
     if (isExactTitle) {
       score = 90;
@@ -725,30 +922,37 @@ function searchOutcomeScenarios(normalized: string): LegalRetrievalResult[] {
     } else if (isKeywordHit) {
       score = 75;
       reasons.push('scenario-match');
-    } else if (summaryLower.includes(normalized) || legalAreaLower.includes(normalized) || normalized.includes(legalAreaLower)) {
+    } else if (
+      item.summaryLower.includes(normalized) ||
+      item.legalAreaLower.includes(normalized) ||
+      normalized.includes(item.legalAreaLower)
+    ) {
       score = 58;
       reasons.push('keyword-match');
     }
 
     if (score > 0) {
       results.push({
-        id: `outcome:${scenario.id}`,
+        id: `outcome:${item.id}`,
         recordType: 'outcome-scenario',
-        sourceId: scenario.id,
-        displayTitle: scenario.topicTitle,
-        displayTitleBn: scenario.topicTitleBn,
-        matchingText: scenario.proceduralSteps && scenario.proceduralSteps.length > 0
-          ? `${scenario.scenarioSummary}\n\nProcedural Steps:\n` +
-            scenario.proceduralSteps.map((s) => `${s.step}. ${s.title}: ${s.description}`).join('\n')
-          : scenario.scenarioSummary,
-        matchingTextBn: scenario.scenarioSummaryBn,
-        explanation: `Procedural guidance: ${scenario.proceduralClassification.filingMechanism} (${scenario.proceduralClassification.trialCourt})`,
-        penaltyOrRemedy: scenario.statutoryConsequences.civilRemedies.join('; ') || scenario.statutoryConsequences.potentialPenalties.join('; '),
+        sourceId: item.id,
+        displayTitle: item.raw.topicTitle,
+        displayTitleBn: item.raw.topicTitleBn,
+        matchingText:
+          item.raw.proceduralSteps && item.raw.proceduralSteps.length > 0
+            ? `${item.raw.scenarioSummary}\n\nProcedural Steps:\n` +
+              item.raw.proceduralSteps.map((s) => `${s.step}. ${s.title}: ${s.description}`).join('\n')
+            : item.raw.scenarioSummary,
+        matchingTextBn: item.raw.scenarioSummaryBn,
+        explanation: `Procedural guidance: ${item.raw.proceduralClassification.filingMechanism} (${item.raw.proceduralClassification.trialCourt})`,
+        penaltyOrRemedy:
+          item.raw.statutoryConsequences.civilRemedies.join('; ') ||
+          item.raw.statutoryConsequences.potentialPenalties.join('; '),
         relevanceScore: score,
         matchReasons: reasons,
-        internalDestination: `/legal-outcome-guide?topic=${encodeURIComponent(scenario.id)}`,
+        internalDestination: `/legal-outcome-guide?topic=${encodeURIComponent(item.id)}`,
         sourceCompleteness: 'procedural-guide',
-        jurisdiction: scenario.jurisdiction,
+        jurisdiction: item.raw.jurisdiction,
       });
     }
   }
@@ -757,7 +961,7 @@ function searchOutcomeScenarios(normalized: string): LegalRetrievalResult[] {
 }
 
 // ============================================================================
-// 5. PUBLIC RETRIEVAL ENGINE ENTRY POINT
+// 6. PUBLIC RETRIEVAL ENGINE ENTRY POINT
 // ============================================================================
 
 /**
@@ -804,12 +1008,11 @@ export function retrieveLegalSources(
     crossReferenceMentions
   );
 
-  const existingLawIds = new Set(LAWS_DATABASE.map((l) => l.id));
-
   // Search Bangladesh Code catalog if enabled
-  const catalogMatches = options.includeCatalogRecords !== false
-    ? searchBangladeshCodeCatalog(normalized, parsedTokens, existingLawIds)
-    : [];
+  const catalogMatches =
+    options.includeCatalogRecords !== false
+      ? searchBangladeshCodeCatalog(normalized, parsedTokens)
+      : [];
 
   const glossaryMatches = searchGlossary(normalized);
   const scenarioMatches = searchOutcomeScenarios(normalized);
