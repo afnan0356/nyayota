@@ -30,7 +30,11 @@ import {
   routeConversationalQuery,
   handleConversationalTurn,
   generateNaturalConversationalResponse,
+  generateLegalStream,
+  createLegalEventStream,
+  createLegalStreamingResponse,
   RoutingDecision,
+  LegalStreamEvent,
 } from './conversation';
 
 // ============================================================================
@@ -514,3 +518,42 @@ export async function executeNyayotaAIPipeline(
     conversationalRouting: convDecision,
   };
 }
+
+/**
+ * Streaming service pipeline executor (Phase 8).
+ * Provides an async generator of LegalStreamEvent for progressive UI consumption.
+ */
+export async function* executeNyayotaAIStreamingPipeline(
+  request: NyayotaAIServiceRequest & { signal?: AbortSignal }
+): AsyncGenerator<LegalStreamEvent, void, unknown> {
+  const { sanitized: cleanQuery } = sanitizeInputQuery(request?.query);
+  const convContext = buildConversationContext(request.messages, request.lawContext);
+  const convDecision = routeConversationalQuery(cleanQuery || '', convContext);
+
+  let sources: DeterministicSourceCitation[] = [];
+  let deterministicResponse: DeterministicLegalResponse | undefined;
+
+  if (convDecision.shouldRetrieve) {
+    const route = await routeQuery(cleanQuery, {
+      limit: request.options?.limit || 6,
+      minScore: request.options?.minScore || 25,
+      targetJurisdiction: request.options?.targetJurisdiction,
+      includeCatalogRecords: request.options?.includeCatalogRecords,
+    });
+    deterministicResponse = generateResponseFromRoute(route);
+    sources = deterministicResponse.sources || [];
+  }
+
+  yield* generateLegalStream({
+    query: cleanQuery || request.query || '',
+    context: convContext,
+    decision: convDecision,
+    sources,
+    deterministicResponse,
+    targetLanguage: request.language || 'both',
+    apiKey: request.apiKey,
+    genAiClient: request.genAiClient,
+    signal: request.signal,
+  });
+}
+

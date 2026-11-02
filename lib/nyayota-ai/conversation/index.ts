@@ -10,3 +10,5 @@ export * from './intent-detector';
 export * from './conversational-router';
 export * from './conversation-handler';
 export * from './natural-response-engine';
+export * from './streaming-response-engine';
+export * from './stream-parser';

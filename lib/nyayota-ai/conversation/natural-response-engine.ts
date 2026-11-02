@@ -14,6 +14,7 @@
  * 7. Multi-Jurisdiction Awareness: Discloses boundaries for foreign unindexed systems.
  */
 
+import { createHash } from 'crypto';
 import { GoogleGenAI } from '@google/genai';
 import {
   ConversationContext,
@@ -63,13 +64,15 @@ const EDUCATIONAL_DISCLAIMER_BN =
   'সতর্কবার্তা: ন্যায়তা শুধুমাত্র শিক্ষামূলক আইনি গবেষণার তথ্য প্রদান করে এবং এটি আনুষ্ঠানিক আইনি প্রতিনিধিত্ব বা পরামর্শ নয়।';
 
 /**
- * Server-side cache for GoogleGenAI SDK instances keyed by API key hash/value.
- * Avoids repeated client reconstruction on every conversational turn.
+ * Server-side cache for GoogleGenAI SDK instances keyed by SHA-256 hash.
+ * Avoids storing plaintext API credentials as Map keys while preventing
+ * redundant client reconstruction on every conversational turn.
  */
 const genAiClientCache = new Map<string, GoogleGenAI>();
 
 export function getOrCreateGenAiClient(apiKey: string): GoogleGenAI {
-  let client = genAiClientCache.get(apiKey);
+  const cacheKey = createHash('sha256').update(apiKey).digest('hex');
+  let client = genAiClientCache.get(cacheKey);
   if (!client) {
     if (genAiClientCache.size >= 10) {
       const oldestKey = genAiClientCache.keys().next().value;
@@ -83,7 +86,7 @@ export function getOrCreateGenAiClient(apiKey: string): GoogleGenAI {
         },
       },
     });
-    genAiClientCache.set(apiKey, client);
+    genAiClientCache.set(cacheKey, client);
   }
   return client;
 }
