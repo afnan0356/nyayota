@@ -31,6 +31,7 @@ import {
   formatGeminiContents,
   sanitizeGeneratedResponse,
   buildSystemInstruction,
+  generateNaturalConversationalResponse,
   ServiceChatMessage,
 } from '@/lib/nyayota-ai';
 
@@ -680,6 +681,252 @@ The appointed advocate must adhere strictly to the canons of professional conduc
       expect(res.headers.get('Retry-After')).toBe('86400');
       expect(res.headers.get('Cache-Control')).toContain('no-store');
     });
+
+    it('rejects attempts to bypass suspension via spoofed client parameters or headers', async () => {
+      const bypassAttempts = [
+        { query: 'Section 302', engine: 'deterministic', admin: true },
+        { query: 'Section 302', engine: 'general', bypass: '1' },
+        { query: 'Section 302', isInternal: true },
+        { query: 'Section 302', authorization: 'Bearer secret-token' },
+      ];
+
+      for (const payload of bypassAttempts) {
+        const req = new NextRequest('http://localhost:3000/api/ai-assistant?bypass=true&admin=1', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Admin-Access': 'true',
+            'Authorization': 'Bearer test-admin',
+          },
+          body: JSON.stringify(payload),
+        });
+
+        const res = await POST(req);
+        expect(res.status).toBe(503);
+      }
+    });
+  });
+
+  // ==========================================================================
+  // 12. Robustness to Malformed Responses, Network Drops & Timeouts
+  // ==========================================================================
+  describe('12. Robustness to Malformed Responses & Network Outages', () => {
+    it('falls back to deterministic analysis when Gemini returns an empty or whitespace string', async () => {
+      const mockEmptyClient = {
+        models: {
+          generateContent: async () => ({ text: '   ' }),
+        },
+      };
+
+      const result = await executeNyayotaAIPipeline({
+        query: 'What is Section 302 of the Penal Code?',
+        language: 'en',
+        generateNaturalResponse: true,
+        genAiClient: mockEmptyClient,
+      });
+
+      expect(result.success).toBe(true);
+      expect(result.generationMethod).toBe('deterministic-fallback');
+      expect(result.text).toContain('Penal Code');
+      expect(result.sources.length).toBeGreaterThan(0);
+    });
+
+    it('falls back to deterministic analysis when Gemini response text property is undefined or null', async () => {
+      const mockMalformedClient = {
+        models: {
+          generateContent: async () => ({}),
+        },
+      };
+
+      const result = await executeNyayotaAIPipeline({
+        query: 'What is Section 378 of the Penal Code?',
+        language: 'en',
+        generateNaturalResponse: true,
+        genAiClient: mockMalformedClient,
+      });
+
+      expect(result.success).toBe(true);
+      expect(result.generationMethod).toBe('deterministic-fallback');
+      expect(result.text).toContain('Section 378');
+    });
+
+    it('falls back to deterministic analysis when network fetch throws a connection error', async () => {
+      const mockNetworkFailureClient = {
+        models: {
+          generateContent: async () => {
+            throw new TypeError('fetch failed: ECONNREFUSED');
+          },
+        },
+      };
+
+      const result = await executeNyayotaAIPipeline({
+        query: 'Explain Section 300 of the Penal Code',
+        language: 'en',
+        generateNaturalResponse: true,
+        genAiClient: mockNetworkFailureClient,
+      });
+
+      expect(result.success).toBe(true);
+      expect(result.generationMethod).toBe('deterministic-fallback');
+      expect(result.text.toLowerCase()).toContain('murder');
+      expect(result.provider).toBe('nyayota-legal-engine-v1');
+    });
+
+    it('respects timeout configuration and falls back when timeoutMs expires', async () => {
+      const mockHangingClient = {
+        models: {
+          generateContent: async () => {
+            await new Promise((resolve) => setTimeout(resolve, 300));
+            return { text: 'Delayed response' };
+          },
+        },
+      };
+
+      const context = buildConversationContext([]);
+      const decision = routeConversationalQuery('Section 302', context);
+
+      const result = await generateNaturalConversationalResponse({
+        query: 'Section 302',
+        context,
+        decision,
+        timeoutMs: 50, // Short 50ms timeout for testing
+        genAiClient: mockHangingClient,
+      });
+
+      expect(result.generationMethod).toBe('deterministic-fallback');
+    });
+  });
+
+  // ==========================================================================
+  // 13. Route-Level Request Validation & Character Budget Limits
+  // ==========================================================================
+  describe('13. Route-Level Request Validation & Character Budgets', () => {
+    // Temporarily enable assistant for validation testing, then strictly restore suspension
+    const withActiveAssistant = async (fn: () => Promise<void>) => {
+      const original = Object.getOwnPropertyDescriptor(AI_CONFIG, 'isPublicAssistantAvailable');
+      Object.defineProperty(AI_CONFIG, 'isPublicAssistantAvailable', {
+        value: true,
+        configurable: true,
+        writable: true,
+      });
+      try {
+        await fn();
+      } finally {
+        if (original) {
+          Object.defineProperty(AI_CONFIG, 'isPublicAssistantAvailable', original);
+        } else {
+          Object.defineProperty(AI_CONFIG, 'isPublicAssistantAvailable', {
+            get: () => false,
+            configurable: true,
+          });
+        }
+      }
+    };
+
+    it('rejects non-JSON Content-Type with HTTP 415', async () => {
+      await withActiveAssistant(async () => {
+        const req = new NextRequest('http://localhost:3000/api/ai-assistant', {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain' },
+          body: 'query=Section 302',
+        });
+        const res = await POST(req);
+        expect(res.status).toBe(415);
+        const data = await res.json();
+        expect(data.error).toContain('Invalid Content-Type');
+      });
+    });
+
+    it('rejects empty, missing, or whitespace-only queries with HTTP 400', async () => {
+      await withActiveAssistant(async () => {
+        const emptyBodies = [{}, { query: '' }, { query: '   ' }, { query: 'a' }];
+        for (const body of emptyBodies) {
+          const req = new NextRequest('http://localhost:3000/api/ai-assistant', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body),
+          });
+          const res = await POST(req);
+          expect(res.status).toBe(400);
+        }
+      });
+    });
+
+    it('rejects queries exceeding 1,500 characters with HTTP 400', async () => {
+      await withActiveAssistant(async () => {
+        const overlyLongQuery = 'Section 300 '.repeat(150); // 1800 chars
+        const req = new NextRequest('http://localhost:3000/api/ai-assistant', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ query: overlyLongQuery }),
+        });
+        const res = await POST(req);
+        expect(res.status).toBe(400);
+        const data = await res.json();
+        expect(data.error).toContain('maximum allowed length');
+      });
+    });
+
+    it('caps individual messages at 2,000 characters and filters invalid roles', async () => {
+      await withActiveAssistant(async () => {
+        const longContent = 'A'.repeat(2500);
+        const req = new NextRequest('http://localhost:3000/api/ai-assistant', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            query: 'Explain Section 300',
+            engine: 'deterministic',
+            messages: [
+              { role: 'user', content: longContent },
+              { role: 'invalid_role', content: 'Should be dropped' },
+              { role: 'assistant', content: 'Valid previous turn' },
+            ],
+          }),
+        });
+        const res = await POST(req);
+        expect(res.status).toBe(200);
+        const data = await res.json();
+        expect(data.engine).toBe('deterministic');
+      });
+    });
+  });
+
+  // ==========================================================================
+  // 14. Multi-Reference Disambiguation & Cross-Turn Consistency
+  // ==========================================================================
+  describe('14. Multi-Reference Disambiguation & Consistency', () => {
+    it('correctly maps Bengali numerals across multi-turn statutory queries', () => {
+      const messages: ServiceChatMessage[] = [
+        { role: 'user', content: 'দণ্ডবিধির ধারা ৩০২ এর বিধান কী?' },
+        { role: 'assistant', content: 'দণ্ডবিধির ৩০২ ধারা অনুযায়ী হত্যার শাস্তি নির্ধারিত।' },
+      ];
+
+      const context = buildConversationContext(messages);
+      expect(context.activeSection).toBe('Section 302');
+      expect(context.activeAct?.title).toContain('Penal Code');
+
+      // Follow-up with Bengali numerals referencing another section
+      const decision = routeConversationalQuery('এর সাথে ৩৯২ ধারা তুলনা করুন', context);
+      expect(decision.intent).toBe('legal_follow_up');
+      expect(decision.effectiveRetrievalQuery).toContain('392');
+    });
+
+    it('isolates foreign legal queries and prevents cross-jurisdiction bleed', async () => {
+      const ipcResult = await executeNyayotaAIPipeline({
+        query: 'What is Section 420 under the Indian Penal Code (IPC)?',
+      });
+      // Strictly clarifies IPC is outside Bangladesh coverage rather than falsely retrieving Bangladesh Penal Code
+      expect(ipcResult.detectedIntent).toBe('clarification_needed');
+      expect(ipcResult.clarificationPrompt).toBeDefined();
+      expect(ipcResult.text).toContain('IPC');
+      expect(ipcResult.text).toContain('Indian Penal Code');
+
+      const usResult = await executeNyayotaAIPipeline({
+        query: 'What is the First Amendment of the US Constitution?',
+      });
+      expect(usResult.text).toContain('Bangladesh');
+    });
   });
 
 });
+

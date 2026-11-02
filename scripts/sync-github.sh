@@ -1,27 +1,31 @@
 #!/usr/bin/env bash
 # ==============================================================================
-# NYAYOTA AI — GitHub Synchronization Helper Script (Hardened)
+# NYAYOTA AI — GitHub Synchronization Pipeline (Hardened & Audited)
 # Phase 6C: Natural Conversational Response Engine
 # Official Repository: https://github.com/afnan0356/nyayota.git
 # ==============================================================================
-# Architectural & Security Directives:
-#   1. NEVER automatically run "git init". Prevents creating detached, unlinked
-#      repositories with fabricated commit history.
-#   2. Enforces execution inside a genuine clone of https://github.com/afnan0356/nyayota.
-#   3. Validates official remote repository URL. Preserves existing remotes and
-#      never overwrites unrelated configurations.
-#   4. Strictly stages ONLY the 8 authorized Phase 6C manifest files.
-#   5. Strictly forbids staging .env files, tokens, credentials, or build artifacts.
-#   6. Prohibits destructive git commands: NO force-push (--force), NO git reset --hard,
-#      NO history rewriting, NO silent branch overwriting.
-#   7. Provides a genuinely read-only --dry-run mode that mutates no state.
-#   8. Enforces automated pre-flight checks: bun test, npm run lint, npm run build.
-#   9. Preserves all Nyayota security constraints: public AI assistant remains suspended.
+# Architectural & Security Guarantees:
+#   1. Zero Eval Execution: All commands execute directly with quoted arguments;
+#      no `eval` is used anywhere in this script.
+#   2. Branch Validation: Branch names are strictly validated using Git's
+#      `check-ref-format --branch` mechanism to prevent argument injection.
+#   3. Strict Remote Identity: Host must be 'github.com' and repository path must
+#      match 'afnan0356/nyayota'. Unrelated remotes are never overwritten.
+#   4. Protection of Pre-Existing Staged Work: Inspects index before staging.
+#      If unrelated staged changes are detected, aborts safely without altering index.
+#   5. Strictly Bounded Manifest: Stages ONLY the 8 authorized Phase 6C files.
+#      Forbidden files (.env*, credentials, build outputs, node_modules) are blocked.
+#   6. Zero History Rewriting: NO `git init`, NO `git reset --hard`, NO force-push.
+#   7. Genuinely Read-Only Dry-Run: `--dry-run` performs static inspection only;
+#      it does NOT execute builds, cache writes, branch switches, or Git mutations.
+#   8. Automated Quality Gates: Live sync enforces `bun test`, `npm run lint`, and
+#      `NODE_ENV=production npm run build`.
+#   9. Credential Safety: Scans manifest files for tokens and redacts outputs.
 # ==============================================================================
 
 set -euo pipefail
 
-# ANSI color codes for clear terminal reporting
+# ANSI color codes
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
@@ -31,9 +35,10 @@ BOLD='\033[1m'
 DIM='\033[2m'
 NC='\033[0m' # No Color
 
-# Official repository configuration
-OFFICIAL_REPO_SSH="git@github.com:afnan0356/nyayota.git"
+# Official repository reference constants
+OFFICIAL_OWNER_REPO="afnan0356/nyayota"
 OFFICIAL_REPO_HTTPS="https://github.com/afnan0356/nyayota.git"
+OFFICIAL_REPO_SSH="git@github.com:afnan0356/nyayota.git"
 DEFAULT_BRANCH="feature/phase-6c-natural-response-engine"
 
 # User-configurable parameters
@@ -41,8 +46,9 @@ REMOTE_URL="${REMOTE_URL:-$OFFICIAL_REPO_HTTPS}"
 BRANCH_NAME="${BRANCH_NAME:-$DEFAULT_BRANCH}"
 DRY_RUN=false
 SKIP_TESTS=false
+VALIDATE_QUALITY=false
 
-# Expected Phase 6C file manifest (strictly bounded)
+# Authorized Phase 6C file manifest (strictly bounded)
 PHASE_6C_FILES=(
   "lib/ai-config.ts"
   "lib/nyayota-ai/conversation/types.ts"
@@ -54,7 +60,7 @@ PHASE_6C_FILES=(
   "scripts/sync-github.sh"
 )
 
-# Parse command line flags
+# Parse command line arguments safely
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --dry-run)
@@ -63,6 +69,10 @@ while [[ $# -gt 0 ]]; do
       ;;
     --skip-tests)
       SKIP_TESTS=true
+      shift
+      ;;
+    --validate-quality)
+      VALIDATE_QUALITY=true
       shift
       ;;
     --branch)
@@ -82,27 +92,30 @@ while [[ $# -gt 0 ]]; do
       shift 2
       ;;
     --help|-h)
-      echo -e "${BOLD}${CYAN}NYAYOTA AI — GitHub Synchronization Helper (Hardened)${NC}"
+      echo -e "${BOLD}${CYAN}NYAYOTA AI — GitHub Synchronization Pipeline (Hardened)${NC}"
       echo ""
       echo -e "Usage: ${BOLD}./scripts/sync-github.sh [OPTIONS]${NC}"
       echo ""
       echo "Options:"
-      echo "  --dry-run       Read-only inspection; outputs planned actions without modifying state."
-      echo "  --skip-tests    Skip pre-flight test, lint, and build execution (use with caution)."
-      echo "  --branch NAME   Target feature branch (default: feature/phase-6c-natural-response-engine)."
-      echo "  --remote URL    Target repository remote URL (default: https://github.com/afnan0356/nyayota.git)."
-      echo "  --help, -h      Show this guidance screen."
+      echo "  --dry-run             Strictly read-only inspection; outputs planned actions without file or Git changes."
+      echo "  --validate-quality    Run full test, lint, and build checks during dry-run."
+      echo "  --skip-tests          Bypass pre-flight quality checks during live execution (use with caution)."
+      echo "  --branch NAME         Target feature branch (default: feature/phase-6c-natural-response-engine)."
+      echo "  --remote URL          Target remote URL (default: https://github.com/afnan0356/nyayota.git)."
+      echo "  --help, -h            Display this help guidance."
       echo ""
       echo "Safety Guarantees:"
       echo "  - NEVER runs 'git init' or creates disconnected repositories."
-      echo "  - Stages ONLY the 8 authorized Phase 6C files."
-      echo "  - Never force-pushes or rewrites git history."
-      echo "  - Pre-flight checks: bun test, npm run lint, npm run build."
+      echo "  - Prohibits eval execution and validates branch names via Git check-ref-format."
+      echo "  - Validates remote against official owner/repo: ${OFFICIAL_OWNER_REPO}."
+      echo "  - Protects pre-existing staged changes from being mixed into Phase 6C commit."
+      echo "  - Stages strictly the 8 authorized Phase 6C manifest files."
+      echo "  - Never force-pushes or rewrites repository history."
       exit 0
       ;;
     *)
       echo -e "${RED}Unknown option: $1${NC}" >&2
-      echo "Run './scripts/sync-github.sh --help' for usage guidance." >&2
+      echo "Run './scripts/sync-github.sh --help' for usage instructions." >&2
       exit 1
       ;;
   esac
@@ -113,29 +126,60 @@ echo -e "${BOLD}${CYAN}   NYAYOTA AI — Hardened GitHub Synchronization Pipelin
 echo -e "${BOLD}${CYAN}======================================================================${NC}"
 echo -e "Target Repository : ${BLUE}${REMOTE_URL}${NC}"
 echo -e "Target Branch     : ${BLUE}${BRANCH_NAME}${NC}"
-echo -e "Execution Mode    : $([ "$DRY_RUN" = true ] && echo -e "${YELLOW}DRY-RUN (Strictly Read-Only)${NC}" || echo -e "${GREEN}LIVE EXECUTION${NC}")"
-echo -e "Pre-Flight Checks : $([ "$SKIP_TESTS" = true ] && echo -e "${YELLOW}SKIPPED (--skip-tests)${NC}" || echo -e "${GREEN}ENABLED (test, lint, build)${NC}")"
+echo -e "Execution Mode    : $([ "$DRY_RUN" = true ] && echo -e "${YELLOW}STRICT DRY-RUN (Read-Only Inspection)${NC}" || echo -e "${GREEN}LIVE SYNCHRONIZATION EXECUTION${NC}")"
+echo -e "Quality Gates     : $([ "$SKIP_TESTS" = true ] && echo -e "${YELLOW}SKIPPED (--skip-tests)${NC}" || ([ "$DRY_RUN" = true ] && [ "$VALIDATE_QUALITY" = false ] && echo -e "${DIM}DEFERRED IN DRY-RUN (use --validate-quality to run)${NC}" || echo -e "${GREEN}ENABLED (test, lint, build)${NC}"))"
 echo ""
 
-# Helper to execute or dry-run command safely
-run_cmd() {
-  local cmd="$*"
-  if [ "$DRY_RUN" = true ]; then
-    echo -e "${YELLOW}[DRY-RUN WOULD EXECUTE]${NC} ${cmd}"
-  else
-    echo -e "${CYAN}==>${NC} ${cmd}"
-    eval "$cmd"
+# ------------------------------------------------------------------------------
+# STEP 1: Branch Name Syntax & Injection Validation
+# ------------------------------------------------------------------------------
+echo -e "${BOLD}[1/8] Validating target branch name syntax...${NC}"
+if command -v git &>/dev/null; then
+  if ! git check-ref-format --branch "$BRANCH_NAME" 2>/dev/null; then
+    echo -e "${RED}Fatal: Branch name '${BRANCH_NAME}' is invalid under Git reference formatting rules.${NC}" >&2
+    exit 1
   fi
-}
+else
+  # Fallback regex if git is not in PATH
+  if [[ ! "$BRANCH_NAME" =~ ^[a-zA-Z0-9/_.-]+$ ]] || [[ "$BRANCH_NAME" =~ \.\. ]] || [[ "$BRANCH_NAME" =~ ^/ ]]; then
+    echo -e "${RED}Fatal: Branch name '${BRANCH_NAME}' contains invalid characters or structure.${NC}" >&2
+    exit 1
+  fi
+fi
+echo -e "  ${GREEN}✓ Branch name '${BRANCH_NAME}' syntax validated.${NC}"
 
 # ------------------------------------------------------------------------------
-# STEP 1: Verify Manifest Files on Disk & Security Inspection
+# STEP 2: Validate Remote URL & Repository Identity
 # ------------------------------------------------------------------------------
-echo -e "${BOLD}[1/7] Verifying Phase 6C file manifest integrity on disk...${NC}"
+echo -e "\n${BOLD}[2/8] Validating official repository identity...${NC}"
+
+validate_repo_url() {
+  local url="$1"
+  # Match HTTPS: https://github.com/afnan0356/nyayota(.git)
+  # Match SSH: git@github.com:afnan0356/nyayota(.git) or ssh://git@github.com/afnan0356/nyayota(.git)
+  if [[ "$url" =~ ^https://github\.com/afnan0356/nyayota(\.git)?$ ]] || \
+     [[ "$url" =~ ^git@github\.com:afnan0356/nyayota(\.git)?$ ]] || \
+     [[ "$url" =~ ^ssh://git@github\.com/afnan0356/nyayota(\.git)?$ ]]; then
+    return 0
+  fi
+  return 1
+}
+
+if ! validate_repo_url "$REMOTE_URL"; then
+  echo -e "${RED}Fatal: Remote URL '${REMOTE_URL}' does not match official repository '${OFFICIAL_OWNER_REPO}' on github.com!${NC}" >&2
+  echo "Expected format: https://github.com/afnan0356/nyayota.git or git@github.com:afnan0356/nyayota.git" >&2
+  exit 1
+fi
+echo -e "  ${GREEN}✓ Official repository identity confirmed: ${OFFICIAL_OWNER_REPO} on github.com${NC}"
+
+# ------------------------------------------------------------------------------
+# STEP 3: Verify Manifest Files on Disk
+# ------------------------------------------------------------------------------
+echo -e "\n${BOLD}[3/8] Verifying Phase 6C file manifest integrity on disk...${NC}"
 MISSING_FILES=0
 for file in "${PHASE_6C_FILES[@]}"; do
   if [ -f "$file" ]; then
-    FILE_SIZE=$(wc -c < "$file" 2>/dev/null || stat -c%s "$file" 2>/dev/null || echo "0")
+    FILE_SIZE=$(wc -c < "$file" 2>/dev/null || echo "0")
     echo -e "  ${GREEN}✓${NC} Found: ${file} ${DIM}(${FILE_SIZE} bytes)${NC}"
   else
     echo -e "  ${RED}✗ Missing required Phase 6C file:${NC} ${file}" >&2
@@ -144,214 +188,256 @@ for file in "${PHASE_6C_FILES[@]}"; do
 done
 
 if [ "$MISSING_FILES" -gt 0 ]; then
-  echo -e "\n${RED}Fatal: ${MISSING_FILES} Phase 6C manifest files are missing. Synchronization aborted.${NC}" >&2
+  echo -e "\n${RED}Fatal: ${MISSING_FILES} required Phase 6C manifest files are missing. Synchronization aborted.${NC}" >&2
   exit 1
 fi
 echo -e "  ${GREEN}✓ All 8 Phase 6C manifest files verified on disk.${NC}"
 
-# Security Check: scan application and test files for accidentally embedded secrets
-echo -e "\n${BOLD}[Security Check] Scanning manifest files for sensitive tokens...${NC}"
-SECRET_PATTERNS=("AIzaSy" "ghp_" "github_pat_" "-----BEGIN PRIVATE KEY-----")
-FOUND_SECRETS=0
-for pattern in "${SECRET_PATTERNS[@]}"; do
-  for file in "${PHASE_6C_FILES[@]}"; do
-    # Exclude script itself from self-matching pattern definitions
-    if [ "$file" = "scripts/sync-github.sh" ]; then
-      continue
-    fi
-    if grep -q "$pattern" "$file" 2>/dev/null; then
-      echo -e "  ${RED}✗ Security Alert: Potential secret pattern '${pattern}' detected in ${file}!${NC}" >&2
-      FOUND_SECRETS=$((FOUND_SECRETS + 1))
+# ------------------------------------------------------------------------------
+# STEP 4: Credential & Secret Scanning (With Output Redaction)
+# ------------------------------------------------------------------------------
+echo -e "\n${BOLD}[4/8] Scanning manifest files for sensitive tokens & credentials...${NC}"
+# Use substrings that do not match literal script regex definitions
+PAT_AIZA="AI""zaSy"
+PAT_GHP="gh""p_"
+PAT_GHPAT="github_""pat_"
+PAT_PRIVKEY="BEGIN ""PRIVATE KEY"
+
+SECRET_FOUND=0
+for file in "${PHASE_6C_FILES[@]}"; do
+  # Skip checking the sync script itself for secret token keywords
+  if [ "$file" = "scripts/sync-github.sh" ]; then
+    continue
+  fi
+
+  for pat in "$PAT_AIZA" "$PAT_GHP" "$PAT_GHPAT" "$PAT_PRIVKEY"; do
+    if grep -q -F "$pat" "$file" 2>/dev/null; then
+      MATCH_LINE=$(grep -n -F "$pat" "$file" 2>/dev/null | head -n 1 | cut -d: -f1)
+      echo -e "  ${RED}✗ Security Alert: Potential credential pattern detected in ${file} at line ${MATCH_LINE} [VALUE REDACTED]${NC}" >&2
+      SECRET_FOUND=$((SECRET_FOUND + 1))
     fi
   done
 done
 
-if [ "$FOUND_SECRETS" -gt 0 ]; then
-  echo -e "\n${RED}Fatal: Sensitive tokens or keys detected in manifest files. Synchronization aborted.${NC}" >&2
+if [ "$SECRET_FOUND" -gt 0 ]; then
+  echo -e "\n${RED}Fatal: Potential secrets detected in codebase files. Synchronization aborted.${NC}" >&2
   exit 1
 fi
-echo -e "  ${GREEN}✓ Zero hardcoded API keys or credentials detected in manifest files.${NC}"
+echo -e "  ${GREEN}✓ Zero hardcoded API keys or private credentials detected in manifest.${NC}"
 
 # ------------------------------------------------------------------------------
-# STEP 2: Automatic Pre-Flight Quality Gates (Test, Lint, Build)
+# STEP 5: Quality Gates (Live Mode or Dry-Run with --validate-quality)
 # ------------------------------------------------------------------------------
-if [ "$SKIP_TESTS" = false ]; then
-  echo -e "\n${BOLD}[2/7] Executing mandatory pre-flight quality checks...${NC}"
+SHOULD_RUN_QUALITY=false
+if [ "$DRY_RUN" = false ] && [ "$SKIP_TESTS" = false ]; then
+  SHOULD_RUN_QUALITY=true
+elif [ "$DRY_RUN" = true ] && [ "$VALIDATE_QUALITY" = true ]; then
+  SHOULD_RUN_QUALITY=true
+fi
+
+if [ "$SHOULD_RUN_QUALITY" = true ]; then
+  echo -e "\n${BOLD}[5/8] Executing automated pre-flight quality checks...${NC}"
 
   # Gate 1: Test Suite
   echo -e "  ${CYAN}[Gate 1/3]${NC} Running test suite..."
   if command -v bun &>/dev/null; then
-    bun test || { echo -e "\n${RED}Pre-flight test suite failed! Synchronization halted.${NC}" >&2; exit 1; }
+    bun test
   elif command -v npm &>/dev/null; then
-    npm test || { echo -e "\n${RED}Pre-flight test suite failed! Synchronization halted.${NC}" >&2; exit 1; }
+    npm test
   else
     echo -e "${RED}Neither 'bun' nor 'npm' found to run tests. Halting.${NC}" >&2
     exit 1
   fi
-  echo -e "  ${GREEN}✓ Test suite passed (all tests green).${NC}"
+  echo -e "  ${GREEN}✓ Test suite passed completely.${NC}"
 
   # Gate 2: ESLint
   echo -e "  ${CYAN}[Gate 2/3]${NC} Running ESLint code quality audit..."
-  npm run lint || { echo -e "\n${RED}ESLint validation failed! Synchronization halted.${NC}" >&2; exit 1; }
+  npm run lint
   echo -e "  ${GREEN}✓ ESLint clean (0 errors, 0 warnings).${NC}"
 
   # Gate 3: Next.js Production Build
   echo -e "  ${CYAN}[Gate 3/3]${NC} Validating Next.js production compilation..."
-  NODE_ENV=production npm run build || { echo -e "\n${RED}Next.js build failed! Synchronization halted.${NC}" >&2; exit 1; }
+  NODE_ENV=production npm run build
   echo -e "  ${GREEN}✓ Next.js production build succeeded.${NC}"
 else
-  echo -e "\n${BOLD}[2/7] Pre-flight checks skipped via --skip-tests flag.${NC}"
-  echo -e "  ${YELLOW}Notice: Pre-flight checks were intentionally bypassed.${NC}"
+  echo -e "\n${BOLD}[5/8] Quality checks status:${NC}"
+  if [ "$DRY_RUN" = true ]; then
+    echo -e "  ${DIM}Skipped in strict read-only dry-run mode (use --validate-quality to execute).${NC}"
+  else
+    echo -e "  ${YELLOW}Notice: Pre-flight checks were explicitly bypassed via --skip-tests.${NC}"
+  fi
 fi
 
 # ------------------------------------------------------------------------------
-# STEP 3: Audit Git Environment & Prevent Fabricated History
+# STEP 6: Audit Git Environment & Prohibit Fabricated History
 # ------------------------------------------------------------------------------
-echo -e "\n${BOLD}[3/7] Auditing Git repository environment...${NC}"
+echo -e "\n${BOLD}[6/8] Auditing Git repository environment...${NC}"
 
 if ! command -v git &>/dev/null; then
-  echo -e "${RED}Fatal: git is not installed or not in PATH.${NC}" >&2
+  echo -e "${RED}Fatal: git command is not available in PATH.${NC}" >&2
   exit 1
 fi
 
 if [ ! -d ".git" ]; then
-  echo -e "  ${YELLOW}Status: Isolated workspace detected (.git directory absent).${NC}"
+  echo -e "  ${YELLOW}Environment: Isolated workspace detected (.git directory absent).${NC}"
   echo -e "  ${YELLOW}Rule Enforced: Automatic 'git init' is STRICTLY PROHIBITED.${NC}"
   echo ""
-  echo -e "  ${BOLD}Explanation:${NC}"
-  echo "  Running 'git init' in an isolated directory creates a disconnected repository"
-  echo "  with fabricated history that cannot cleanly merge with the official Nyayota tree."
+  echo "  Explanation:"
+  echo "  Running 'git init' creates a detached repository with fabricated history"
+  echo "  that cannot cleanly merge with the official Nyayota tree."
   echo ""
   if [ "$DRY_RUN" = true ]; then
-    echo -e "  ${YELLOW}[DRY-RUN MODE REPORT]${NC}"
-    echo "  In a genuine clone of 'https://github.com/afnan0356/nyayota.git', this script will:"
-    echo "    1. Verify remote 'origin' points to 'afnan0356/nyayota'"
-    echo "    2. Create/checkout feature branch '${BRANCH_NAME}'"
-    echo "    3. Stage exactly the 8 verified Phase 6C files"
-    echo "    4. Create an audited conventional commit"
-    echo "    5. Provide the exact push command: git push -u origin \"${BRANCH_NAME}\""
+    echo -e "  ${BOLD}${YELLOW}[READ-ONLY DRY-RUN INSPECTION REPORT]${NC}"
+    echo "  Status in genuine clone of '${OFFICIAL_REPO_HTTPS}':"
+    echo "    1. Branch verification: would check or create '${BRANCH_NAME}'"
+    echo "    2. Pre-existing staged check: would verify no unrelated staged work"
+    echo "    3. Manifest staging: would stage exactly the 8 verified files"
+    echo "    4. Conventional commit: would record audited Phase 6C commit"
+    echo "    5. Remote push: git push -u origin \"${BRANCH_NAME}\""
     echo ""
-    echo -e "  ${GREEN}✓ Dry-run completed safely. Zero Git state or files modified.${NC}"
+    echo -e "  ${GREEN}✓ Strict dry-run completed. Zero files or Git states modified.${NC}"
     exit 0
   else
     echo -e "${RED}Fatal: Cannot perform live Git synchronization in an uninitialized directory.${NC}" >&2
     echo ""
-    echo -e "${BOLD}Recommended Synchronization Procedure from a Genuine Nyayota Clone:${NC}"
-    echo "  1. On your machine or server with Git and GitHub access, clone Nyayota:"
+    echo -e "${BOLD}Recommended Synchronization Procedure From a Genuine Clone:${NC}"
+    echo "  1. On your machine with Git and GitHub access, clone the repository:"
     echo -e "     ${CYAN}git clone ${OFFICIAL_REPO_HTTPS}${NC}"
     echo -e "     ${CYAN}cd nyayota${NC}"
     echo ""
-    echo "  2. Copy the 8 verified Phase 6C files into that cloned repository."
+    echo "  2. Copy the 8 verified Phase 6C files into the cloned repository."
     echo ""
     echo "  3. Run this synchronization script inside the clone:"
-    echo -e "     ${CYAN}./scripts/sync-github.sh --branch ${BRANCH_NAME}${NC}"
+    echo -e "     ${CYAN}./scripts/sync-github.sh --branch \"${BRANCH_NAME}\"${NC}"
     echo ""
-    echo "  4. Push the branch and open a Pull Request:"
-    echo -e "     ${CYAN}git push -u origin ${BRANCH_NAME}${NC}"
+    echo "  4. Push upstream and open a Pull Request:"
+    echo -e "     ${CYAN}git push -u origin \"${BRANCH_NAME}\"${NC}"
     exit 1
   fi
 fi
 
 # ------------------------------------------------------------------------------
-# STEP 4: Validate Git Remote & Identity
+# STEP 7: Remote & Branch Validation in Genuine Git Clone
 # ------------------------------------------------------------------------------
-echo -e "\n${BOLD}[4/7] Validating Git repository remote & identity...${NC}"
+echo -e "\n${BOLD}[7/8] Inspecting Git remotes, branches, and staged state...${NC}"
 
-# Check existing remotes
-REMOTES=$(git remote -v || true)
-if [[ -z "$REMOTES" ]]; then
-  echo -e "  ${YELLOW}No Git remote configured.${NC}"
-  if [ "$DRY_RUN" = true ]; then
-    echo -e "  ${YELLOW}[DRY-RUN WOULD EXECUTE]${NC} git remote add origin \"${REMOTE_URL}\""
-  else
-    echo -e "  Adding remote 'origin' -> ${BLUE}${REMOTE_URL}${NC}"
-    git remote add origin "${REMOTE_URL}"
+# Remote verification
+if git remote | grep -q "^origin$"; then
+  EXISTING_URL=$(git remote get-url origin 2>/dev/null || echo "")
+  echo -e "  Remote 'origin' detected: ${BLUE}${EXISTING_URL}${NC}"
+  if ! validate_repo_url "$EXISTING_URL"; then
+    echo -e "${RED}Fatal: Remote 'origin' (${EXISTING_URL}) is not the official repository (${OFFICIAL_OWNER_REPO})!${NC}" >&2
+    echo "To avoid contaminating an unrelated repository, synchronization is aborted." >&2
+    exit 1
   fi
+  echo -e "  ${GREEN}✓ Remote 'origin' verified as official repository.${NC}"
 else
-  # Remote exists; verify it matches the official Nyayota repository
-  ORIGIN_URL=$(git remote get-url origin 2>/dev/null || echo "")
-  echo -e "  Remote 'origin' detected: ${BLUE}${ORIGIN_URL}${NC}"
-  
-  if [[ "$ORIGIN_URL" != *"afnan0356/nyayota"* ]]; then
-    echo -e "\n${RED}Fatal: Remote 'origin' (${ORIGIN_URL}) does NOT point to afnan0356/nyayota!${NC}" >&2
-    echo -e "To prevent overwriting unrelated repositories, synchronization is aborted." >&2
-    exit 1
+  echo -e "  Remote 'origin' not configured."
+  if [ "$DRY_RUN" = true ]; then
+    echo -e "  ${DIM}[Dry-Run] Would add remote origin -> ${REMOTE_URL}${NC}"
+  else
+    git remote add origin "$REMOTE_URL"
+    echo -e "  ${GREEN}✓ Added remote 'origin' -> ${REMOTE_URL}${NC}"
   fi
-  echo -e "  ${GREEN}✓ Verified official Nyayota repository remote identity.${NC}"
 fi
 
-# ------------------------------------------------------------------------------
-# STEP 5: Safe Feature Branch Handling
-# ------------------------------------------------------------------------------
-echo -e "\n${BOLD}[5/7] Preparing feature branch '${BRANCH_NAME}'...${NC}"
-
+# Branch handling without destructive reset
 CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "")
 echo -e "  Current active branch: ${BLUE}${CURRENT_BRANCH}${NC}"
-
-# Protect against dirty working tree with unrelated unstaged changes
-UNTRACKED_CHANGES=$(git status --porcelain 2>/dev/null || true)
-if [[ -n "$UNTRACKED_CHANGES" ]]; then
-  echo -e "  ${YELLOW}Notice: Uncommitted working tree changes detected:${NC}"
-  echo "$UNTRACKED_CHANGES" | sed 's/^/    /'
-  echo -e "  ${DIM}Only the 8 explicit Phase 6C files will be staged. Other files are protected.${NC}"
-fi
 
 if [ "$CURRENT_BRANCH" = "$BRANCH_NAME" ]; then
   echo -e "  ${GREEN}✓ Already on target branch '${BRANCH_NAME}'.${NC}"
 else
   if git show-ref --verify --quiet "refs/heads/${BRANCH_NAME}"; then
-    echo -e "  Branch '${BRANCH_NAME}' already exists locally. Switching to it without resetting..."
-    run_cmd "git checkout \"${BRANCH_NAME}\""
+    echo -e "  Target branch '${BRANCH_NAME}' exists locally. Switching safely..."
+    if [ "$DRY_RUN" = true ]; then
+      echo -e "  ${DIM}[Dry-Run] Would checkout '${BRANCH_NAME}'${NC}"
+    else
+      git checkout "$BRANCH_NAME"
+    fi
   else
-    echo -e "  Creating and checking out dedicated branch '${BRANCH_NAME}'..."
-    run_cmd "git checkout -b \"${BRANCH_NAME}\""
+    echo -e "  Creating new feature branch '${BRANCH_NAME}' from '${CURRENT_BRANCH}'..."
+    if [ "$DRY_RUN" = true ]; then
+      echo -e "  ${DIM}[Dry-Run] Would create and checkout branch '${BRANCH_NAME}'${NC}"
+    else
+      git checkout -b "$BRANCH_NAME"
+    fi
   fi
 fi
 
-# ------------------------------------------------------------------------------
-# STEP 6: Strictly Stage ONLY Authorized Manifest Files
-# ------------------------------------------------------------------------------
-echo -e "\n${BOLD}[6/7] Staging authorized Phase 6C manifest files...${NC}"
-
-for file in "${PHASE_6C_FILES[@]}"; do
-  echo -e "  + Staging: ${file}"
-  run_cmd "git add -- \"${file}\""
-done
-
-# Post-staging security assertion: ensure no forbidden file was staged
-if [ "$DRY_RUN" = false ]; then
-  STAGED_FILES=$(git diff --cached --name-only 2>/dev/null || true)
-  FORBIDDEN_STAGED=0
-  while IFS= read -r staged; do
-    [[ -z "$staged" ]] && continue
-    # Verify staged file is strictly in the allowed manifest
-    IS_ALLOWED=false
-    for allowed in "${PHASE_6C_FILES[@]}"; do
-      if [ "$staged" = "$allowed" ]; then
-        IS_ALLOWED=true
+# Pre-existing staged changes protection
+PRE_STAGED=$(git diff --cached --name-only 2>/dev/null || true)
+if [[ -n "$PRE_STAGED" ]]; then
+  UNRELATED_STAGED=0
+  while IFS= read -r staged_file; do
+    [[ -z "$staged_file" ]] && continue
+    IS_AUTHORIZED=false
+    for auth in "${PHASE_6C_FILES[@]}"; do
+      if [ "$staged_file" = "$auth" ]; then
+        IS_AUTHORIZED=true
         break
       fi
     done
-    if [ "$IS_ALLOWED" = false ]; then
-      echo -e "  ${RED}Security Violation: File '${staged}' is NOT in Phase 6C manifest! Unstaging...${NC}" >&2
-      git restore --staged -- "$staged"
-      FORBIDDEN_STAGED=$((FORBIDDEN_STAGED + 1))
+    if [ "$IS_AUTHORIZED" = false ]; then
+      echo -e "  ${RED}Security Warning: Unrelated staged file detected: ${staged_file}${NC}" >&2
+      UNRELATED_STAGED=$((UNRELATED_STAGED + 1))
     fi
-  done <<< "$STAGED_FILES"
+  done <<< "$PRE_STAGED"
 
-  if [ "$FORBIDDEN_STAGED" -gt 0 ]; then
-    echo -e "${RED}Fatal: Unauthorized files were staged. Staging reverted and process halted.${NC}" >&2
+  if [ "$UNRELATED_STAGED" -gt 0 ]; then
+    echo -e "${RED}Fatal: Pre-existing staged files outside Phase 6C manifest detected.${NC}" >&2
+    echo "To protect your existing work from being committed into Phase 6C, synchronization is halted." >&2
+    echo "Please unstage or stash unrelated changes first: git stash or git restore --staged <files>" >&2
     exit 1
   fi
-
-  echo -e "\nStaged changes ready for commit:"
-  git status --short
 fi
 
 # ------------------------------------------------------------------------------
-# STEP 7: Audited Conventional Commit
+# STEP 8: Stage Manifest & Commit (Live Mode Only)
 # ------------------------------------------------------------------------------
-echo -e "\n${BOLD}[7/7] Preparing audited conventional commit...${NC}"
+echo -e "\n${BOLD}[8/8] Staging Phase 6C files & preparing commit...${NC}"
+
+if [ "$DRY_RUN" = true ]; then
+  echo -e "  ${YELLOW}[DRY-RUN] Planned staging list:${NC}"
+  for file in "${PHASE_6C_FILES[@]}"; do
+    echo -e "    + git add -- \"${file}\""
+  done
+  echo -e "\n  ${YELLOW}[DRY-RUN] Planned commit message:${NC}"
+  echo "    feat(nyayota-ai): implement phase 6c natural conversational response engine"
+  echo ""
+  echo -e "  ${GREEN}✓ Dry-run completed safely. No Git changes made.${NC}"
+  exit 0
+fi
+
+# Live staging
+for file in "${PHASE_6C_FILES[@]}"; do
+  echo -e "  + Staging: ${file}"
+  git add -- "$file"
+done
+
+# Post-staging verification: strictly verify staged files match manifest
+POST_STAGED=$(git diff --cached --name-only 2>/dev/null || true)
+UNAUTHORIZED_POST=0
+while IFS= read -r staged_file; do
+  [[ -z "$staged_file" ]] && continue
+  IS_AUTH=false
+  for auth in "${PHASE_6C_FILES[@]}"; do
+    if [ "$staged_file" = "$auth" ]; then
+      IS_AUTH=true
+      break
+    fi
+  done
+  if [ "$IS_AUTH" = false ]; then
+    echo -e "  ${RED}Security Violation: File '${staged_file}' is not in Phase 6C manifest! Unstaging...${NC}" >&2
+    git restore --staged -- "$staged_file"
+    UNAUTHORIZED_POST=$((UNAUTHORIZED_POST + 1))
+  fi
+done <<< "$POST_STAGED"
+
+if [ "$UNAUTHORIZED_POST" -gt 0 ]; then
+  echo -e "${RED}Fatal: Unauthorized files were in the staging index. Staging rolled back.${NC}" >&2
+  exit 1
+fi
 
 COMMIT_TITLE="feat(nyayota-ai): implement phase 6c natural conversational response engine"
 COMMIT_BODY="Implement Phase 6C natural conversational response engine:
@@ -367,23 +453,18 @@ COMMIT_MSG="${COMMIT_TITLE}
 
 ${COMMIT_BODY}"
 
-if [ "$DRY_RUN" = false ]; then
-  if git diff --cached --quiet; then
-    echo -e "  ${YELLOW}Notice: Working tree clean or changes already committed. Nothing new to commit.${NC}"
-  else
-    git commit -m "${COMMIT_MSG}"
-    echo -e "  ${GREEN}✓ Phase 6C commit recorded successfully.${NC}"
-  fi
+if git diff --cached --quiet; then
+  echo -e "  ${YELLOW}Notice: Working tree clean or changes already committed. Nothing to commit.${NC}"
 else
-  echo -e "${YELLOW}[DRY-RUN WOULD COMMIT]${NC} git commit with message:"
-  echo -e "${DIM}${COMMIT_TITLE}${NC}"
+  git commit -m "$COMMIT_MSG"
+  echo -e "  ${GREEN}✓ Phase 6C commit recorded successfully.${NC}"
 fi
 
 echo -e "\n${BOLD}${GREEN}======================================================================${NC}"
-echo -e "${BOLD}${GREEN}   Phase 6C Synchronization Pipeline Complete                         ${NC}"
+echo -e "${BOLD}${GREEN}   Phase 6C Synchronization Pipeline Completed Successfully           ${NC}"
 echo -e "${BOLD}${GREEN}======================================================================${NC}"
 echo ""
-echo -e "To push this branch to GitHub (safe push, no --force):"
+echo -e "To push this feature branch to GitHub (safe push, no force):"
 echo -e "  ${BOLD}${CYAN}git push -u origin \"${BRANCH_NAME}\"${NC}"
 echo ""
 echo -e "After pushing, open a Pull Request against main:"
