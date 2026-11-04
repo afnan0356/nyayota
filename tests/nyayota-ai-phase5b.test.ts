@@ -45,12 +45,14 @@ describe('Nyayota AI — Phase 5B Integration & Donation Suite', () => {
       const data = await res.json();
 
       expect(data.engine).toBe('deterministic');
-      expect(data.provider).toBe('nyayota-deterministic-engine');
+      expect(data.status).toBe('success');
       expect(data.text).toBeDefined();
       expect(data.text.toLowerCase()).toContain('murder');
-      expect(data.deterministicResponse).toBeDefined();
-      expect(data.deterministicResponse.sources.length).toBeGreaterThan(0);
-      expect(data.deterministicResponse.sources[0].title).toBe('The Penal Code, 1860');
+      // Verify internal engine results are strictly stripped from public responses
+      expect(data.deterministicResponse).toBeUndefined();
+      expect(data.pipelineResult).toBeUndefined();
+      expect(data.sources.length).toBeGreaterThan(0);
+      expect(data.sources[0].title).toBe('The Penal Code, 1860');
     });
 
     it('routes to general AI mode when engine is general', async () => {
@@ -68,13 +70,13 @@ describe('Nyayota AI — Phase 5B Integration & Donation Suite', () => {
       const data = await res.json();
 
       expect(data.engine).toBe('general');
-      // In environment with or without active Gemini API key
-      expect(data.provider).toMatch(/(gemini-3.8-flash|gemini-2.5-flash|nyayota-legal-engine-v1)/);
+      expect(['success', 'degraded']).toContain(data.status);
       expect(data.text).toBeDefined();
       expect(data.text.toLowerCase()).toContain('negligence');
+      expect(data.deterministicResponse).toBeUndefined();
     }, 15000);
 
-    it('safely defaults invalid or unrecognised engine strings to deterministic mode', async () => {
+    it('strictly rejects invalid or unrecognised engine strings with 400 status', async () => {
       const req = new NextRequest('http://localhost:3000/api/ai-assistant', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -85,12 +87,10 @@ describe('Nyayota AI — Phase 5B Integration & Donation Suite', () => {
       });
 
       const res = await POST(req);
-      expect(res.status).toBe(200);
+      expect(res.status).toBe(400);
       const data = await res.json();
 
-      expect(data.engine).toBe('deterministic');
-      expect(data.provider).toBe('nyayota-deterministic-engine');
-      expect(data.text.toLowerCase()).toContain('arrest');
+      expect(data.error).toContain('Invalid engine');
     });
 
     it('rejects malformed non-JSON requests safely', async () => {

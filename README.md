@@ -469,17 +469,21 @@ All external AI integrations are centralized within `lib/ai-config.ts`:
   1. **Source-Grounded Legal Research Mode:** Powered entirely by Nyayota's deterministic TypeScript retrieval pipeline (`lib/nyayota-ai/`). Executes with zero external API calls, zero token consumption, deterministic citations, and anti-hallucination barriers.
   2. **General AI Assistant Mode:** Powered by Google Gemini via server-side `@google/genai` SDK for conceptual legal explanations and comparative inquiries.
 
-### Differentiated Rate Limiting & Abuse Protection
+### Distributed Rate Limiting & Abuse Protection (Phase 2)
 
-The assistant API route (`app/api/ai-assistant/route.ts`) implements multi-layered defensive safeguards:
+The assistant API route (`app/api/ai-assistant/route.ts`) and security subsystem (`lib/rate-limiter.ts`, `lib/security-validation.ts`, `lib/request-body-reader.ts`) implement multi-layered defensive safeguards:
 - **Strict Content-Type Check:** Rejects non-JSON payloads with HTTP 415.
-- **Size Bounds:** Capped at 32 KB payload size, 1,500 characters per query, and 8,000 characters total conversation history.
-- **Timeout Protection:** External upstream calls race against a 12-second timeout to prevent hanging serverless invocations.
-- **Differentiated Sliding-Window Rate Limiter:**
-  - *General AI Mode:* 15 requests per 60 seconds per IP (protects upstream API quota).
-  - *Deterministic Legal Mode:* 30 requests per 60 seconds per IP (allows high-throughput civic research).
-  - *Sanitized IP Extraction:* Handles edge proxies (`x-vercel-forwarded-for`, `x-real-ip`, `x-forwarded-for`), strips IPv4/IPv6 ports, and validates against malicious injection.
-- **Serverless Architectural Consideration:** In-memory sliding windows operate per serverless container instance. For high-volume production deployments, zero-cost edge rate limiting via Cloudflare WAF or serverless token-bucket synchronization via Upstash Redis (free tier) is recommended.
+- **Stream-Level Byte Bounds (32 KB Cap):** Reads incoming stream chunks via `req.body.getReader()`, aborting transmission immediately if total payload exceeds 32 KB (32,768 bytes) with HTTP 413.
+- **Strict Input Validation:** Rejects unsupported modes, languages, engines, or client-injected `system` roles with HTTP 400.
+- **CSRF & Origin Protection:** Rejects unauthorized cross-origin POST requests or cross-site fetch requests with HTTP 403.
+- **Leak-Proof Public Response:** Strictly returns `text`, `engine`, `status`, safe `sources`, `disclaimer`, `timestamp`, and clarification prompts. Internal retrieval structures, pipeline results, raw model outputs, tokens, and debug details are completely stripped.
+- **Upstream Cancellation:** Connects client `AbortSignal` with `AbortController` and a 12-second timeout to terminate upstream Google GenAI API calls upon timeout or client disconnect.
+- **Distributed Sliding-Window Rate Limiter:**
+  - *General AI Mode:* 15 requests per 60 seconds per IP (`Ratelimit.slidingWindow(15, "60 s")`).
+  - *Deterministic Legal Mode:* 30 requests per 60 seconds per IP (`Ratelimit.slidingWindow(30, "60 s")`).
+  - *Distributed Multi-Region Deployment:* Implements `@upstash/ratelimit` with `@upstash/redis` via `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN`.
+  - *Honest Architecture Status:* When Upstash credentials are unconfigured, process-local in-memory rate limiting is isolated for development/test only and is never misrepresented as distributed in production.
+  - *Trusted IP Extraction:* Prioritizes platform-authenticated `x-vercel-forwarded-for` on Vercel to block client IP spoofing, with strict IPv4 octet validation, IPv6 parsing, and port stripping.
 - **Security Policy:** For vulnerability reporting, see our [`SECURITY.md`](SECURITY.md) (contact: `nyayota.contact@gmail.com`).
 
 ---

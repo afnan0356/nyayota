@@ -49,13 +49,13 @@ describe('Nyayota AI — Phase 5C QA & Safety Suite', () => {
       const data = await res.json();
 
       expect(data.engine).toBe('deterministic');
-      expect(data.provider).toBe('nyayota-deterministic-engine');
+      expect(data.status).toBe('success');
       expect(data.text).toBeDefined();
       expect(data.text.toLowerCase()).toContain('murder');
-      expect(data.deterministicResponse).toBeDefined();
+      expect(data.deterministicResponse).toBeUndefined();
     });
 
-    it('identifies provider clearly in general mode', async () => {
+    it('identifies engine status cleanly in general mode', async () => {
       const req = new NextRequest('http://localhost:3000/api/ai-assistant', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -70,12 +70,13 @@ describe('Nyayota AI — Phase 5C QA & Safety Suite', () => {
       const data = await res.json();
 
       expect(data.engine).toBe('general');
-      expect(['gemini-3.8-flash', 'gemini-2.5-flash', 'nyayota-legal-engine-v1']).toContain(data.provider);
+      expect(['success', 'degraded']).toContain(data.status);
       expect(data.text).toBeDefined();
       expect(data.text.toLowerCase()).toContain('negligence');
+      expect(data.deterministicResponse).toBeUndefined();
     }, 15000);
 
-    it('defaults invalid or unknown engine values safely to deterministic pipeline', async () => {
+    it('rejects invalid or unknown engine values with 400 status', async () => {
       const req = new NextRequest('http://localhost:3000/api/ai-assistant', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -86,12 +87,10 @@ describe('Nyayota AI — Phase 5C QA & Safety Suite', () => {
       });
 
       const res = await POST(req);
-      expect(res.status).toBe(200);
+      expect(res.status).toBe(400);
       const data = await res.json();
 
-      expect(data.engine).toBe('deterministic');
-      expect(data.provider).toBe('nyayota-deterministic-engine');
-      expect(data.text.toLowerCase()).toContain('arrest');
+      expect(data.error).toContain('Invalid engine');
     });
   });
 

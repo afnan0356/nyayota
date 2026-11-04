@@ -1,119 +1,30 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { executeNyayotaAIPipeline } from '@/lib/nyayota-ai';
-import { AI_CONFIG, AssistantEngineType } from '@/lib/ai-config';
-import { DeterministicSourceCitation } from '@/lib/nyayota-ai/types';
+import { AI_CONFIG } from '@/lib/ai-config';
+import { checkRateLimit } from '@/lib/rate-limiter';
+import { readBoundedJson } from '@/lib/request-body-reader';
+import {
+  getTrustedClientIp,
+  validateRequestOrigin,
+  validateAssistantRequest,
+  sanitizePublicSources,
+  PublicAssistantResponse,
+} from '@/lib/security-validation';
 
-export interface ChatMessage {
-  role: 'user' | 'assistant';
-  content: string;
-}
-
-// ---------------------------------------------------------------------------
-// Rate Limiting Architecture & Serverless Deployment Note:
-// Differentiated sliding-window rate limiter:
-// - General AI Mode (Gemini): 15 requests per 60 seconds (prevents API quota exhaustion)
-// - Deterministic Mode (Nyayota): 30 requests per 60 seconds (local TypeScript execution)
-//
-// NOTE FOR PRODUCTION DISTRIBUTED DEPLOYMENT:
-// In-memory rate limiting is process-local. In stateless serverless environments
-// like Vercel Functions across multiple edge instances, an external shared store
-// (e.g. Upstash Redis via @upstash/ratelimit) is recommended if public API traffic
-// is re-enabled. Environment variables: UPSTASH_REDIS_REST_URL and UPSTASH_REDIS_REST_TOKEN.
-// ---------------------------------------------------------------------------
-interface RateLimitRecord {
-  timestamps: number[];
-}
-const rateLimitMap = new Map<string, RateLimitRecord>();
-
-function checkDifferentiatedRateLimit(
-  clientIp: string,
-  engine: AssistantEngineType
-): { allowed: boolean; remaining: number; limit: number } {
-  const config = engine === 'general' ? AI_CONFIG.rateLimits.general : AI_CONFIG.rateLimits.deterministic;
-  const now = Date.now();
-  const rateLimitKey = `${engine}:${clientIp}`;
-  const record = rateLimitMap.get(rateLimitKey) || { timestamps: [] };
-
-  const activeTimestamps = record.timestamps.filter((ts) => now - ts < config.windowMs);
-
-  if (activeTimestamps.length >= config.maxRequests) {
-    rateLimitMap.set(rateLimitKey, { timestamps: activeTimestamps });
-    return { allowed: false, remaining: 0, limit: config.maxRequests };
-  }
-
-  activeTimestamps.push(now);
-  rateLimitMap.set(rateLimitKey, { timestamps: activeTimestamps });
-
-  // Cleanup expired entries periodically to prevent memory leak
-  if (rateLimitMap.size > 2000) {
-    for (const [key, val] of rateLimitMap.entries()) {
-      if (val.timestamps.every((t) => now - t >= 60000)) {
-        rateLimitMap.delete(key);
-      }
-    }
-  }
-
-  return {
-    allowed: true,
-    remaining: config.maxRequests - activeTimestamps.length,
-    limit: config.maxRequests,
-  };
-}
-
-/**
- * Extracts and validates trusted client IP address.
- * Prioritizes Vercel's platform-injected 'x-vercel-forwarded-for' header
- * to prevent client IP spoofing via attacker-supplied x-forwarded-for headers.
- */
-function getClientIp(req: NextRequest): string {
-  const sanitizeIp = (raw: string | null | undefined): string | null => {
-    if (!raw) return null;
-    let ip = raw.split(',')[0].trim();
-    // Handle bracketed IPv6 with port (e.g. [2001:db8::1]:8080)
-    if (ip.startsWith('[') && ip.includes(']')) {
-      ip = ip.slice(1, ip.indexOf(']'));
-    } else if (/^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}:\d+$/.test(ip)) {
-      // Strip trailing port from IPv4 if present (e.g. 192.168.1.1:54321)
-      ip = ip.split(':')[0];
-    }
-    // Strict IP characters check (IPv4 or IPv6)
-    if (/^[0-9a-fA-F:.]+$/.test(ip) && ip.length <= 45) {
-      return ip;
-    }
-    return null;
-  };
-
-  // 1. Vercel-authenticated header (trusted edge proxy)
-  const vercelIp = sanitizeIp(req.headers.get('x-vercel-forwarded-for'));
-  if (vercelIp) return vercelIp;
-
-  // 2. NextRequest native IP if present
-  if ((req as any).ip) {
-    const nativeIp = sanitizeIp((req as any).ip);
-    if (nativeIp) return nativeIp;
-  }
-
-  // 3. Fallback proxies (for local dev and testing)
-  const realIp = sanitizeIp(req.headers.get('x-real-ip'));
-  if (realIp) return realIp;
-
-  const forwarded = sanitizeIp(req.headers.get('x-forwarded-for'));
-  if (forwarded) return forwarded;
-
-  return '127.0.0.1';
-}
+export const dynamic = 'force-dynamic';
 
 const SECURITY_HEADERS = {
   'Cache-Control': 'no-store, no-cache, must-revalidate',
   'X-Content-Type-Options': 'nosniff',
+  'X-Frame-Options': 'DENY',
 };
 
 export async function POST(req: NextRequest) {
   // -------------------------------------------------------------------------
-  // PUBLIC ASSISTANT TEMPORARY SUSPENSION CHECK
+  // 1. PUBLIC ASSISTANT TEMPORARY SUSPENSION CHECK
   // Server-controlled flag: AI_CONFIG.isPublicAssistantAvailable
-  // When suspended, immediately return HTTP 503 without invoking Gemini,
-  // the deterministic engine, or leaking any sensitive internal traces.
+  // When false: immediately return HTTP 503 without executing Gemini or
+  // the legal retrieval pipeline, and without leaking internal traces.
   // No client-side parameter, query param, or header can override this.
   // -------------------------------------------------------------------------
   if (!AI_CONFIG.isPublicAssistantAvailable) {
@@ -129,181 +40,135 @@ export async function POST(req: NextRequest) {
     );
   }
 
+  // -------------------------------------------------------------------------
+  // 2. ORIGIN & CROSS-SITE REQUEST VALIDATION
+  // Validates Origin and Referer headers against allowed domains.
+  // Blocks unauthorized cross-origin POST requests.
+  // -------------------------------------------------------------------------
+  const originValidation = validateRequestOrigin(req);
+  if (!originValidation.allowed) {
+    return NextResponse.json(
+      { error: originValidation.reason || 'Forbidden: Unauthorized request origin.' },
+      { status: 403, headers: SECURITY_HEADERS }
+    );
+  }
+
+  // -------------------------------------------------------------------------
+  // 3. CONTENT-TYPE ENFORCEMENT
+  // Rejects non-JSON payloads before stream consumption.
+  // -------------------------------------------------------------------------
+  const contentType = req.headers.get('content-type') || '';
+  if (!contentType.toLowerCase().includes('application/json')) {
+    return NextResponse.json(
+      { error: 'Invalid Content-Type. Expected application/json.' },
+      { status: 415, headers: SECURITY_HEADERS }
+    );
+  }
+
   try {
-    const contentType = req.headers.get('content-type') || '';
-    if (!contentType.toLowerCase().includes('application/json')) {
+    // -----------------------------------------------------------------------
+    // 4. STREAM-LEVEL BOUNDED REQUEST BODY CONSUMPTION (32 KB CAP)
+    // Enforces the 32 KB limit while reading stream chunks.
+    // Immediately aborts the reader if byte count exceeds 32,768 bytes.
+    // -----------------------------------------------------------------------
+    const readResult = await readBoundedJson(req, 32768);
+    if (!readResult.success) {
       return NextResponse.json(
-        { error: 'Invalid Content-Type. Expected application/json.' },
-        { status: 415, headers: SECURITY_HEADERS }
+        { error: readResult.error },
+        { status: readResult.statusCode, headers: SECURITY_HEADERS }
       );
     }
 
-    // 1. True Byte-Level Body Size Check
-    const rawText = await req.text();
-    const byteLength = new TextEncoder().encode(rawText).length;
-    if (byteLength > 32768) {
+    // -----------------------------------------------------------------------
+    // 5. STRICT INPUT SCHEMA VALIDATION
+    // Validates query bounds, enums (mode, language, engine), chat roles,
+    // and bounded lawContext. Rejects invalid parameters without silent fallback.
+    // -----------------------------------------------------------------------
+    const validationResult = validateAssistantRequest(readResult.data);
+    if (!validationResult.valid) {
       return NextResponse.json(
-        { error: 'Payload exceeds maximum permitted size of 32KB.' },
-        { status: 413, headers: SECURITY_HEADERS }
+        { error: validationResult.error },
+        { status: validationResult.statusCode, headers: SECURITY_HEADERS }
       );
     }
 
-    let body: any;
-    try {
-      body = JSON.parse(rawText);
-    } catch {
-      return NextResponse.json(
-        { error: 'Malformed JSON payload.' },
-        { status: 400, headers: SECURITY_HEADERS }
-      );
-    }
+    const { query, mode, language, engine, messages, lawContext } = validationResult.data;
 
-    if (!body || typeof body !== 'object' || Array.isArray(body)) {
-      return NextResponse.json(
-        { error: 'Request body must be a JSON object.' },
-        { status: 400, headers: SECURITY_HEADERS }
-      );
-    }
+    // -----------------------------------------------------------------------
+    // 6. TRUSTED CLIENT IP & DISTRIBUTED RATE LIMITING
+    // Extracts IP prioritizing Vercel's trusted platform header.
+    // Checks Upstash Redis rate limiter (15 req/min general, 30 req/min deterministic).
+    // -----------------------------------------------------------------------
+    const clientIpInfo = getTrustedClientIp(req);
+    const rateLimit = await checkRateLimit(clientIpInfo.ip, engine);
 
-    const { query, mode = 'explain', language = 'both', lawContext, messages = [] } = body;
-
-    // 2. Strict Query Validation
-    if (!query || typeof query !== 'string' || query.trim().length === 0) {
-      return NextResponse.json(
-        { error: 'Query parameter is required and must be non-empty.' },
-        { status: 400, headers: SECURITY_HEADERS }
-      );
-    }
-
-    const trimmedQuery = query.trim();
-    if (trimmedQuery.length < 2) {
-      return NextResponse.json(
-        { error: 'Query must be at least 2 characters long.' },
-        { status: 400, headers: SECURITY_HEADERS }
-      );
-    }
-
-    if (trimmedQuery.length > 1500) {
-      return NextResponse.json(
-        { error: 'Query exceeds maximum allowed length of 1,500 characters.' },
-        { status: 400, headers: SECURITY_HEADERS }
-      );
-    }
-
-    // 3. Strict Mode & Language Enums
-    const safeMode = typeof mode === 'string' && ['explain', 'outcome', 'compare', 'analogy', 'statute'].includes(mode)
-      ? mode
-      : 'explain';
-    const safeLanguage = typeof language === 'string' && ['english', 'bengali', 'both'].includes(language)
-      ? language
-      : 'both';
-
-    const isExplicitDeterministic =
-      body.engine === 'deterministic' ||
-      body.assistantMode === 'deterministic' ||
-      body.engine === 'source-grounded';
-    const isExplicitGeneral =
-      body.engine === 'general' ||
-      body.assistantMode === 'general' ||
-      body.engine === 'gemini';
-
-    const selectedEngine: AssistantEngineType = isExplicitGeneral
-      ? 'general'
-      : isExplicitDeterministic
-      ? 'deterministic'
-      : 'deterministic';
-
-    // 4. Strict Message History Validation (Reject client system prompts)
-    const validatedMessages: ChatMessage[] = [];
-    let totalHistoryLength = 0;
-    if (Array.isArray(messages)) {
-      for (const msg of messages.slice(-10)) {
-        if (msg && typeof msg === 'object' && typeof msg.content === 'string') {
-          // Strictly reject client-supplied 'system' role
-          if (msg.role === 'user' || msg.role === 'assistant') {
-            const sanitizedContent = msg.content.trim().slice(0, 2000);
-            if (sanitizedContent && totalHistoryLength + sanitizedContent.length <= 8000) {
-              validatedMessages.push({
-                role: msg.role,
-                content: sanitizedContent,
-              });
-              totalHistoryLength += sanitizedContent.length;
-            }
-          }
-        }
-      }
-    }
-
-    // 5. Strict LawContext Validation (Bounded field lengths)
-    let validatedLawContext: any = undefined;
-    if (lawContext && typeof lawContext === 'object' && !Array.isArray(lawContext)) {
-      validatedLawContext = {
-        title: typeof lawContext.title === 'string' ? lawContext.title.slice(0, 200) : '',
-        category: typeof lawContext.category === 'string' ? lawContext.category.slice(0, 100) : undefined,
-        jurisdiction: typeof lawContext.jurisdiction === 'string' ? lawContext.jurisdiction.slice(0, 100) : undefined,
-        sectionNumber: typeof lawContext.sectionNumber === 'string' ? lawContext.sectionNumber.slice(0, 50) : undefined,
-        sectionTitle: typeof lawContext.sectionTitle === 'string' ? lawContext.sectionTitle.slice(0, 200) : undefined,
-        sectionContent: typeof lawContext.sectionContent === 'string' ? lawContext.sectionContent.slice(0, 2000) : undefined,
-      };
-    }
-
-    // 6. Differentiated Rate Limiting
-    const clientIp = getClientIp(req);
-    const rateLimit = checkDifferentiatedRateLimit(clientIp, selectedEngine);
+    const rateLimitHeaders = {
+      ...SECURITY_HEADERS,
+      'X-RateLimit-Limit': String(rateLimit.limit),
+      'X-RateLimit-Remaining': String(rateLimit.remaining),
+    };
 
     if (!rateLimit.allowed) {
+      const retryAfterSec = Math.max(1, Math.ceil(rateLimit.resetMs / 1000));
       return NextResponse.json(
         {
-          error: selectedEngine === 'general'
+          error: engine === 'general'
             ? 'General AI assistant rate limit exceeded (15 requests/min).'
             : 'Legal research rate limit exceeded (30 requests/min).',
-          retryAfterSeconds: 60,
+          retryAfterSeconds: retryAfterSec,
         },
         {
           status: 429,
           headers: {
-            ...SECURITY_HEADERS,
-            'Retry-After': '60',
-            'X-RateLimit-Limit': String(rateLimit.limit),
+            ...rateLimitHeaders,
+            'Retry-After': String(retryAfterSec),
             'X-RateLimit-Remaining': '0',
           },
         }
       );
     }
 
-    // 7. Pipeline Execution
-    if (selectedEngine === 'deterministic') {
+    // -----------------------------------------------------------------------
+    // 7. PIPELINE EXECUTION & STRICT PUBLIC RESPONSE FILTERING
+    // Executes deterministic or general pipeline with client AbortSignal.
+    // Returns strictly: text, engine, status, safe sources, disclaimer, timestamp.
+    // Strips internal retrieval objects, raw model payloads, tokens, and debug data.
+    // -----------------------------------------------------------------------
+    const serviceLanguage = language === 'bengali' ? 'bn' : language === 'english' ? 'en' : 'both';
+    const serviceMode = mode === 'compare' ? 'compare' : mode === 'statute' ? 'cite' : 'explain';
+
+    if (engine === 'deterministic') {
       try {
-        const deterministicResult = await executeNyayotaAIPipeline({
-          query: trimmedQuery,
-          language: safeLanguage === 'bengali' ? 'bn' : safeLanguage === 'english' ? 'en' : 'both',
-          mode: safeMode === 'compare' ? 'compare' : safeMode === 'statute' ? 'cite' : 'explain',
-          lawContext: validatedLawContext,
-          messages: validatedMessages,
+        const pipelineResult = await executeNyayotaAIPipeline({
+          query,
+          language: serviceLanguage,
+          mode: serviceMode,
+          lawContext,
+          messages,
+          signal: req.signal,
         });
 
-        return NextResponse.json(
-          {
-            text: deterministicResult.text,
-            provider: 'nyayota-deterministic-engine',
-            engine: 'deterministic',
-            status: 'success',
-            sources: deterministicResult.sources || [],
-            deterministicResponse: deterministicResult,
-            disclaimer: deterministicResult.disclaimer || 'Educational Information Only — Not Legal Advice.',
-            timestamp: new Date().toISOString(),
-          },
-          {
-            headers: {
-              ...SECURITY_HEADERS,
-              'X-RateLimit-Limit': String(rateLimit.limit),
-              'X-RateLimit-Remaining': String(rateLimit.remaining),
-            },
-          }
-        );
+        const responseStatus = pipelineResult.status === 'clarification-required'
+          ? 'clarification-required'
+          : pipelineResult.status === 'out-of-scope'
+          ? 'out-of-scope'
+          : 'success';
+
+        const publicResponse: PublicAssistantResponse = {
+          text: pipelineResult.text,
+          engine: 'deterministic',
+          status: responseStatus,
+          sources: sanitizePublicSources(pipelineResult.sources),
+          disclaimer: pipelineResult.disclaimer || 'Educational Information Only — Not Legal Advice.',
+          timestamp: new Date().toISOString(),
+          clarificationPrompt: pipelineResult.clarificationPrompt,
+          clarificationOptions: pipelineResult.clarificationOptions,
+        };
+
+        return NextResponse.json(publicResponse, { headers: rateLimitHeaders });
       } catch (detError: unknown) {
-        const errorMsg = detError instanceof Error ? detError.message : 'Unknown deterministic pipeline error';
-        console.error('Deterministic legal pipeline error:', errorMsg);
+        const msg = detError instanceof Error ? detError.message : 'Unknown error';
+        console.error('Deterministic legal pipeline error:', msg);
         return NextResponse.json(
           { error: 'An error occurred during deterministic legal retrieval.' },
           { status: 500, headers: SECURITY_HEADERS }
@@ -311,85 +176,97 @@ export async function POST(req: NextRequest) {
       }
     }
 
+    // Engine: General AI (Gemini Grounded / Conversational)
     const apiKey = process.env.GEMINI_API_KEY;
+    const isApiKeyConfigured = Boolean(apiKey && apiKey !== 'MY_GEMINI_API_KEY' && !apiKey.startsWith('test') && apiKey.length > 10);
+
+    // If server Gemini key is not configured, gracefully return degraded legal analysis
+    if (!isApiKeyConfigured) {
+      console.warn('GEMINI_API_KEY is not configured on server; returning degraded deterministic response.');
+      const fallbackResult = await executeNyayotaAIPipeline({
+        query,
+        language: serviceLanguage,
+        mode: serviceMode,
+        lawContext,
+        messages,
+        signal: req.signal,
+      });
+
+      const publicResponse: PublicAssistantResponse = {
+        text: fallbackResult.text,
+        engine: 'general',
+        status: 'degraded',
+        sources: sanitizePublicSources(fallbackResult.sources),
+        disclaimer: fallbackResult.disclaimer || 'Educational Information Only — Not Legal Advice.',
+        timestamp: new Date().toISOString(),
+        clarificationPrompt: fallbackResult.clarificationPrompt,
+        clarificationOptions: fallbackResult.clarificationOptions,
+      };
+
+      return NextResponse.json(publicResponse, { headers: rateLimitHeaders });
+    }
 
     try {
       const pipelineResult = await executeNyayotaAIPipeline({
-        query: trimmedQuery,
-        language: safeLanguage === 'bengali' ? 'bn' : safeLanguage === 'english' ? 'en' : 'both',
-        mode: safeMode === 'compare' ? 'compare' : safeMode === 'statute' ? 'cite' : 'explain',
-        lawContext: validatedLawContext,
-        messages: validatedMessages,
+        query,
+        language: serviceLanguage,
+        mode: serviceMode,
+        lawContext,
+        messages,
         generateNaturalResponse: true,
         apiKey,
+        signal: req.signal,
       });
 
-      return NextResponse.json(
-        {
-          text: pipelineResult.text,
-          provider: pipelineResult.provider || AI_CONFIG.model,
-          engine: 'general',
-          status: 'success',
-          generationMethod: pipelineResult.generationMethod,
-          sources: pipelineResult.sources || [],
-          deterministicResponse: pipelineResult,
-          disclaimer: pipelineResult.disclaimer || 'Educational Information Only — Not Legal Advice.',
-          timestamp: new Date().toISOString(),
-        },
-        {
-          headers: {
-            ...SECURITY_HEADERS,
-            'X-RateLimit-Limit': String(rateLimit.limit),
-            'X-RateLimit-Remaining': String(rateLimit.remaining),
-          },
-        }
-      );
-    } catch (pipelineError: unknown) {
-      const errorMsg = pipelineError instanceof Error ? pipelineError.message : 'Unknown pipeline error';
-      console.error('General conversational legal pipeline error:', errorMsg);
+      const responseStatus = pipelineResult.status === 'clarification-required'
+        ? 'clarification-required'
+        : pipelineResult.status === 'out-of-scope'
+        ? 'out-of-scope'
+        : 'success';
 
-      // Resilient local fallback if external pipeline fails
-      const fallbackResponse = generateLocalLegalAnalysis(trimmedQuery, safeMode, safeLanguage, validatedLawContext);
-      return NextResponse.json(
-        {
-          text: fallbackResponse,
-          provider: 'nyayota-legal-engine-v1',
-          engine: 'general',
-          status: 'degraded',
-          sources: [],
-          disclaimer: 'Educational Information Only — Not Legal Advice.',
-          timestamp: new Date().toISOString(),
-        },
-        {
-          headers: {
-            ...SECURITY_HEADERS,
-            'X-RateLimit-Limit': String(rateLimit.limit),
-            'X-RateLimit-Remaining': String(rateLimit.remaining),
-          },
-        }
-      );
+      const publicResponse: PublicAssistantResponse = {
+        text: pipelineResult.text,
+        engine: 'general',
+        status: responseStatus,
+        sources: sanitizePublicSources(pipelineResult.sources),
+        disclaimer: pipelineResult.disclaimer || 'Educational Information Only — Not Legal Advice.',
+        timestamp: new Date().toISOString(),
+        clarificationPrompt: pipelineResult.clarificationPrompt,
+        clarificationOptions: pipelineResult.clarificationOptions,
+      };
+
+      return NextResponse.json(publicResponse, { headers: rateLimitHeaders });
+    } catch (pipelineError: unknown) {
+      const msg = pipelineError instanceof Error ? pipelineError.message : 'Unknown error';
+      console.error('General conversational legal pipeline error:', msg);
+
+      // Resilient local degraded fallback if external pipeline fails or aborts
+      const fallbackResult = await executeNyayotaAIPipeline({
+        query,
+        language: serviceLanguage,
+        mode: serviceMode,
+        lawContext,
+        messages,
+        signal: req.signal,
+      });
+
+      const publicResponse: PublicAssistantResponse = {
+        text: fallbackResult.text,
+        engine: 'general',
+        status: 'degraded',
+        sources: sanitizePublicSources(fallbackResult.sources),
+        disclaimer: 'Educational Information Only — Not Legal Advice.',
+        timestamp: new Date().toISOString(),
+      };
+
+      return NextResponse.json(publicResponse, { headers: rateLimitHeaders });
     }
   } catch (error: unknown) {
     const errorMsg = error instanceof Error ? error.message : 'Internal error';
-    console.error('AI assistant route encountered an error:', errorMsg);
+    console.error('AI assistant route encountered an unhandled error:', errorMsg);
     return NextResponse.json(
       { error: 'An error occurred while analyzing the legal query.' },
       { status: 500, headers: SECURITY_HEADERS }
     );
   }
-}
-
-function generateLocalLegalAnalysis(query: string, _mode: string, _language: string, lawContext?: any): string {
-  const q = query.toLowerCase();
-
-  if (lawContext && lawContext.title) {
-    const sectionInfo = lawContext.sectionNumber ? ` - ${lawContext.sectionNumber}` : '';
-    return `### Legal Analysis: ${lawContext.title}${sectionInfo}\n\n**Jurisdictional Context:** ${lawContext.jurisdiction || 'Bangladesh'} • **Branch:** ${lawContext.category || 'Codified Law'}\n\n**Key Statutory Purpose & Provisions:**\n- **Statutory Foundation:** ${lawContext.title} serves as a governing framework in ${lawContext.jurisdiction || 'Bangladesh'}.\n${lawContext.sectionNumber ? `- **Target Provision:** ${lawContext.sectionNumber} (${lawContext.sectionTitle || ''}) sets out specific statutory rules and legal requirements.` : ''}\n${lawContext.overview ? `- **Statutory Scope:** ${lawContext.overview}` : ''}\n\n**Plain Language Breakdown (সহজ ভাষায় ব্যাখ্যা):**\nIn everyday terms, this law ensures that rights, duties, and procedural steps are transparently defined. When individuals or institutions interact in this area, they must comply with statutory standards to maintain legality and avoid enforcement sanctions or invalidation.\n\n---\n*Educational Information Only — Not Legal Advice.*`;
-  }
-
-  if (q.includes('negligence') || q.includes('অবহেলা') || q.includes('duty of care')) {
-    return `### Legal Explanation: Negligence & The Duty of Care\n\n**Core Definition:**\n*Negligence* is the failure to exercise the standard of care that a reasonably prudent person would have exercised in a similar situation, resulting in unintended injury or loss to another party.\n\n**The 4 Essential Legal Pillars of Negligence:**\n1. **Duty of Care:** The defendant owed a legal obligation to protect the plaintiff from foreseeable harm.\n2. **Breach of Duty:** The defendant failed to meet the required standard of care.\n3. **Causation:** The breach directly caused the claimant's injury.\n4. **Damages:** Measurable physical or financial harm was suffered.\n\n---\n*Educational Information Only — Not Legal Advice.*`;
-  }
-
-  return `### Nyayota Legal Analysis & Provisions\n\n**Inquiry:** "${query}"\n\n**Statutory & Conceptual Breakdown:**\n- **Jurisdiction:** Evaluated under Bangladesh Statutory Law and Universal Legal Principles.\n- **Core Principle:** Legal obligations require statutory authorization (*intra vires*), absence of arbitrary exercise, and adherence to natural justice.\n\n---\n*Educational Information Only — Not Legal Advice.*`;
 }

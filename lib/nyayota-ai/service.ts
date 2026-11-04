@@ -82,6 +82,9 @@ export interface NyayotaAIServiceRequest {
   /** Optional custom or mocked GenAI client for testing */
   genAiClient?: any;
 
+  /** Optional AbortSignal for request cancellation */
+  signal?: AbortSignal;
+
   /** Optional fine-tuning options for retrieval */
   options?: {
     limit?: number;
@@ -270,6 +273,7 @@ export async function executeNyayotaAIPipeline(
         sources: [],
         apiKey: request.apiKey,
         genAiClient: request.genAiClient,
+        signal: request.signal,
       });
 
       let primaryText = naturalOutput.text;
@@ -424,6 +428,7 @@ export async function executeNyayotaAIPipeline(
       deterministicResponse: genResponse,
       apiKey: request.apiKey,
       genAiClient: request.genAiClient,
+      signal: request.signal,
     });
 
     let primaryText = naturalOutput.text;

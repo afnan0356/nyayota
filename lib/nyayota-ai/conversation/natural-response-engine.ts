@@ -39,6 +39,7 @@ export interface NaturalResponseEngineInput {
   apiKey?: string;
   model?: string;
   timeoutMs?: number;
+  signal?: AbortSignal;
   /** Optional custom/mocked GenAI client for deterministic offline testing */
   genAiClient?: any;
 }
@@ -259,6 +260,7 @@ export async function generateNaturalConversationalResponse(
     apiKey = process.env.GEMINI_API_KEY,
     model = AI_CONFIG.model,
     timeoutMs = AI_CONFIG.timeoutMs,
+    signal: externalSignal,
     genAiClient,
   } = input;
 
@@ -267,57 +269,86 @@ export async function generateNaturalConversationalResponse(
   const canUseGemini = Boolean(isValidApiKey || genAiClient);
 
   if (canUseGemini) {
-    try {
-      const ai = genAiClient || getOrCreateGenAiClient(apiKey!);
-
-      const systemInstruction = buildSystemInstruction(context, decision, sources, targetLanguage);
-      const contents = formatGeminiContents(query, context);
-
+    // If incoming request is already aborted, do not initiate upstream call
+    if (externalSignal?.aborted) {
+      console.warn('Gemini generation skipped: incoming request was already aborted');
+    } else {
+      const abortController = new AbortController();
       let timer: ReturnType<typeof setTimeout> | undefined;
-      const timeoutPromise = new Promise<never>((_, reject) => {
-        timer = setTimeout(
-          () => reject(new Error(`Natural response generation timed out after ${timeoutMs / 1000}s`)),
-          timeoutMs
-        );
-      });
 
-      let activeModel = model;
-      let rawGeneratedText: string | undefined;
+      const handleExternalAbort = () => {
+        abortController.abort(externalSignal?.reason || new Error('Request aborted by client'));
+      };
+
+      if (externalSignal) {
+        externalSignal.addEventListener('abort', handleExternalAbort, { once: true });
+      }
+
+      timer = setTimeout(() => {
+        abortController.abort(new Error(`Natural response generation timed out after ${timeoutMs / 1000}s`));
+      }, timeoutMs);
 
       try {
+        const ai = genAiClient || getOrCreateGenAiClient(apiKey!);
+        const systemInstruction = buildSystemInstruction(context, decision, sources, targetLanguage);
+        const contents = formatGeminiContents(query, context);
+
+        let activeModel = model;
+        let rawGeneratedText: string | undefined;
+
+        const abortPromise = new Promise<never>((_, reject) => {
+          if (abortController.signal.aborted) {
+            reject(abortController.signal.reason || new Error(`Natural response generation timed out after ${timeoutMs / 1000}s`));
+          } else {
+            abortController.signal.addEventListener('abort', () => {
+              reject(abortController.signal.reason || new Error(`Natural response generation timed out after ${timeoutMs / 1000}s`));
+            }, { once: true });
+          }
+        });
+
         try {
-          const responsePromise = ai.models.generateContent({
-            model: activeModel,
-            contents,
-            config: {
-              systemInstruction,
-            },
-          });
-          const response = await Promise.race([responsePromise, timeoutPromise]);
-          rawGeneratedText = (response as any).text;
-        } catch (primaryModelError: unknown) {
-          // If primary model encounters an error and alternative fallback model is configured and different
-          const fallbackModel = AI_CONFIG.fallbackModel;
-          if (!genAiClient && fallbackModel && fallbackModel !== activeModel) {
-            activeModel = fallbackModel;
-            const fallbackPromise = ai.models.generateContent({
+          try {
+            const callPromise = ai.models.generateContent({
               model: activeModel,
               contents,
               config: {
                 systemInstruction,
+                abortSignal: abortController.signal,
               },
             });
-            const response = await Promise.race([fallbackPromise, timeoutPromise]);
-            rawGeneratedText = (response as any).text;
-          } else {
-            throw primaryModelError;
+            const response = await Promise.race([callPromise, abortPromise]);
+            rawGeneratedText = (response as any)?.text;
+          } catch (primaryModelError: unknown) {
+            // If primary model encounters an error (and not aborted) and fallback model is configured
+            if (!abortController.signal.aborted && !genAiClient) {
+              const fallbackModel = AI_CONFIG.fallbackModel;
+              if (fallbackModel && fallbackModel !== activeModel) {
+                activeModel = fallbackModel;
+                const fallbackCall = ai.models.generateContent({
+                  model: activeModel,
+                  contents,
+                  config: {
+                    systemInstruction,
+                    abortSignal: abortController.signal,
+                  },
+                });
+                const fallbackResponse = await Promise.race([fallbackCall, abortPromise]);
+                rawGeneratedText = (fallbackResponse as any)?.text;
+              } else {
+                throw primaryModelError;
+              }
+            } else {
+              throw primaryModelError;
+            }
+          }
+        } finally {
+          if (timer) {
+            clearTimeout(timer);
+          }
+          if (externalSignal) {
+            externalSignal.removeEventListener('abort', handleExternalAbort);
           }
         }
-      } finally {
-        if (timer) {
-          clearTimeout(timer);
-        }
-      }
 
       if (typeof rawGeneratedText === 'string' && rawGeneratedText.trim().length > 0) {
         const executionTimeMs = Date.now() - startTime;
@@ -347,6 +378,7 @@ export async function generateNaturalConversationalResponse(
       console.warn('Natural Conversational Engine falling back to deterministic response:', errorMsg);
     }
   }
+}
 
   // 2. Deterministic Fallback Path (Zero downtime, resilient offline execution)
   // Preserves complete structured legal analysis from verified database records
