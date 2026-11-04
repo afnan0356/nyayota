@@ -376,13 +376,21 @@ nyayota/
 │       ├── service.ts               # Resilient end-to-end integration boundary
 │       └── index.ts                 # Public module barrel export
 │
-├── tests/                           # Automated Verification & Evaluation Suites
+├── tests/                           # Automated Verification & Evaluation Suites (299 tests)
 │   ├── nyayota-ai-retrieval.test.ts # Retrieval precision and section matching tests
 │   ├── nyayota-ai-router.test.ts    # Intent classification and routing barrier tests
 │   ├── nyayota-ai-generator.test.ts # Source-grounded explanation generation tests
 │   ├── nyayota-ai-service.test.ts   # Service pipeline integration & timeout tests
 │   ├── nyayota-ai-evaluation.test.ts# 50-query golden benchmark evaluation suite
-│   └── nyayota-ai-phase5c.test.ts   # Edge security, donation safety & QA tests
+│   ├── nyayota-ai-phase5b.test.ts   # Mode routing & deterministic execution tests
+│   ├── nyayota-ai-phase5c.test.ts   # Edge security, donation safety & QA tests
+│   ├── nyayota-phase5e.test.ts      # Public assistant 503 suspension tests
+│   ├── nyayota-phase5f.test.ts      # Hierarchical donation architecture tests
+│   ├── nyayota-ai-conversation-phase6a.test.ts # Conversational turns & memory tests
+│   ├── nyayota-ai-conversation-phase6b.test.ts # Conversation history validation tests
+│   ├── nyayota-ai-conversation-phase6c.test.ts # Grounded generation & injection tests
+│   ├── nyayota-ai-streaming-phase8.test.ts     # Streaming SSE response architecture tests
+│   └── nyayota-security-remediation.test.ts    # Repository trust, IP & security audit tests
 │
 └── public/                          # Static assets and repository media
     └── images/
@@ -408,13 +416,13 @@ All statutory records included in Nyayota are grounded in authentic primary sour
    - **Primary Depositary:** Office of Legal Affairs, United Nations (*United Nations Treaty Collection — UNTS*).
    - **Treaty Series Reference:** Certified depositary texts published in the *United Nations Treaty Series (U.N.T.S.)*.
 
-### Cryptographic File Integrity vs. Statutory Legal Authenticity
+### Data Ingestion Tracking vs. Statutory Legal Authenticity
 
-To prevent misunderstanding regarding our verification systems:
+To maintain complete transparency regarding our curation and verification processes:
 
 | Verification Layer | Nature & Mechanism | What It Proves | What It Does NOT Prove |
 | :--- | :--- | :--- | :--- |
-| **`checksumSha256`** | Cryptographic hash (SHA-256) of local JSON/TypeScript baseline dataset strings. | **Local Data Integrity:** Proves that local repository data files have not suffered accidental software corruption, unintended line deletions, or unauthorized tampering during deployment. | **Does NOT prove statutory legal authenticity.** Only official government gazettes carry statutory force of law. |
+| **`integrityStatus`** | Curation status (`source-linked`, `reviewed`, `unverified`, `independently-verified`). | **Source Transparency:** Verifies that the record is anchored to an official government repository URL (`bdlaws.minlaw.gov.bd` or `bdcode.gov.bd`). | **Does NOT prove court certification.** Only official printed gazettes published by BG Press carry evidentiary authority in court proceedings. |
 | **`lastVerifiedDate`** | ISO timestamp recording maintainer review against the government portal. | **Editorial Recency:** Confirms when maintainers last cross-referenced the record against `bdlaws.minlaw.gov.bd`. | **Does NOT guarantee real-time reflection** of newly passed emergency ordinances or ungazetted amendments. |
 | **`officialGazetteCitation`** | Formal legislative enactment citation (e.g. Act XLV of 1860). | **Historical Pedigree:** Identifies the formal parent Act and historical volume in *The Bangladesh Code*. | Must be read in conjunction with subsequent amending Acts listed in `lastAmendmentAct`. |
 
@@ -564,8 +572,9 @@ For full contribution standards, data verification criteria, and environment rul
 4. **Validate Your Changes:**
    Run the test suite, linter, and production build before submitting:
    ```bash
-   npm test        # or bun test (119 automated tests)
+   bun test        # 299 automated tests across 13 suites
    npm run lint    # ESLint flat config
+   npm run typecheck # TypeScript compiler strict verification
    npm run build   # Next.js production compilation
    ```
 5. **Submit a Pull Request:** Provide a descriptive pull request title detailing the exact statutes or components modified, along with primary source links.
@@ -575,11 +584,12 @@ For full contribution standards, data verification criteria, and environment rul
 
 ## License & Intellectual Property
 
-Nyayota is released under the **[MIT License](LICENSE)**.
+Nyayota maintains a strict boundary between software code and curated legal datasets:
 
-- **Platform Source Code:** The application codebase, user interface, custom software components, and original styling in this repository are open source and licensed under the [MIT License](LICENSE). Copyright &copy; 2026 Md. Afnan. See the [`LICENSE`](LICENSE) file for the complete terms and conditions.
-- **Primary Statutory Texts:** Codified legislation, Acts of Parliament, President's Orders, government gazette notifications, and international multilateral treaties reproduced herein are public government works and official statutory instruments. They are reproduced for educational, research, and non-commercial public knowledge purposes in accordance with public-domain legal principles and fair dealing provisions under international copyright conventions and national copyright laws.
-- **Brand Protection & IP Audit:** For our detailed intellectual property evaluation, trademark safeguards, and proposed dual-licensing roadmap, see [`docs/LEGAL_AND_BRAND_PROTECTION_AUDIT.md`](docs/LEGAL_AND_BRAND_PROTECTION_AUDIT.md).
+- **Platform Source Code (MIT License):** All software source code, components, layout logic, algorithms, and styling in this repository are open source and licensed under the **[MIT License](LICENSE)**. Copyright &copy; 2026 Md. Afnan.
+- **Curated Legal Content & Dataset Rights Register:** Curated annotations, plain-language legal syntheses ("Explain Like I'm 15"), procedural guides, and bilingual cross-references are editorial works governed by the **[CONTENT-LICENSE.md](CONTENT-LICENSE.md)**.
+- **Primary Statutory Texts:** Enacted statutory legislation and international treaties are official public instruments reproduced under educational fair dealing exceptions (Section 24 & 72 of the Bangladesh Copyright Act, 2000).
+- **Brand Protection & Trademark Policy:** "Nyayota", "Nyayota AI", and platform logos are trademarks of Md. Afnan. See [`docs/LEGAL_AND_BRAND_PROTECTION_AUDIT.md`](docs/LEGAL_AND_BRAND_PROTECTION_AUDIT.md) and [`docs/TRADEMARKS_AND_THIRD_PARTY_ASSETS.md`](docs/TRADEMARKS_AND_THIRD_PARTY_ASSETS.md).
 
 ---
 

@@ -273,42 +273,49 @@ export async function generateNaturalConversationalResponse(
       const systemInstruction = buildSystemInstruction(context, decision, sources, targetLanguage);
       const contents = formatGeminiContents(query, context);
 
-      const timeoutPromise = new Promise<never>((_, reject) =>
-        setTimeout(
+      let timer: ReturnType<typeof setTimeout> | undefined;
+      const timeoutPromise = new Promise<never>((_, reject) => {
+        timer = setTimeout(
           () => reject(new Error(`Natural response generation timed out after ${timeoutMs / 1000}s`)),
           timeoutMs
-        )
-      );
+        );
+      });
 
       let activeModel = model;
       let rawGeneratedText: string | undefined;
 
       try {
-        const responsePromise = ai.models.generateContent({
-          model: activeModel,
-          contents,
-          config: {
-            systemInstruction,
-          },
-        });
-        const response = await Promise.race([responsePromise, timeoutPromise]);
-        rawGeneratedText = (response as any).text;
-      } catch (primaryModelError: unknown) {
-        // If primary model encounters an error and alternative fallback model is configured and different
-        const fallbackModel = AI_CONFIG.fallbackModel;
-        if (!genAiClient && fallbackModel && fallbackModel !== activeModel) {
-          activeModel = fallbackModel;
-          const fallbackPromise = ai.models.generateContent({
+        try {
+          const responsePromise = ai.models.generateContent({
             model: activeModel,
             contents,
             config: {
               systemInstruction,
             },
           });
-          const response = await Promise.race([fallbackPromise, timeoutPromise]);
+          const response = await Promise.race([responsePromise, timeoutPromise]);
           rawGeneratedText = (response as any).text;
-        } else {
-          throw primaryModelError;
+        } catch (primaryModelError: unknown) {
+          // If primary model encounters an error and alternative fallback model is configured and different
+          const fallbackModel = AI_CONFIG.fallbackModel;
+          if (!genAiClient && fallbackModel && fallbackModel !== activeModel) {
+            activeModel = fallbackModel;
+            const fallbackPromise = ai.models.generateContent({
+              model: activeModel,
+              contents,
+              config: {
+                systemInstruction,
+              },
+            });
+            const response = await Promise.race([fallbackPromise, timeoutPromise]);
+            rawGeneratedText = (response as any).text;
+          } else {
+            throw primaryModelError;
+          }
+        }
+      } finally {
+        if (timer) {
+          clearTimeout(timer);
         }
       }
 

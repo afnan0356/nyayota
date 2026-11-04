@@ -41,7 +41,11 @@ const CITATIONS_COLLECTION_KEY = 'nyayota_collected_citations_v1';
 // Helper to notify other tabs/components
 function notifyResearchUpdate() {
   if (typeof window !== 'undefined') {
-    window.dispatchEvent(new Event('nyayota-research-updated'));
+    try {
+      window.dispatchEvent(new Event('nyayota-research-updated'));
+    } catch {
+      // Ignore in non-browser environments
+    }
   }
 }
 
@@ -99,7 +103,11 @@ export function saveResearchNote(note: Omit<ResearchNote, 'id' | 'createdAt' | '
         updatedAt: now,
       };
       notes[index] = updated;
-      localStorage.setItem(RESEARCH_NOTES_KEY, JSON.stringify(notes));
+      try {
+        localStorage.setItem(RESEARCH_NOTES_KEY, JSON.stringify(notes));
+      } catch (e) {
+        console.error('Failed to save updated research note to localStorage', e);
+      }
       notifyResearchUpdate();
       return updated;
     }
@@ -119,14 +127,22 @@ export function saveResearchNote(note: Omit<ResearchNote, 'id' | 'createdAt' | '
   };
 
   notes.unshift(newNote);
-  localStorage.setItem(RESEARCH_NOTES_KEY, JSON.stringify(notes));
+  try {
+    localStorage.setItem(RESEARCH_NOTES_KEY, JSON.stringify(notes));
+  } catch (e) {
+    console.error('Failed to save new research note to localStorage', e);
+  }
   notifyResearchUpdate();
   return newNote;
 }
 
 export function deleteResearchNote(id: string): void {
   const notes = getResearchNotes().filter((n) => n.id !== id);
-  localStorage.setItem(RESEARCH_NOTES_KEY, JSON.stringify(notes));
+  try {
+    localStorage.setItem(RESEARCH_NOTES_KEY, JSON.stringify(notes));
+  } catch (e) {
+    console.error('Failed to delete research note from localStorage', e);
+  }
   notifyResearchUpdate();
 }
 
@@ -161,7 +177,11 @@ export function addCitationToCollection(citation: Omit<CollectedCitation, 'id' |
     const filtered = list.filter(
       (c) => !(c.lawId === citation.lawId && c.sectionNumber === citation.sectionNumber)
     );
-    localStorage.setItem(CITATIONS_COLLECTION_KEY, JSON.stringify(filtered));
+    try {
+      localStorage.setItem(CITATIONS_COLLECTION_KEY, JSON.stringify(filtered));
+    } catch (e) {
+      console.error('Failed to update citations collection in localStorage', e);
+    }
     notifyResearchUpdate();
     return false;
   }
@@ -173,19 +193,31 @@ export function addCitationToCollection(citation: Omit<CollectedCitation, 'id' |
   };
 
   list.unshift(newItem);
-  localStorage.setItem(CITATIONS_COLLECTION_KEY, JSON.stringify(list));
+  try {
+    localStorage.setItem(CITATIONS_COLLECTION_KEY, JSON.stringify(list));
+  } catch (e) {
+    console.error('Failed to add citation to localStorage', e);
+  }
   notifyResearchUpdate();
   return true;
 }
 
 export function removeCitationFromCollection(id: string): void {
   const list = getCollectedCitations().filter((c) => c.id !== id);
-  localStorage.setItem(CITATIONS_COLLECTION_KEY, JSON.stringify(list));
+  try {
+    localStorage.setItem(CITATIONS_COLLECTION_KEY, JSON.stringify(list));
+  } catch (e) {
+    console.error('Failed to remove citation from localStorage', e);
+  }
   notifyResearchUpdate();
 }
 
 export function clearCollectedCitations(): void {
-  localStorage.setItem(CITATIONS_COLLECTION_KEY, JSON.stringify([]));
+  try {
+    localStorage.setItem(CITATIONS_COLLECTION_KEY, JSON.stringify([]));
+  } catch (e) {
+    console.error('Failed to clear citations in localStorage', e);
+  }
   notifyResearchUpdate();
 }
 

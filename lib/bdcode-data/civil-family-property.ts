@@ -34,7 +34,7 @@ export const CIVIL_FAMILY_PROPERTY_LAWS: BangladeshLawRecord[] = [
     officialGazetteCitation: 'Legislative Enactment Act V of 1908 (Adopted via Act VIII of 1973)',
     importDate: '2026-08-20T00:00:00Z',
     lastVerifiedDate: '2026-08-26T00:00:00Z',
-    integrityStatus: 'fully-verified',
+    integrityStatus: 'source-linked',
     totalSectionsCount: 158,
     relatedLawIds: ['bd-specific-relief-1877', 'bd-limitation-act-1908', 'bd-court-fees-1870'],
     sections: [
@@ -103,7 +103,7 @@ export const CIVIL_FAMILY_PROPERTY_LAWS: BangladeshLawRecord[] = [
     officialGazetteCitation: 'Legislative Enactment Act I of 1877 (Adopted via Act VIII of 1973)',
     importDate: '2026-08-20T00:00:00Z',
     lastVerifiedDate: '2026-08-26T00:00:00Z',
-    integrityStatus: 'fully-verified',
+    integrityStatus: 'source-linked',
     totalSectionsCount: 57,
     relatedLawIds: ['bd-cpc-1908', 'bd-transfer-property-1882', 'bd-limitation-act-1908'],
     sections: [
@@ -180,7 +180,7 @@ export const CIVIL_FAMILY_PROPERTY_LAWS: BangladeshLawRecord[] = [
     officialGazetteCitation: 'Legislative Enactment Act IX of 1908 (Adopted via Act VIII of 1973)',
     importDate: '2026-08-20T00:00:00Z',
     lastVerifiedDate: '2026-08-26T00:00:00Z',
-    integrityStatus: 'fully-verified',
+    integrityStatus: 'source-linked',
     totalSectionsCount: 32,
     relatedLawIds: ['bd-cpc-1908', 'bd-specific-relief-1877'],
     sections: [
@@ -233,7 +233,7 @@ export const CIVIL_FAMILY_PROPERTY_LAWS: BangladeshLawRecord[] = [
     officialGazetteCitation: 'Legislative Enactment Act VII of 1870 (Adopted via Act VIII of 1973)',
     importDate: '2026-08-20T00:00:00Z',
     lastVerifiedDate: '2026-08-26T00:00:00Z',
-    integrityStatus: 'fully-verified',
+    integrityStatus: 'source-linked',
     totalSectionsCount: 36,
     relatedLawIds: ['bd-cpc-1908', 'bd-specific-relief-1877'],
     sections: [
@@ -286,7 +286,7 @@ export const CIVIL_FAMILY_PROPERTY_LAWS: BangladeshLawRecord[] = [
     officialGazetteCitation: 'Bangladesh Gazette Extraordinary, 24 January 2001',
     importDate: '2026-08-20T00:00:00Z',
     lastVerifiedDate: '2026-08-26T00:00:00Z',
-    integrityStatus: 'fully-verified',
+    integrityStatus: 'source-linked',
     totalSectionsCount: 58,
     relatedLawIds: ['bd-cpc-1908', 'bd-contract-act-1872'],
     sections: [
@@ -349,7 +349,7 @@ export const CIVIL_FAMILY_PROPERTY_LAWS: BangladeshLawRecord[] = [
     officialGazetteCitation: 'Gazette of Pakistan Extraordinary, 2 March 1961 (Adopted via Act VIII of 1973)',
     importDate: '2026-08-20T00:00:00Z',
     lastVerifiedDate: '2026-08-26T00:00:00Z',
-    integrityStatus: 'fully-verified',
+    integrityStatus: 'source-linked',
     totalSectionsCount: 13,
     relatedLawIds: ['bd-family-courts-act-2023', 'bd-dowry-prohibition-2018'],
     sections: [
@@ -418,7 +418,7 @@ export const CIVIL_FAMILY_PROPERTY_LAWS: BangladeshLawRecord[] = [
     officialGazetteCitation: 'Bangladesh Gazette Extraordinary, 15 February 2023',
     importDate: '2026-08-20T00:00:00Z',
     lastVerifiedDate: '2026-08-26T00:00:00Z',
-    integrityStatus: 'fully-verified',
+    integrityStatus: 'source-linked',
     totalSectionsCount: 28,
     relatedLawIds: ['bd-muslim-family-laws-1961', 'bd-guardians-wards-1890', 'bd-dowry-prohibition-2018'],
     sections: [
@@ -479,7 +479,7 @@ export const CIVIL_FAMILY_PROPERTY_LAWS: BangladeshLawRecord[] = [
     officialGazetteCitation: 'Legislative Enactment Act VIII of 1890 (Adopted via Act VIII of 1973)',
     importDate: '2026-08-20T00:00:00Z',
     lastVerifiedDate: '2026-08-26T00:00:00Z',
-    integrityStatus: 'fully-verified',
+    integrityStatus: 'source-linked',
     totalSectionsCount: 53,
     relatedLawIds: ['bd-family-courts-act-2023', 'bd-muslim-family-laws-1961'],
     sections: [
@@ -532,7 +532,7 @@ export const CIVIL_FAMILY_PROPERTY_LAWS: BangladeshLawRecord[] = [
     officialGazetteCitation: 'Bangladesh Gazette Extraordinary, 24 September 2012',
     importDate: '2026-08-20T00:00:00Z',
     lastVerifiedDate: '2026-08-26T00:00:00Z',
-    integrityStatus: 'fully-verified',
+    integrityStatus: 'source-linked',
     totalSectionsCount: 9,
     relatedLawIds: ['bd-family-courts-act-2023', 'bd-special-marriage-1872'],
     sections: [
@@ -585,7 +585,7 @@ export const CIVIL_FAMILY_PROPERTY_LAWS: BangladeshLawRecord[] = [
     officialGazetteCitation: 'Legislative Enactment Act III of 1872 (Adopted via Act VIII of 1973)',
     importDate: '2026-08-20T00:00:00Z',
     lastVerifiedDate: '2026-08-26T00:00:00Z',
-    integrityStatus: 'fully-verified',
+    integrityStatus: 'source-linked',
     totalSectionsCount: 22,
     relatedLawIds: ['bd-family-courts-act-2023'],
     sections: [
@@ -630,7 +630,7 @@ export const CIVIL_FAMILY_PROPERTY_LAWS: BangladeshLawRecord[] = [
     officialGazetteCitation: 'Bangladesh Gazette Extraordinary, 8 October 2018',
     importDate: '2026-08-20T00:00:00Z',
     lastVerifiedDate: '2026-08-26T00:00:00Z',
-    integrityStatus: 'fully-verified',
+    integrityStatus: 'source-linked',
     totalSectionsCount: 10,
     relatedLawIds: ['bd-nari-o-shishu-2000', 'bd-penal-code-1860'],
     sections: [
@@ -690,7 +690,7 @@ export const CIVIL_FAMILY_PROPERTY_LAWS: BangladeshLawRecord[] = [
     officialGazetteCitation: 'Legislative Enactment Act IV of 1882 (Adopted via Act VIII of 1973)',
     importDate: '2026-08-20T00:00:00Z',
     lastVerifiedDate: '2026-08-26T00:00:00Z',
-    integrityStatus: 'fully-verified',
+    integrityStatus: 'source-linked',
     totalSectionsCount: 137,
     relatedLawIds: ['bd-registration-act-1908', 'bd-sata-1950', 'bd-land-crime-prevention-2023'],
     sections: [
@@ -760,7 +760,7 @@ export const CIVIL_FAMILY_PROPERTY_LAWS: BangladeshLawRecord[] = [
     officialGazetteCitation: 'Legislative Enactment Act XVI of 1908 (Adopted via Act VIII of 1973)',
     importDate: '2026-08-20T00:00:00Z',
     lastVerifiedDate: '2026-08-26T00:00:00Z',
-    integrityStatus: 'fully-verified',
+    integrityStatus: 'source-linked',
     totalSectionsCount: 93,
     relatedLawIds: ['bd-transfer-property-1882', 'bd-land-crime-prevention-2023'],
     sections: [
@@ -813,7 +813,7 @@ export const CIVIL_FAMILY_PROPERTY_LAWS: BangladeshLawRecord[] = [
     officialGazetteCitation: 'Dacca Gazette Extraordinary, 16 May 1951 (Adopted via Act VIII of 1973)',
     importDate: '2026-08-20T00:00:00Z',
     lastVerifiedDate: '2026-08-26T00:00:00Z',
-    integrityStatus: 'fully-verified',
+    integrityStatus: 'source-linked',
     totalSectionsCount: 152,
     relatedLawIds: ['bd-transfer-property-1882', 'bd-registration-act-1908', 'bd-land-crime-prevention-2023'],
     sections: [
@@ -866,7 +866,7 @@ export const CIVIL_FAMILY_PROPERTY_LAWS: BangladeshLawRecord[] = [
     officialGazetteCitation: 'Bangladesh Gazette Extraordinary, 18 September 2023',
     importDate: '2026-08-20T00:00:00Z',
     lastVerifiedDate: '2026-08-26T00:00:00Z',
-    integrityStatus: 'fully-verified',
+    integrityStatus: 'source-linked',
     totalSectionsCount: 26,
     relatedLawIds: ['bd-transfer-property-1882', 'bd-registration-act-1908', 'bd-penal-code-1860'],
     sections: [

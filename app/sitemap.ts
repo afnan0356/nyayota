@@ -18,7 +18,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { path: '/research', priority: 0.8, changeFrequency: 'weekly' },
     { path: '/search', priority: 0.8, changeFrequency: 'daily' },
     { path: '/discover', priority: 0.75, changeFrequency: 'weekly' },
-    { path: '/ai-assistant', priority: 0.75, changeFrequency: 'weekly' },
     { path: '/about', priority: 0.7, changeFrequency: 'monthly' },
     { path: '/contact', priority: 0.7, changeFrequency: 'monthly' },
     { path: '/roadmap', priority: 0.65, changeFrequency: 'monthly' },

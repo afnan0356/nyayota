@@ -82,13 +82,14 @@ export type BangladeshLawStatus =
   | 'Pending Gazette Enforcement';
 
 /**
- * Official source verification & ingestion integrity status
+ * Ingestion and verification status for statutory records.
+ * Distinguishes data-level ingestion tracking from formal legal authenticity or gazette certification.
  */
 export type IngestionIntegrityStatus =
-  | 'fully-verified'       // Verified against official gazette & bdcode.gov.bd
-  | 'provisional-indexed'  // Catalog metadata verified, full section extraction in progress
-  | 'source-syncing'       // Scheduled for automated gazette sync
-  | 'amendment-pending';   // Recent legislative amendment awaiting gazette text integration
+  | 'unverified'               // Initial ingest; metadata or provisions not yet cross-checked
+  | 'source-linked'            // Canonical link verified to official repository (bdlaws.minlaw.gov.bd or bdcode.gov.bd)
+  | 'reviewed'                 // Statutory text and provisions manually checked against digital source
+  | 'independently-verified';  // Cross-verified against official printed gazette or authorized law reports
 
 // ============================================================================
 // 2. BANGLADESH CODE STATUTE DATA MODEL

@@ -52,14 +52,17 @@ npm run dev
 ### Step 4: Run Verification Commands
 Before submitting changes, all checks must pass cleanly:
 ```bash
-# 1. Run full automated test suite (119+ tests)
+# 1. Run full automated test suite (280+ tests)
 bun test
 # or: npm test
 
 # 2. Run ESLint flat config
 npm run lint
 
-# 3. Verify production compilation and type checks
+# 3. Verify TypeScript type safety
+npm run typecheck
+
+# 4. Verify Next.js production build
 npm run build
 ```
 
@@ -82,18 +85,19 @@ When adding records to `lib/bdcode-data/*` or `lib/legal-data.ts`, provide:
 - `actNumber`: Exact legislative designation (e.g., `Act No. XLV of 1860`).
 - `enactmentYear`: Year of passage.
 - `volumeNumber` & `volumeCitation`: Official volume in *The Bangladesh Code*.
-- `sourceUrl`: Direct hyperlink to `bdlaws.minlaw.gov.bd`.
+- `sourceUrl`: Direct hyperlink to `bdlaws.minlaw.gov.bd` or `bdcode.gov.bd`.
 - `officialGazetteCitation`: Gazette date and notification number.
 - `lastVerifiedDate`: ISO date when the text was verified against the government portal.
+- `integrityStatus`: Ingestion status (`source-linked`, `reviewed`, `unverified`, or `independently-verified`).
 
 ### 4.3 Editorial & Translation Boundaries
 - **Statutory Text (`content` / `contentBn`):** Must be a faithful transcription of the official Gazette / Bangladesh Code text. Do not modernize archaic statutory language in the primary text field.
 - **Educational Summaries (`simpleExplanation` / `explainLike15`):** Clear, objective, non-jargon explanations designed for everyday citizens.
 - **No Copyright Infringement:** Never copy headnotes, commentaries, case digests, or annotations from commercial legal publishers, textbooks, or proprietary subscription databases.
 
-### 4.4 Data Integrity vs. Statutory Authenticity
-- Nyayota computes SHA-256 hashes (`checksumSha256`) of local statutory JSON data structures. This is a software engineering mechanism to detect accidental repository drift or transmission corruption.
-- Contributors and users must understand that SHA-256 integrity does **not** substitute for official government authentication. Authoritative legal validity rests exclusively with *The Bangladesh Gazette Extraordinary* and the official Acts published by the Government of Bangladesh.
+### 4.4 Data Ingestion Tracking vs. Statutory Authenticity
+- Nyayota tracks source links and curation status using `integrityStatus` (`source-linked`, `reviewed`, `unverified`, `independently-verified`). This is a software engineering mechanism to track curation progress and digital source links.
+- Contributors and users must understand that digital ingestion tracking does **not** substitute for official government authentication. Authoritative legal validity rests exclusively with *The Bangladesh Gazette Extraordinary* and the official printed Acts published by the Government of Bangladesh.
 
 ---
 

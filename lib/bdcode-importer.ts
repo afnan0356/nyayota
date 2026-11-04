@@ -339,7 +339,7 @@ export function runCatalogIntegrityAudit(
 
   for (const law of catalog) {
     totalSections += law.sections.length;
-    if (law.integrityStatus === 'fully-verified') verifiedCount++;
+    if (law.integrityStatus === 'source-linked' || law.integrityStatus === 'reviewed' || law.integrityStatus === 'independently-verified') verifiedCount++;
     if (law.sourceUrl && law.sourceUrl.startsWith('http')) withSourceLinks++;
     if (law.officialGazetteCitation) withGazetteCitations++;
 
@@ -454,7 +454,7 @@ export function ingestBangladeshLawRecord(
     officialGazetteCitation: payload.officialGazetteCitation || 'Bangladesh Gazette Reference Pending',
     importDate: new Date().toISOString(),
     lastVerifiedDate: new Date().toISOString(),
-    integrityStatus: report.metrics.emptySectionsCount > 0 ? 'provisional-indexed' : 'fully-verified',
+    integrityStatus: report.metrics.emptySectionsCount > 0 ? 'unverified' : 'source-linked',
     totalSectionsCount: payload.totalSectionsCount || cleanSections.length,
     relatedLawIds: payload.relatedLawIds || [],
     sections: cleanSections,

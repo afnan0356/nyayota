@@ -44,31 +44,34 @@ The repository's root `LICENSE` file currently contains the standard 1988 MIT Li
 
 ---
 
-## 2. Distinction: Public Domain Primary Texts vs. Curated Proprietary Works
+## 2. Distinction: Primary Statutory Instruments vs. Curated Editorial Works
 
-A clear legal boundary must be drawn between the non-copyrightable primary law and Nyayota's copyrightable original intellectual property:
+*Note: This analysis reflects architectural and technical governance classifications. It does not constitute a formal legal opinion and requires independent review by a certified legal practitioner admitted to the Supreme Court of Bangladesh.*
+
+A clear boundary is established between primary legislative instruments and Nyayota's original editorial synthesis:
 
 ```
 ┌────────────────────────────────────────────────────────────────────────┐
 │                        LEGAL DATA CLASSIFICATION                       │
 ├─────────────────────────────────────────┬──────────────────────────────┤
 │ PRIMARY STATUTORY INSTRUMENTS           │ CURATED ORIGINAL INTELLECTUAL│
-│ (Public Domain / Government Works)      │ PROPERTY (Nyayota Original)  │
+│ (Government & Treaty Sources)           │ PROPERTY (Nyayota Original)  │
 ├─────────────────────────────────────────┼──────────────────────────────┤
 │ • Official Acts of Parliament           │ • Bespoke TypeScript Schema  │
 │ • Ordinances & President's Orders       │ • "Explain Like I'm 15" text │
 │ • Bangladesh Gazette Notifications      │ • Procedural Citizen Guides  │
-│ • Verbatim statutory sections           │ • Curated Cross-References   │
+│ • Verbatim statutory provisions         │ • Curated Cross-References   │
 │ • International Treaty Texts (UNTS)     │ • Bilingual Terminology Map  │
-│ • Authentic Gazette Numbers & Dates     │ • Cryptographic Hashes & IDs │
+│ • Authentic Gazette Citations           │ • Intent Classification Graph│
 │ • Official Bengali Law Translations     │ • UI Design & Custom Engines │
 └─────────────────────────────────────────┴──────────────────────────────┘
 ```
 
-### Statutory Basis:
-- **Section 24 & Section 72, The Copyright Act, 2000 (Bangladesh / আইন নং ২৮, ২০০০):** Acts of Parliament, government reports, judicial decisions, and official gazette notifications are published under the authority of the government. Reproduction of legislative texts for educational, research, fair dealing, or public informative purposes does not infringe copyright.
-- **Fair Dealing Exemption:** Providing public access to enacted statutory law is a constitutional and fundamental rule of law safeguard. No party can claim exclusive proprietary copyright over the verbatim text of Section 302 of the Penal Code or Article 27 of the Constitution.
-- **Database & Compilation Rights:** However, the **selection, arrangement, coordination, plain-language interpretation, and structured adaptation** of these statutes into a cohesive software architecture constitute an original compilation protected under copyright law.
+### Statutory Framework:
+- **Section 24 & Section 72, The Copyright Act, 2000 (Bangladesh / আইন নং ২৮, ২০০০):** Acts of Parliament, government reports, judicial decisions, and official gazette notifications are published under state authority. Reproduction of legislative texts for educational, research, fair dealing, or public informative purposes does not infringe copyright under domestic exceptions.
+- **Non-Exclusivity:** Verbatim statutory sections enacted by the sovereign legislature cannot be monopolized by any single publisher.
+- **Database & Editorial Rights:** The original compilation, curation, structural formatting, plain-language translations, and educational explanations authored by Nyayota contributors represent editorial works governed by the [Content License Register](../CONTENT-LICENSE.md).
+- **Formal Review:** Maintainers must consult qualified intellectual property legal counsel before initiating commercial sublicensing agreements.
 
 ---
 

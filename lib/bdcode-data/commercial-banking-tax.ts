@@ -34,7 +34,7 @@ export const COMMERCIAL_BANKING_TAX_LAWS: BangladeshLawRecord[] = [
     officialGazetteCitation: 'Bangladesh Gazette Extraordinary, 11 October 2006',
     importDate: '2026-08-20T00:00:00Z',
     lastVerifiedDate: '2026-08-26T00:00:00Z',
-    integrityStatus: 'fully-verified',
+    integrityStatus: 'source-linked',
     totalSectionsCount: 353,
     relatedLawIds: ['bd-epz-labour-2019', 'bd-contract-act-1872'],
     sections: [
@@ -119,7 +119,7 @@ export const COMMERCIAL_BANKING_TAX_LAWS: BangladeshLawRecord[] = [
     officialGazetteCitation: 'Bangladesh Gazette Extraordinary, 28 February 2019',
     importDate: '2026-08-20T00:00:00Z',
     lastVerifiedDate: '2026-08-26T00:00:00Z',
-    integrityStatus: 'fully-verified',
+    integrityStatus: 'source-linked',
     totalSectionsCount: 209,
     relatedLawIds: ['bd-labour-act-2006', 'bd-companies-act-1994'],
     sections: [
@@ -166,7 +166,7 @@ export const COMMERCIAL_BANKING_TAX_LAWS: BangladeshLawRecord[] = [
     officialGazetteCitation: 'Legislative Enactment Act IX of 1872 (Adopted via Act VIII of 1973)',
     importDate: '2026-08-20T00:00:00Z',
     lastVerifiedDate: '2026-08-26T00:00:00Z',
-    integrityStatus: 'fully-verified',
+    integrityStatus: 'source-linked',
     totalSectionsCount: 238,
     relatedLawIds: ['bd-companies-act-1994', 'bd-sale-of-goods-1930', 'bd-specific-relief-1877'],
     sections: [
@@ -220,7 +220,7 @@ export const COMMERCIAL_BANKING_TAX_LAWS: BangladeshLawRecord[] = [
     officialGazetteCitation: 'Bangladesh Gazette Extraordinary, 11 September 1994',
     importDate: '2026-08-20T00:00:00Z',
     lastVerifiedDate: '2026-08-26T00:00:00Z',
-    integrityStatus: 'fully-verified',
+    integrityStatus: 'source-linked',
     totalSectionsCount: 404,
     relatedLawIds: ['bd-contract-act-1872', 'bd-bank-company-1991'],
     sections: [
@@ -281,7 +281,7 @@ export const COMMERCIAL_BANKING_TAX_LAWS: BangladeshLawRecord[] = [
     officialGazetteCitation: 'Legislative Enactment Act III of 1930 (Adopted via Act VIII of 1973)',
     importDate: '2026-08-20T00:00:00Z',
     lastVerifiedDate: '2026-08-26T00:00:00Z',
-    integrityStatus: 'fully-verified',
+    integrityStatus: 'source-linked',
     totalSectionsCount: 66,
     relatedLawIds: ['bd-contract-act-1872'],
     sections: [
@@ -326,7 +326,7 @@ export const COMMERCIAL_BANKING_TAX_LAWS: BangladeshLawRecord[] = [
     officialGazetteCitation: 'Legislative Enactment Act IX of 1932 (Adopted via Act VIII of 1973)',
     importDate: '2026-08-20T00:00:00Z',
     lastVerifiedDate: '2026-08-26T00:00:00Z',
-    integrityStatus: 'fully-verified',
+    integrityStatus: 'source-linked',
     totalSectionsCount: 74,
     relatedLawIds: ['bd-contract-act-1872', 'bd-companies-act-1994'],
     sections: [
@@ -372,7 +372,7 @@ export const COMMERCIAL_BANKING_TAX_LAWS: BangladeshLawRecord[] = [
     officialGazetteCitation: 'Legislative Enactment Act XXVI of 1881 (Adopted via Act VIII of 1973)',
     importDate: '2026-08-20T00:00:00Z',
     lastVerifiedDate: '2026-08-26T00:00:00Z',
-    integrityStatus: 'fully-verified',
+    integrityStatus: 'source-linked',
     totalSectionsCount: 141,
     relatedLawIds: ['bd-bank-company-1991', 'bd-money-loan-court-2003', 'bd-contract-act-1872'],
     sections: [
@@ -431,7 +431,7 @@ export const COMMERCIAL_BANKING_TAX_LAWS: BangladeshLawRecord[] = [
     officialGazetteCitation: 'Bangladesh Gazette Extraordinary, 4 May 1991',
     importDate: '2026-08-20T00:00:00Z',
     lastVerifiedDate: '2026-08-26T00:00:00Z',
-    integrityStatus: 'fully-verified',
+    integrityStatus: 'source-linked',
     totalSectionsCount: 124,
     relatedLawIds: ['bd-financial-institutions-1993', 'bd-money-loan-court-2003', 'bd-money-laundering-2012'],
     sections: [
@@ -484,7 +484,7 @@ export const COMMERCIAL_BANKING_TAX_LAWS: BangladeshLawRecord[] = [
     officialGazetteCitation: 'Bangladesh Gazette Extraordinary, 26 September 1993',
     importDate: '2026-08-20T00:00:00Z',
     lastVerifiedDate: '2026-08-26T00:00:00Z',
-    integrityStatus: 'fully-verified',
+    integrityStatus: 'source-linked',
     totalSectionsCount: 52,
     relatedLawIds: ['bd-bank-company-1991', 'bd-money-loan-court-2003'],
     sections: [
@@ -530,7 +530,7 @@ export const COMMERCIAL_BANKING_TAX_LAWS: BangladeshLawRecord[] = [
     officialGazetteCitation: 'Bangladesh Gazette Extraordinary, 10 March 2003',
     importDate: '2026-08-20T00:00:00Z',
     lastVerifiedDate: '2026-08-26T00:00:00Z',
-    integrityStatus: 'fully-verified',
+    integrityStatus: 'source-linked',
     totalSectionsCount: 60,
     relatedLawIds: ['bd-bank-company-1991', 'bd-ni-act-1881', 'bd-cpc-1908'],
     sections: [
@@ -592,7 +592,7 @@ export const COMMERCIAL_BANKING_TAX_LAWS: BangladeshLawRecord[] = [
     officialGazetteCitation: 'Bangladesh Gazette Extraordinary, 20 February 2012',
     importDate: '2026-08-20T00:00:00Z',
     lastVerifiedDate: '2026-08-26T00:00:00Z',
-    integrityStatus: 'fully-verified',
+    integrityStatus: 'source-linked',
     totalSectionsCount: 31,
     relatedLawIds: ['bd-acc-act-2004', 'bd-bank-company-1991'],
     sections: [
@@ -640,7 +640,7 @@ export const COMMERCIAL_BANKING_TAX_LAWS: BangladeshLawRecord[] = [
     officialGazetteCitation: 'Bangladesh Gazette Extraordinary, 24 March 1997',
     importDate: '2026-08-20T00:00:00Z',
     lastVerifiedDate: '2026-08-26T00:00:00Z',
-    integrityStatus: 'fully-verified',
+    integrityStatus: 'source-linked',
     totalSectionsCount: 105,
     relatedLawIds: ['bd-companies-act-1994', 'bd-money-loan-court-2003'],
     sections: [
@@ -687,7 +687,7 @@ export const COMMERCIAL_BANKING_TAX_LAWS: BangladeshLawRecord[] = [
     officialGazetteCitation: 'Bangladesh Gazette Extraordinary, 22 June 2023',
     importDate: '2026-08-20T00:00:00Z',
     lastVerifiedDate: '2026-08-26T00:00:00Z',
-    integrityStatus: 'fully-verified',
+    integrityStatus: 'source-linked',
     totalSectionsCount: 345,
     relatedLawIds: ['bd-vat-sd-act-2012', 'bd-customs-act-2023'],
     sections: [
@@ -740,7 +740,7 @@ export const COMMERCIAL_BANKING_TAX_LAWS: BangladeshLawRecord[] = [
     officialGazetteCitation: 'Bangladesh Gazette Extraordinary, 10 December 2012',
     importDate: '2026-08-20T00:00:00Z',
     lastVerifiedDate: '2026-08-26T00:00:00Z',
-    integrityStatus: 'fully-verified',
+    integrityStatus: 'source-linked',
     totalSectionsCount: 139,
     relatedLawIds: ['bd-income-tax-act-2023', 'bd-customs-act-2023'],
     sections: [
@@ -793,7 +793,7 @@ export const COMMERCIAL_BANKING_TAX_LAWS: BangladeshLawRecord[] = [
     officialGazetteCitation: 'Bangladesh Gazette Extraordinary, 13 November 2023',
     importDate: '2026-08-20T00:00:00Z',
     lastVerifiedDate: '2026-08-26T00:00:00Z',
-    integrityStatus: 'fully-verified',
+    integrityStatus: 'source-linked',
     totalSectionsCount: 269,
     relatedLawIds: ['bd-vat-sd-act-2012', 'bd-income-tax-act-2023'],
     sections: [
@@ -840,7 +840,7 @@ export const COMMERCIAL_BANKING_TAX_LAWS: BangladeshLawRecord[] = [
     officialGazetteCitation: 'Bangladesh Gazette Extraordinary, 29 March 2009',
     importDate: '2026-08-20T00:00:00Z',
     lastVerifiedDate: '2026-08-26T00:00:00Z',
-    integrityStatus: 'fully-verified',
+    integrityStatus: 'source-linked',
     totalSectionsCount: 131,
     relatedLawIds: ['bd-copyright-act-2023', 'bd-patent-act-2023'],
     sections: [
@@ -893,7 +893,7 @@ export const COMMERCIAL_BANKING_TAX_LAWS: BangladeshLawRecord[] = [
     officialGazetteCitation: 'Bangladesh Gazette Extraordinary, 19 October 2023',
     importDate: '2026-08-20T00:00:00Z',
     lastVerifiedDate: '2026-08-26T00:00:00Z',
-    integrityStatus: 'fully-verified',
+    integrityStatus: 'source-linked',
     totalSectionsCount: 110,
     relatedLawIds: ['bd-trademarks-act-2009', 'bd-patent-act-2023', 'bd-cyber-security-act-2023'],
     sections: [
@@ -946,7 +946,7 @@ export const COMMERCIAL_BANKING_TAX_LAWS: BangladeshLawRecord[] = [
     officialGazetteCitation: 'Bangladesh Gazette Extraordinary, 11 September 2023',
     importDate: '2026-08-20T00:00:00Z',
     lastVerifiedDate: '2026-08-26T00:00:00Z',
-    integrityStatus: 'fully-verified',
+    integrityStatus: 'source-linked',
     totalSectionsCount: 98,
     relatedLawIds: ['bd-trademarks-act-2009', 'bd-copyright-act-2023', 'bd-gi-goods-act-2013'],
     sections: [
@@ -991,7 +991,7 @@ export const COMMERCIAL_BANKING_TAX_LAWS: BangladeshLawRecord[] = [
     officialGazetteCitation: 'Bangladesh Gazette Extraordinary, 10 November 2013',
     importDate: '2026-08-20T00:00:00Z',
     lastVerifiedDate: '2026-08-26T00:00:00Z',
-    integrityStatus: 'fully-verified',
+    integrityStatus: 'source-linked',
     totalSectionsCount: 34,
     relatedLawIds: ['bd-trademarks-act-2009', 'bd-patent-act-2023'],
     sections: [

@@ -34,8 +34,7 @@ export const CONSTITUTIONAL_CRIMINAL_LAWS: BangladeshLawRecord[] = [
     officialGazetteCitation: 'Bangladesh Gazette Extraordinary, 14 December 1972',
     importDate: '2026-08-20T00:00:00Z',
     lastVerifiedDate: '2026-08-26T00:00:00Z',
-    integrityStatus: 'fully-verified',
-    checksumSha256: '99bc45de82903ab10283e7489201cbde81938a9201948201948291039849201a',
+    integrityStatus: 'source-linked',
     totalSectionsCount: 153,
     relatedLawIds: ['bd-crpc-1898', 'bd-cpc-1908', 'bd-penal-code-1860'],
     sections: [
@@ -121,8 +120,7 @@ export const CONSTITUTIONAL_CRIMINAL_LAWS: BangladeshLawRecord[] = [
     officialGazetteCitation: 'Bangladesh Gazette Extraordinary, 26 December 1972',
     importDate: '2026-09-01T00:00:00Z',
     lastVerifiedDate: '2026-09-01T00:00:00Z',
-    integrityStatus: 'fully-verified',
-    checksumSha256: '5e179b291dca40e9803bf25daeb91605ec103a890e75a6f20811e5c54c414902',
+    integrityStatus: 'source-linked',
     totalSectionsCount: 94,
     relatedLawIds: ['bd-constitution-1972'],
     sections: [
@@ -175,8 +173,7 @@ export const CONSTITUTIONAL_CRIMINAL_LAWS: BangladeshLawRecord[] = [
     officialGazetteCitation: 'Bangladesh Gazette Extraordinary, 14 July 2009',
     importDate: '2026-09-01T00:00:00Z',
     lastVerifiedDate: '2026-09-01T00:00:00Z',
-    integrityStatus: 'fully-verified',
-    checksumSha256: '72f9547ea8d998a46b9c9f22c62c3e1082531e2195f134268e0d468eb058e0a1',
+    integrityStatus: 'source-linked',
     totalSectionsCount: 30,
     relatedLawIds: ['bd-constitution-1972', 'bd-legal-aid-2000'],
     sections: [
@@ -230,8 +227,7 @@ export const CONSTITUTIONAL_CRIMINAL_LAWS: BangladeshLawRecord[] = [
     officialGazetteCitation: 'Bangladesh Gazette Extraordinary, 26 January 2000',
     importDate: '2026-09-01T00:00:00Z',
     lastVerifiedDate: '2026-09-01T00:00:00Z',
-    integrityStatus: 'fully-verified',
-    checksumSha256: '2188ab4589df012345bc6789012345de6789012345fa78901234567890123456',
+    integrityStatus: 'source-linked',
     totalSectionsCount: 24,
     relatedLawIds: ['bd-constitution-1972', 'bd-cpc-1908', 'bd-crpc-1898'],
     sections: [
@@ -287,8 +283,7 @@ export const CONSTITUTIONAL_CRIMINAL_LAWS: BangladeshLawRecord[] = [
     officialGazetteCitation: 'Legislative Enactment Act XLV of 1860 (Adopted via Act VIII of 1973)',
     importDate: '2026-08-20T00:00:00Z',
     lastVerifiedDate: '2026-08-26T00:00:00Z',
-    integrityStatus: 'fully-verified',
-    checksumSha256: 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
+    integrityStatus: 'source-linked',
     totalSectionsCount: 511,
     relatedLawIds: ['bd-crpc-1898', 'bd-evidence-act-1872', 'bd-nari-o-shishu-2000'],
     sections: [
@@ -378,8 +373,7 @@ export const CONSTITUTIONAL_CRIMINAL_LAWS: BangladeshLawRecord[] = [
     officialGazetteCitation: 'Legislative Enactment Act V of 1898 (Reorganized via Ordinance No. XXIV of 1982 & Act XXXII of 2009)',
     importDate: '2026-08-20T00:00:00Z',
     lastVerifiedDate: '2026-08-26T00:00:00Z',
-    integrityStatus: 'fully-verified',
-    checksumSha256: 'a12bc9382fa084cb9348e3a2b0e9102c9182a3948e91823ab02938491029384e',
+    integrityStatus: 'source-linked',
     totalSectionsCount: 565,
     relatedLawIds: ['bd-penal-code-1860', 'bd-evidence-act-1872', 'bd-constitution-1972'],
     sections: [
@@ -463,8 +457,7 @@ export const CONSTITUTIONAL_CRIMINAL_LAWS: BangladeshLawRecord[] = [
     officialGazetteCitation: 'Legislative Enactment Act I of 1872 (Amended via Act XXI of 2022)',
     importDate: '2026-08-20T00:00:00Z',
     lastVerifiedDate: '2026-08-26T00:00:00Z',
-    integrityStatus: 'fully-verified',
-    checksumSha256: '44cd901234ef5678901234bc5678901234de5678901234fa5678901234567890',
+    integrityStatus: 'source-linked',
     totalSectionsCount: 167,
     relatedLawIds: ['bd-crpc-1898', 'bd-cpc-1908', 'bd-penal-code-1860'],
     sections: [
@@ -526,8 +519,7 @@ export const CONSTITUTIONAL_CRIMINAL_LAWS: BangladeshLawRecord[] = [
     officialGazetteCitation: 'Bangladesh Gazette Extraordinary, 14 February 2000',
     importDate: '2026-08-20T00:00:00Z',
     lastVerifiedDate: '2026-08-26T00:00:00Z',
-    integrityStatus: 'fully-verified',
-    checksumSha256: '88ab345678ef9012345678ab9012345678cd9012345678ef9012345678901234',
+    integrityStatus: 'source-linked',
     totalSectionsCount: 34,
     relatedLawIds: ['bd-penal-code-1860', 'bd-crpc-1898', 'bd-evidence-act-1872'],
     sections: [
@@ -592,7 +584,7 @@ export const CONSTITUTIONAL_CRIMINAL_LAWS: BangladeshLawRecord[] = [
     officialGazetteCitation: 'Bangladesh Gazette Extraordinary, 23 February 2004',
     importDate: '2026-08-20T00:00:00Z',
     lastVerifiedDate: '2026-08-26T00:00:00Z',
-    integrityStatus: 'fully-verified',
+    integrityStatus: 'source-linked',
     totalSectionsCount: 38,
     relatedLawIds: ['bd-penal-code-1860', 'bd-crpc-1898', 'bd-money-laundering-2012'],
     sections: [
@@ -656,7 +648,7 @@ export const CONSTITUTIONAL_CRIMINAL_LAWS: BangladeshLawRecord[] = [
     officialGazetteCitation: 'Bangladesh Gazette Extraordinary, 9 February 1974',
     importDate: '2026-08-20T00:00:00Z',
     lastVerifiedDate: '2026-08-26T00:00:00Z',
-    integrityStatus: 'fully-verified',
+    integrityStatus: 'source-linked',
     totalSectionsCount: 36,
     relatedLawIds: ['bd-crpc-1898', 'bd-penal-code-1860', 'bd-constitution-1972'],
     sections: [
@@ -710,7 +702,7 @@ export const CONSTITUTIONAL_CRIMINAL_LAWS: BangladeshLawRecord[] = [
     officialGazetteCitation: 'Bangladesh Gazette Extraordinary, 27 December 2018',
     importDate: '2026-08-20T00:00:00Z',
     lastVerifiedDate: '2026-08-26T00:00:00Z',
-    integrityStatus: 'fully-verified',
+    integrityStatus: 'source-linked',
     totalSectionsCount: 70,
     relatedLawIds: ['bd-crpc-1898', 'bd-penal-code-1860'],
     sections: [
@@ -767,8 +759,7 @@ export const CONSTITUTIONAL_CRIMINAL_LAWS: BangladeshLawRecord[] = [
     officialGazetteCitation: 'Bangladesh Gazette Extraordinary, 20 June 2013 (Repealed and replaced the Children Act, 1974 / Act XXXIX of 1974)',
     importDate: '2026-09-01T00:00:00Z',
     lastVerifiedDate: '2026-09-01T00:00:00Z',
-    integrityStatus: 'fully-verified',
-    checksumSha256: '4839201bcde81938a9201948201948291039849201a99bc45de82903ab10283e',
+    integrityStatus: 'source-linked',
     totalSectionsCount: 100,
     relatedLawIds: ['bd-penal-code-1860', 'bd-crpc-1898', 'bd-nari-o-shishu-2000'],
     sections: [
@@ -829,8 +820,7 @@ export const CONSTITUTIONAL_CRIMINAL_LAWS: BangladeshLawRecord[] = [
     officialGazetteCitation: 'Bangladesh Gazette Extraordinary, 20 February 2012',
     importDate: '2026-09-01T00:00:00Z',
     lastVerifiedDate: '2026-09-01T00:00:00Z',
-    integrityStatus: 'fully-verified',
-    checksumSha256: '91823ab02938491029384ea12bc9382fa084cb9348e3a2b0e9102c9182a3948e',
+    integrityStatus: 'source-linked',
     totalSectionsCount: 47,
     relatedLawIds: ['bd-penal-code-1860', 'bd-crpc-1898', 'bd-nari-o-shishu-2000'],
     sections: [
@@ -887,8 +877,7 @@ export const CONSTITUTIONAL_CRIMINAL_LAWS: BangladeshLawRecord[] = [
     officialGazetteCitation: 'Bangladesh Gazette Extraordinary, 24 February 2009',
     importDate: '2026-09-01T00:00:00Z',
     lastVerifiedDate: '2026-09-01T00:00:00Z',
-    integrityStatus: 'fully-verified',
-    checksumSha256: '029384fa567890123456789044cd901234ef5678901234bc5678901234de5678',
+    integrityStatus: 'source-linked',
     totalSectionsCount: 44,
     relatedLawIds: ['bd-penal-code-1860', 'bd-crpc-1898', 'bd-money-laundering-2012'],
     sections: [

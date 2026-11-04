@@ -59,12 +59,13 @@ Nyayota is intentionally engineered with defensive safeguards:
    - User query text cap at 1,500 characters.
    - Conversation history capped at 10 messages (8,000 characters total).
    - Upstream model generation timeout capped at 12 seconds.
-4. **Differentiated Sliding-Window Rate Limiting:**
+4. **Differentiated Rate Limiting & Trusted IP Extraction:**
    - General AI mode: 15 requests per 60 seconds.
    - Deterministic legal retrieval: 30 requests per 60 seconds.
-   - Client IP extraction with IPv4/IPv6 port stripping and character sanitization.
+   - Client IP extraction prioritizes platform-injected `x-vercel-forwarded-for` on Vercel to block client IP spoofing, with IPv4/IPv6 port stripping and character validation.
+   - Serverless distributed deployment: Supports external shared Redis rate limiting (Upstash Redis via `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN`) to prevent quota exhaustion across multiple stateless edge lambdas.
 5. **Defensive Headers:** API responses emit `Cache-Control: no-store, no-cache, must-revalidate` and `X-Content-Type-Options: nosniff`.
-6. **Statutory Content Integrity:** Cryptographic SHA-256 hashes detect unintended file drift or corruption in local data structures.
+6. **Statutory Source Provenance & Integrity:** Ingested statutory records are source-linked directly to official digital publications (`bdlaws.minlaw.gov.bd` and `bdcode.gov.bd`) with structured ingestion status audits (`source-linked`, `reviewed`, `unverified`, `independently-verified`). Technical data checks do not substitute for official court gazette certification.
 
 ---
 

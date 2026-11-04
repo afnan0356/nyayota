@@ -34,7 +34,7 @@ export const ENVIRONMENT_ADMIN_LOCAL_CYBER_LAWS: BangladeshLawRecord[] = [
     officialGazetteCitation: 'Bangladesh Gazette Extraordinary, 16 February 1995',
     importDate: '2026-08-20T00:00:00Z',
     lastVerifiedDate: '2026-08-26T00:00:00Z',
-    integrityStatus: 'fully-verified',
+    integrityStatus: 'source-linked',
     totalSectionsCount: 22,
     relatedLawIds: ['bd-environment-court-2010', 'bd-forest-act-1927', 'bd-water-act-2013'],
     sections: [
@@ -87,7 +87,7 @@ export const ENVIRONMENT_ADMIN_LOCAL_CYBER_LAWS: BangladeshLawRecord[] = [
     officialGazetteCitation: 'Bangladesh Gazette Extraordinary, 5 October 2010',
     importDate: '2026-08-20T00:00:00Z',
     lastVerifiedDate: '2026-08-26T00:00:00Z',
-    integrityStatus: 'fully-verified',
+    integrityStatus: 'source-linked',
     totalSectionsCount: 22,
     relatedLawIds: ['bd-environment-conservation-1995'],
     sections: [
@@ -132,7 +132,7 @@ export const ENVIRONMENT_ADMIN_LOCAL_CYBER_LAWS: BangladeshLawRecord[] = [
     officialGazetteCitation: 'Legislative Enactment Act XVI of 1927 (Adopted via Act VIII of 1973)',
     importDate: '2026-08-20T00:00:00Z',
     lastVerifiedDate: '2026-08-26T00:00:00Z',
-    integrityStatus: 'fully-verified',
+    integrityStatus: 'source-linked',
     totalSectionsCount: 86,
     relatedLawIds: ['bd-environment-conservation-1995'],
     sections: [
@@ -177,7 +177,7 @@ export const ENVIRONMENT_ADMIN_LOCAL_CYBER_LAWS: BangladeshLawRecord[] = [
     officialGazetteCitation: 'Bangladesh Gazette Extraordinary, 2 May 2013',
     importDate: '2026-08-20T00:00:00Z',
     lastVerifiedDate: '2026-08-26T00:00:00Z',
-    integrityStatus: 'fully-verified',
+    integrityStatus: 'source-linked',
     totalSectionsCount: 39,
     relatedLawIds: ['bd-environment-conservation-1995'],
     sections: [
@@ -224,7 +224,7 @@ export const ENVIRONMENT_ADMIN_LOCAL_CYBER_LAWS: BangladeshLawRecord[] = [
     officialGazetteCitation: 'Bangladesh Gazette Extraordinary, 6 April 2009',
     importDate: '2026-08-20T00:00:00Z',
     lastVerifiedDate: '2026-08-26T00:00:00Z',
-    integrityStatus: 'fully-verified',
+    integrityStatus: 'source-linked',
     totalSectionsCount: 37,
     relatedLawIds: ['bd-constitution-1972'],
     sections: [
@@ -277,7 +277,7 @@ export const ENVIRONMENT_ADMIN_LOCAL_CYBER_LAWS: BangladeshLawRecord[] = [
     officialGazetteCitation: 'Bangladesh Gazette Extraordinary, 5 June 1981',
     importDate: '2026-08-20T00:00:00Z',
     lastVerifiedDate: '2026-08-26T00:00:00Z',
-    integrityStatus: 'fully-verified',
+    integrityStatus: 'source-linked',
     totalSectionsCount: 13,
     relatedLawIds: ['bd-constitution-1972'],
     sections: [
@@ -322,7 +322,7 @@ export const ENVIRONMENT_ADMIN_LOCAL_CYBER_LAWS: BangladeshLawRecord[] = [
     officialGazetteCitation: 'Legislative Enactment Act X of 1897 (Adopted via Act VIII of 1973)',
     importDate: '2026-08-20T00:00:00Z',
     lastVerifiedDate: '2026-08-26T00:00:00Z',
-    integrityStatus: 'fully-verified',
+    integrityStatus: 'source-linked',
     totalSectionsCount: 31,
     relatedLawIds: ['bd-constitution-1972'],
     sections: [
@@ -369,7 +369,7 @@ export const ENVIRONMENT_ADMIN_LOCAL_CYBER_LAWS: BangladeshLawRecord[] = [
     officialGazetteCitation: 'Legislative Enactment Act XXIII of 1940 (Adopted via Act VIII of 1973)',
     importDate: '2026-08-20T00:00:00Z',
     lastVerifiedDate: '2026-08-26T00:00:00Z',
-    integrityStatus: 'fully-verified',
+    integrityStatus: 'source-linked',
     totalSectionsCount: 41,
     relatedLawIds: ['bd-drugs-act-2023'],
     sections: [
@@ -414,7 +414,7 @@ export const ENVIRONMENT_ADMIN_LOCAL_CYBER_LAWS: BangladeshLawRecord[] = [
     officialGazetteCitation: 'Bangladesh Gazette Extraordinary, 18 September 2023',
     importDate: '2026-08-20T00:00:00Z',
     lastVerifiedDate: '2026-08-26T00:00:00Z',
-    integrityStatus: 'fully-verified',
+    integrityStatus: 'source-linked',
     totalSectionsCount: 71,
     relatedLawIds: ['bd-drugs-act-1940'],
     sections: [
@@ -460,7 +460,7 @@ export const ENVIRONMENT_ADMIN_LOCAL_CYBER_LAWS: BangladeshLawRecord[] = [
     officialGazetteCitation: 'Bangladesh Gazette Extraordinary, 15 March 2005',
     importDate: '2026-08-20T00:00:00Z',
     lastVerifiedDate: '2026-08-26T00:00:00Z',
-    integrityStatus: 'fully-verified',
+    integrityStatus: 'source-linked',
     totalSectionsCount: 16,
     relatedLawIds: ['bd-environment-conservation-1995'],
     sections: [
@@ -507,7 +507,7 @@ export const ENVIRONMENT_ADMIN_LOCAL_CYBER_LAWS: BangladeshLawRecord[] = [
     officialGazetteCitation: 'Bangladesh Gazette Extraordinary, 18 September 2023',
     importDate: '2026-08-20T00:00:00Z',
     lastVerifiedDate: '2026-08-26T00:00:00Z',
-    integrityStatus: 'fully-verified',
+    integrityStatus: 'source-linked',
     totalSectionsCount: 60,
     relatedLawIds: ['bd-telecom-act-2001', 'bd-ict-act-2006', 'bd-penal-code-1860'],
     sections: [
@@ -567,7 +567,7 @@ export const ENVIRONMENT_ADMIN_LOCAL_CYBER_LAWS: BangladeshLawRecord[] = [
     officialGazetteCitation: 'Bangladesh Gazette Extraordinary, 16 April 2001',
     importDate: '2026-08-20T00:00:00Z',
     lastVerifiedDate: '2026-08-26T00:00:00Z',
-    integrityStatus: 'fully-verified',
+    integrityStatus: 'source-linked',
     totalSectionsCount: 78,
     relatedLawIds: ['bd-cyber-security-act-2023', 'bd-ict-act-2006'],
     sections: [
@@ -612,7 +612,7 @@ export const ENVIRONMENT_ADMIN_LOCAL_CYBER_LAWS: BangladeshLawRecord[] = [
     officialGazetteCitation: 'Bangladesh Gazette Extraordinary, 8 October 2006',
     importDate: '2026-08-20T00:00:00Z',
     lastVerifiedDate: '2026-08-26T00:00:00Z',
-    integrityStatus: 'fully-verified',
+    integrityStatus: 'source-linked',
     totalSectionsCount: 90,
     relatedLawIds: ['bd-cyber-security-act-2023', 'bd-evidence-act-1872'],
     sections: [
@@ -659,7 +659,7 @@ export const ENVIRONMENT_ADMIN_LOCAL_CYBER_LAWS: BangladeshLawRecord[] = [
     officialGazetteCitation: 'Bangladesh Gazette Extraordinary, 13 February 1990',
     importDate: '2026-08-20T00:00:00Z',
     lastVerifiedDate: '2026-08-26T00:00:00Z',
-    integrityStatus: 'fully-verified',
+    integrityStatus: 'source-linked',
     totalSectionsCount: 8,
     relatedLawIds: ['bd-constitution-1972'],
     sections: [
@@ -704,7 +704,7 @@ export const ENVIRONMENT_ADMIN_LOCAL_CYBER_LAWS: BangladeshLawRecord[] = [
     officialGazetteCitation: 'Bangladesh Gazette Extraordinary, 22 July 2010',
     importDate: '2026-08-20T00:00:00Z',
     lastVerifiedDate: '2026-08-26T00:00:00Z',
-    integrityStatus: 'fully-verified',
+    integrityStatus: 'source-linked',
     totalSectionsCount: 55,
     relatedLawIds: ['bd-primary-education-1990'],
     sections: [
@@ -751,7 +751,7 @@ export const ENVIRONMENT_ADMIN_LOCAL_CYBER_LAWS: BangladeshLawRecord[] = [
     officialGazetteCitation: 'Bangladesh Gazette Extraordinary, 15 October 2009',
     importDate: '2026-08-20T00:00:00Z',
     lastVerifiedDate: '2026-08-26T00:00:00Z',
-    integrityStatus: 'fully-verified',
+    integrityStatus: 'source-linked',
     totalSectionsCount: 116,
     relatedLawIds: ['bd-pourashava-act-2009', 'bd-city-corp-2009'],
     sections: [
@@ -796,7 +796,7 @@ export const ENVIRONMENT_ADMIN_LOCAL_CYBER_LAWS: BangladeshLawRecord[] = [
     officialGazetteCitation: 'Bangladesh Gazette Extraordinary, 6 October 2009',
     importDate: '2026-08-20T00:00:00Z',
     lastVerifiedDate: '2026-08-26T00:00:00Z',
-    integrityStatus: 'fully-verified',
+    integrityStatus: 'source-linked',
     totalSectionsCount: 128,
     relatedLawIds: ['bd-union-parishad-2009', 'bd-city-corp-2009'],
     sections: [
@@ -841,7 +841,7 @@ export const ENVIRONMENT_ADMIN_LOCAL_CYBER_LAWS: BangladeshLawRecord[] = [
     officialGazetteCitation: 'Bangladesh Gazette Extraordinary, 15 October 2009',
     importDate: '2026-08-20T00:00:00Z',
     lastVerifiedDate: '2026-08-26T00:00:00Z',
-    integrityStatus: 'fully-verified',
+    integrityStatus: 'source-linked',
     totalSectionsCount: 127,
     relatedLawIds: ['bd-pourashava-act-2009', 'bd-union-parishad-2009'],
     sections: [
@@ -888,7 +888,7 @@ export const ENVIRONMENT_ADMIN_LOCAL_CYBER_LAWS: BangladeshLawRecord[] = [
     officialGazetteCitation: 'Legislative Enactment Act II of 1951 (Adopted via Act VIII of 1973)',
     importDate: '2026-08-20T00:00:00Z',
     lastVerifiedDate: '2026-08-26T00:00:00Z',
-    integrityStatus: 'fully-verified',
+    integrityStatus: 'source-linked',
     totalSectionsCount: 22,
     relatedLawIds: ['bd-citizenship-po-1972', 'bd-passport-act-1920', 'bd-foreigners-act-1946'],
     sections: [
@@ -941,7 +941,7 @@ export const ENVIRONMENT_ADMIN_LOCAL_CYBER_LAWS: BangladeshLawRecord[] = [
     officialGazetteCitation: 'Bangladesh Gazette Extraordinary, 15 December 1972',
     importDate: '2026-08-20T00:00:00Z',
     lastVerifiedDate: '2026-08-26T00:00:00Z',
-    integrityStatus: 'fully-verified',
+    integrityStatus: 'source-linked',
     totalSectionsCount: 8,
     relatedLawIds: ['bd-citizenship-act-1951', 'bd-passport-act-1920'],
     sections: [
@@ -986,7 +986,7 @@ export const ENVIRONMENT_ADMIN_LOCAL_CYBER_LAWS: BangladeshLawRecord[] = [
     officialGazetteCitation: 'Legislative Enactment Act XXXIV of 1920 (Adopted via Act VIII of 1973)',
     importDate: '2026-08-20T00:00:00Z',
     lastVerifiedDate: '2026-08-26T00:00:00Z',
-    integrityStatus: 'fully-verified',
+    integrityStatus: 'source-linked',
     totalSectionsCount: 6,
     relatedLawIds: ['bd-foreigners-act-1946', 'bd-citizenship-act-1951'],
     sections: [
@@ -1031,7 +1031,7 @@ export const ENVIRONMENT_ADMIN_LOCAL_CYBER_LAWS: BangladeshLawRecord[] = [
     officialGazetteCitation: 'Legislative Enactment Act XXXI of 1946 (Adopted via Act VIII of 1973)',
     importDate: '2026-08-20T00:00:00Z',
     lastVerifiedDate: '2026-08-26T00:00:00Z',
-    integrityStatus: 'fully-verified',
+    integrityStatus: 'source-linked',
     totalSectionsCount: 19,
     relatedLawIds: ['bd-passport-act-1920', 'bd-citizenship-act-1951'],
     sections: [
@@ -1076,7 +1076,7 @@ export const ENVIRONMENT_ADMIN_LOCAL_CYBER_LAWS: BangladeshLawRecord[] = [
     officialGazetteCitation: 'Bangladesh Gazette Extraordinary, 27 October 2013',
     importDate: '2026-08-20T00:00:00Z',
     lastVerifiedDate: '2026-08-26T00:00:00Z',
-    integrityStatus: 'fully-verified',
+    integrityStatus: 'source-linked',
     totalSectionsCount: 49,
     relatedLawIds: ['bd-passport-act-1920', 'bd-labour-act-2006'],
     sections: [
